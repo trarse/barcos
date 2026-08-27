@@ -1,0 +1,217 @@
+// Esquema de Barlovento.
+//
+// En desarrollo corre sobre SQLite para que la aplicación funcione sin montar
+// nada. Para producción basta cambiar el provider a "postgresql": el esquema
+// evita a propósito los tipos nativos de Postgres (arrays, enums) para que la
+// migración sea un cambio de una línea.
+//
+// Todos los importes se guardan en CÉNTIMOS como enteros. Nunca en coma
+// flotante: el dinero no se redondea dos veces.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Desde Prisma 7 la URL no vive aquí: la CLI la lee de prisma.config.ts y el
+// cliente se conecta a través del driver adapter (src/lib/db.ts).
+datasource db {
+  provider = "sqlite"
+}
+
+/// Zona de navegación: una isla, una costa o una ciudad portuaria.
+model Destino {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  nombre      String
+  provincia   String
+  comunidad   String
+  /// "isla" | "costa" | "ciudad"
+  clase       String
+  titular     String
+  descripcion String
+  /// Texto largo de la landing, en Markdown ligero. Es lo que posiciona.
+  contenido   String
+  latitud     Float
+  longitud    Float
+  imagen      String
+  /// Meses de temporada alta, separados por comas: "6,7,8,9"
+  mesesAlta   String  @default("7,8")
+  destacado   Boolean @default(false)
+  orden       Int     @default(100)
+
+  puertos  Puerto[]
+  preguntas Pregunta[]
+
+  @@index([destacado, orden])
+}
+
+/// Puerto o marina concreta donde se entrega el barco.
+model Puerto {
+  id        String @id @default(cuid())
+  slug      String @unique
+  nombre    String
+  latitud   Float
+  longitud  Float
+  destinoId String
+
+  destino Destino @relation(fields: [destinoId], references: [id], onDelete: Cascade)
+  barcos  Barco[]
+
+  @@index([destinoId])
+}
+
+/// Categoría de embarcación: velero, catamarán, lancha...
+model TipoBarco {
+  id           String  @id @default(cuid())
+  slug         String  @unique
+  nombre       String
+  plural       String
+  descripcion  String
+  /// Si la categoría se puede gobernar sin titulación náutica.
+  sinLicencia  Boolean @default(false)
+  orden        Int     @default(100)
+
+  barcos Barco[]
+}
+
+/// Elemento de equipamiento a bordo. Relación N:M implícita con Barco.
+model Equipamiento {
+  id     String @id @default(cuid())
+  slug   String @unique
+  nombre String
+  /// "navegacion" | "confort" | "ocio" | "seguridad"
+  grupo  String
+
+  barcos Barco[]
+}
+
+/// Actividad vendida como producto propio: pesca, atardecer, buceo...
+model Experiencia {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  nombre      String
+  titular     String
+  descripcion String
+  contenido   String
+  imagen      String
+  /// Duración típica en horas, para estimar el consumo.
+  horas       Int     @default(4)
+  orden       Int     @default(100)
+
+  barcos    Barco[]
+  preguntas Pregunta[]
+}
+
+/// Quien publica el barco: un particular o una empresa de chárter.
+model Propietario {
+  id            String   @id @default(cuid())
+  nombre        String
+  /// "particular" | "empresa"
+  clase         String   @default("particular")
+  desde         DateTime @default(now())
+  respondeEnMin Int      @default(60)
+  superAnfitrion Boolean @default(false)
+  avatar        String?
+
+  barcos Barco[]
+}
+
+model Barco {
+  id          String @id @default(cuid())
+  slug        String @unique
+  nombre      String
+  fabricante  String
+  modelo      String
+  anio        Int
+  descripcion String
+
+  // Ficha técnica
+  esloraCm   Int
+  capacidad  Int
+  camarotes  Int @default(0)
+  aseos      Int @default(0)
+  potenciaCv Int @default(0)
+
+  // Tarifa. Todo en céntimos de euro.
+  precioBaseDia    Int
+  limpieza         Int @default(0)
+  tasaPortuariaDia Int @default(0)
+  patronDia        Int?
+  fianza           Int @default(0)
+  /// Consumo medio en litros por hora de navegación.
+  consumoLitrosHora Float @default(0)
+  /// Descuento porcentual a partir de 7 días (0-100).
+  descuentoSemana  Int @default(0)
+
+  // Condiciones
+  requiereTitulacion Boolean @default(true)
+  reservaInstantanea Boolean @default(false)
+  minimoDias         Int     @default(1)
+
+  // Reputación
+  valoracion   Float @default(0)
+  numOpiniones Int   @default(0)
+
+  publicado Boolean  @default(true)
+  creadoEn  DateTime @default(now())
+
+  tipoId        String
+  puertoId      String
+  propietarioId String
+
+  tipo         TipoBarco     @relation(fields: [tipoId], references: [id])
+  puerto       Puerto        @relation(fields: [puertoId], references: [id], onDelete: Cascade)
+  propietario  Propietario   @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
+  imagenes     Imagen[]
+  equipamiento Equipamiento[]
+  experiencias Experiencia[]
+  opiniones    Opinion[]
+
+  @@index([tipoId])
+  @@index([puertoId])
+  @@index([publicado, precioBaseDia])
+}
+
+model Imagen {
+  id      String @id @default(cuid())
+  url     String
+  alt     String
+  orden   Int    @default(0)
+  barcoId String
+
+  barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
+
+  @@index([barcoId, orden])
+}
+
+model Opinion {
+  id      String   @id @default(cuid())
+  autor   String
+  nota    Int
+  texto   String
+  fecha   DateTime @default(now())
+  barcoId String
+
+  barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
+
+  @@index([barcoId])
+}
+
+/// Pregunta frecuente. Alimenta el bloque de FAQ y su JSON-LD, que es
+/// la mitad de lo que hace destacar una landing en resultados.
+model Pregunta {
+  id       String @id @default(cuid())
+  pregunta String
+  respuesta String
+  orden    Int    @default(0)
+
+  destinoId     String?
+  experienciaId String?
+
+  destino     Destino?     @relation(fields: [destinoId], references: [id], onDelete: Cascade)
+  experiencia Experiencia? @relation(fields: [experienciaId], references: [id], onDelete: Cascade)
+
+  @@index([destinoId])
+  @@index([experienciaId])
+}

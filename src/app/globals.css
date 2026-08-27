@@ -1,1 +1,220 @@
 @import "tailwindcss";
+
+/* El modo oscuro responde al sistema y, por encima, a data-tema en <html>. */
+@custom-variant dark (&:where([data-tema="oscuro"], [data-tema="oscuro"] *));
+
+/* ---------------------------------------------------------------------------
+   Identidad: carta náutica.
+   Los colores salen de la simbología real de las cartas de navegación —
+   cian de las sondas, buff de la tierra, magenta de las balizas y luces,
+   verde de estribor. Nada del azul corporativo genérico del sector.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Paleta base, fija en ambos temas */
+  --abismo: #072b34;
+  --marea: #0e5566;
+  --bajio: #4e9cad;
+  --espuma: #dcecef;
+  --tierra: #efe7d6;
+  --baliza: #c4326b;
+  --estribor: #1b7a5a;
+  --alerta: #b4541f;
+
+  /* Semánticos: claro */
+  --fondo: #f4f8f8;
+  --superficie: #ffffff;
+  --superficie-alt: #eaf2f3;
+  --borde: #d3e2e4;
+  --borde-fuerte: #adc7cb;
+  --texto: #0d2229;
+  --texto-suave: #5a757d;
+  --texto-tenue: #8aa2a8;
+  --acento: #b02a5f;
+  --acento-suave: #fce8f0;
+  --marca: #0e5566;
+  --marca-suave: #dcecef;
+  --exito: #14684c;
+  --exito-suave: #dcf0e8;
+  --sombra: 12 34 41;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fondo: #061a20;
+    --superficie: #0c262e;
+    --superficie-alt: #123039;
+    --borde: #1c3d47;
+    --borde-fuerte: #2d5b68;
+    --texto: #dceaed;
+    --texto-suave: #93b0b7;
+    --texto-tenue: #6b8992;
+    --acento: #ff7aa8;
+    --acento-suave: #3a1526;
+    --marca: #6fc0d2;
+    --marca-suave: #10333d;
+    --exito: #4fc79b;
+    --exito-suave: #0d2f26;
+    --sombra: 0 0 0;
+  }
+}
+
+:root[data-tema="oscuro"] {
+  --fondo: #061a20;
+  --superficie: #0c262e;
+  --superficie-alt: #123039;
+  --borde: #1c3d47;
+  --borde-fuerte: #2d5b68;
+  --texto: #dceaed;
+  --texto-suave: #93b0b7;
+  --texto-tenue: #6b8992;
+  --acento: #ff7aa8;
+  --acento-suave: #3a1526;
+  --marca: #6fc0d2;
+  --marca-suave: #10333d;
+  --exito: #4fc79b;
+  --exito-suave: #0d2f26;
+  --sombra: 0 0 0;
+}
+
+/* Los tokens semánticos se exponen como utilidades de Tailwind. Al ir por
+   variable, un color nunca puede quedarse sin su equivalente en oscuro. */
+@theme inline {
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-superficie-alt: var(--superficie-alt);
+  --color-borde: var(--borde);
+  --color-borde-fuerte: var(--borde-fuerte);
+  --color-texto: var(--texto);
+  --color-texto-suave: var(--texto-suave);
+  --color-texto-tenue: var(--texto-tenue);
+  --color-acento: var(--acento);
+  --color-acento-suave: var(--acento-suave);
+  --color-marca: var(--marca);
+  --color-marca-suave: var(--marca-suave);
+  --color-exito: var(--exito);
+  --color-exito-suave: var(--exito-suave);
+  --color-abismo: var(--abismo);
+  --color-tierra: var(--tierra);
+
+  --font-display: var(--fuente-display), Georgia, serif;
+  --font-sans: var(--fuente-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-carta: 0.625rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--fondo);
+    color: var(--texto);
+    font-family: var(--fuente-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv05" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--fuente-display), Georgia, serif;
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  /* Fraunces trae ejes variables: los fijamos para que el display tenga
+     el punto justo de carácter sin caer en lo decorativo. */
+  h1,
+  h2 {
+    font-variation-settings: "SOFT" 20, "WONK" 1, "opsz" 40;
+  }
+
+  ::selection {
+    background-color: var(--acento);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Las cifras que se comparan en columna van siempre tabulares. */
+  .cifra {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Retícula de carta náutica: el fondo de meridianos y paralelos que
+     identifica la marca. Se usa detrás del hero y de las cabeceras. */
+  .reticula {
+    background-image: linear-gradient(
+        to right,
+        color-mix(in oklab, var(--borde) 60%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--borde) 60%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
+  }
+
+  /* El icono del botón de tema. Se resuelve en CSS con los mismos tres
+     estados que los tokens de color —sistema, claro forzado, oscuro
+     forzado— para que el botón nunca contradiga lo que se está viendo. */
+  .icono-claro {
+    display: block;
+  }
+  .icono-oscuro {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-tema="claro"]) .icono-claro {
+      display: none;
+    }
+    :root:not([data-tema="claro"]) .icono-oscuro {
+      display: block;
+    }
+  }
+
+  :root[data-tema="oscuro"] .icono-claro {
+    display: none;
+  }
+  :root[data-tema="oscuro"] .icono-oscuro {
+    display: block;
+  }
+  :root[data-tema="claro"] .icono-claro {
+    display: block;
+  }
+  :root[data-tema="claro"] .icono-oscuro {
+    display: none;
+  }
+
+  /* Isóbata: la línea de sonda que separa secciones. */
+  .isobata {
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--borde-fuerte) 0 10px,
+      transparent 10px 18px
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

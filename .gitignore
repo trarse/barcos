@@ -32,6 +32,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# La plantilla sí se versiona: es lo que dice qué variables hacen falta.
+!.env.example
+
+# Base de datos de desarrollo (SQLite). Se regenera con `npm run db:reset`.
+*.db
+*.db-journal
+
+# Cliente de Prisma generado. Se recrea con `npx prisma generate`.
+/src/generated/
 
 # vercel
 .vercel
