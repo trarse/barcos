@@ -4,7 +4,7 @@
  */
 export function Burgee({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} role="img" aria-label="Barlovento">
+    <svg viewBox="0 0 32 32" className={className} role="img" aria-label="Estribor">
       {/* Driza */}
       <line x1="5" y1="3" x2="5" y2="29" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
       {/* Galardete: triángulo con muesca en el batiente */}

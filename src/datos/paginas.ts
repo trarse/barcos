@@ -105,7 +105,7 @@ const ES: PaginasFijas = {
   comoFunciona: {
     titulo: "Cómo funciona",
     descripcion:
-      "Cómo reservar un barco en Barlovento: qué incluye el precio, qué pasa con la fianza, qué llevar el día de la salida y cómo se resuelve un problema.",
+      "Cómo reservar un barco en Estribor: qué incluye el precio, qué pasa con la fianza, qué llevar el día de la salida y cómo se resuelve un problema.",
     entradilla:
       "De la búsqueda a la devolución del barco, sin letra pequeña en ningún paso.",
     cta: "Buscar barco",
@@ -282,7 +282,7 @@ const EN: PaginasFijas = {
   comoFunciona: {
     titulo: "How it works",
     descripcion:
-      "How to book a boat on Barlovento: what the price includes, what happens with the deposit, what to bring on the day and how a problem gets resolved.",
+      "How to book a boat on Estribor: what the price includes, what happens with the deposit, what to bring on the day and how a problem gets resolved.",
     entradilla:
       "From the search to handing the boat back, with no small print at any step.",
     cta: "Find a boat",
@@ -459,7 +459,7 @@ const DE: PaginasFijas = {
   comoFunciona: {
     titulo: "So funktioniert es",
     descripcion:
-      "So buchen Sie ein Boot bei Barlovento: was der Preis enthält, was mit der Kaution passiert, was Sie am Tag der Abfahrt mitbringen und wie ein Problem gelöst wird.",
+      "So buchen Sie ein Boot bei Estribor: was der Preis enthält, was mit der Kaution passiert, was Sie am Tag der Abfahrt mitbringen und wie ein Problem gelöst wird.",
     entradilla:
       "Von der Suche bis zur Rückgabe des Bootes – ohne Kleingedrucktes an irgendeiner Stelle.",
     cta: "Boot suchen",

@@ -4,13 +4,13 @@
  */
 
 export const SITIO = {
-  nombre: "Barlovento",
+  nombre: "Estribor",
   lema: "El precio final, por delante",
   descripcion:
     "Alquiler de barcos en España con el precio final desde el primer resultado: combustible, limpieza, amarre y tasas incluidos. Sin sorpresas al pagar.",
-  url: process.env.NEXT_PUBLIC_URL ?? "https://barlovento.es",
+  url: process.env.NEXT_PUBLIC_URL ?? "https://estribor.es",
   idioma: "es-ES",
-  correo: "hola@barlovento.es",
+  correo: "hola@estribor.es",
   telefono: "+34 900 000 000",
 } as const;
 

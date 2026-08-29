@@ -1,4 +1,4 @@
-# Barlovento
+# Estribor
 
 Plataforma de alquiler de barcos en España. La tesis del producto es una sola:
 **el precio que se ve en el buscador es el que se paga.**

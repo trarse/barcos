@@ -1,7 +1,7 @@
 /**
  * Motor de precios.
  *
- * Es el diferenciador de Barlovento: la competencia anuncia el precio base y
+ * Es el diferenciador de Estribor: la competencia anuncia el precio base y
  * suma combustible, limpieza, amarre y tasas en el último paso del pago. Aquí
  * el total sale calculado desde la primera tarjeta de resultados.
  *

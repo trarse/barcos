@@ -40,18 +40,16 @@ export interface ModeloSemilla {
  * sitios donde el dinero cunde más.
  */
 export const FACTOR_DESTINO: Record<string, number> = {
-  mallorca: 1.15,
-  ibiza: 1.35,
-  menorca: 1.0,
-  formentera: 1.3,
   denia: 0.85,
-  valencia: 0.9,
+  javea: 0.95,
+  moraira: 0.95,
+  calpe: 0.9,
+  altea: 0.9,
+  benidorm: 0.9,
+  villajoyosa: 0.8,
   alicante: 0.85,
-  barcelona: 1.1,
-  "costa-brava": 1.0,
-  malaga: 0.95,
-  tenerife: 1.0,
-  "mar-menor": 0.75,
+  "el-campello": 0.8,
+  torrevieja: 0.8,
 };
 
 export const MODELOS: ModeloSemilla[] = [
@@ -80,7 +78,7 @@ export const MODELOS: ModeloSemilla[] = [
     minimoDias: 1,
     equipamiento: ["gps", "sonda", "nevera", "bimini", "snorkel", "chalecos"],
     experiencias: ["calas-y-snorkel"],
-    puertos: ["marina-denia", "santa-pola", "sant-antoni", "tomas-maestre", "puerto-colon"],
+    puertos: ["marina-denia", "santa-pola", "xabia", "les-bassetes", "benidorm", "villajoyosa"],
   },
   {
     nombre: "Zodiac Open 5.5",
@@ -106,7 +104,7 @@ export const MODELOS: ModeloSemilla[] = [
     minimoDias: 1,
     equipamiento: ["gps", "sonda", "radio-vhf", "nevera", "bimini", "snorkel", "chalecos"],
     experiencias: ["calas-y-snorkel", "atardecer"],
-    puertos: ["marina-denia", "port-andratx", "lestartit", "benalmadena", "el-campello"],
+    puertos: ["marina-denia", "el-campello", "moraira", "altea", "villajoyosa", "marina-internacional"],
   },
 
   // -------------------------------------------------------------------- lanchas
@@ -145,7 +143,7 @@ export const MODELOS: ModeloSemilla[] = [
       "chalecos",
     ],
     experiencias: ["calas-y-snorkel", "atardecer"],
-    puertos: ["marina-denia", "palma", "marina-botafoc", "marina-valencia", "port-olimpic", "benalmadena"],
+    puertos: ["marina-denia", "calpe", "campomanes", "marina-internacional", "rcn-torrevieja"],
   },
   {
     nombre: "Jeanneau Cap Camarat 7.5",
@@ -182,7 +180,7 @@ export const MODELOS: ModeloSemilla[] = [
       "chalecos",
     ],
     experiencias: ["calas-y-snorkel", "pesca", "atardecer"],
-    puertos: ["xabia", "alcudia", "mao", "santa-eularia", "palamos", "cabo-palos"],
+    puertos: ["xabia", "les-bassetes", "rcn-torrevieja", "benidorm"],
   },
   {
     nombre: "Beneteau Flyer 8",
@@ -220,7 +218,7 @@ export const MODELOS: ModeloSemilla[] = [
       "chalecos",
     ],
     experiencias: ["calas-y-snorkel", "atardecer", "celebraciones"],
-    puertos: ["marina-botafoc", "palma", "port-olimpic", "marina-valencia", "puerto-colon"],
+    puertos: ["marina-alicante", "el-campello", "altea", "moraira", "benidorm", "villajoyosa"],
   },
 
   // -------------------------------------------------------------------- veleros
@@ -260,7 +258,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "atardecer"],
-    puertos: ["palma", "marina-botafoc", "mao", "port-olimpic", "roses", "marina-valencia"],
+    puertos: ["santa-pola", "marina-denia", "campomanes", "calpe", "villajoyosa", "marina-internacional"],
   },
   {
     nombre: "Jeanneau Sun Odyssey 419",
@@ -299,7 +297,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel"],
-    puertos: ["palma", "ciutadella", "sant-antoni", "lestartit", "marina-alicante"],
+    puertos: ["marina-alicante", "xabia", "les-bassetes", "marina-internacional", "rcn-torrevieja"],
   },
   {
     nombre: "Bavaria Cruiser 46",
@@ -339,7 +337,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "celebraciones"],
-    puertos: ["palma", "marina-botafoc", "roses", "mao"],
+    puertos: ["el-campello", "xabia", "moraira", "altea", "rcn-torrevieja", "benidorm"],
   },
   {
     nombre: "Dufour 390 Grand Large",
@@ -377,7 +375,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "atardecer"],
-    puertos: ["lestartit", "port-vell", "santa-eularia", "puerto-malaga"],
+    puertos: ["marina-denia", "marina-alicante", "calpe", "campomanes", "benidorm", "villajoyosa"],
   },
 
   // ---------------------------------------------------------------- catamaranes
@@ -421,7 +419,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "celebraciones", "atardecer"],
-    puertos: ["marina-botafoc", "palma", "port-olimpic", "la-savina", "puerto-colon"],
+    puertos: ["xabia", "santa-pola", "les-bassetes", "villajoyosa", "marina-internacional"],
   },
   {
     nombre: "Fountaine Pajot Astrea 42",
@@ -463,7 +461,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "celebraciones"],
-    puertos: ["marina-botafoc", "mao", "roses", "marina-valencia"],
+    puertos: ["marina-alicante", "el-campello", "altea", "moraira", "marina-internacional", "rcn-torrevieja"],
   },
   {
     nombre: "Lagoon 380",
@@ -503,7 +501,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["calas-y-snorkel", "celebraciones"],
-    puertos: ["sant-antoni", "alcudia", "palamos", "benalmadena", "los-gigantes"],
+    puertos: ["santa-pola", "marina-denia", "campomanes", "calpe", "rcn-torrevieja", "benidorm"],
   },
 
   // ---------------------------------------------------------------------- yates
@@ -547,7 +545,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["celebraciones", "atardecer"],
-    puertos: ["marina-botafoc", "palma", "port-vell"],
+    puertos: ["el-campello", "xabia", "les-bassetes", "benidorm", "villajoyosa"],
   },
   {
     nombre: "Sunseeker Predator 60",
@@ -586,7 +584,7 @@ export const MODELOS: ModeloSemilla[] = [
       "balsa",
     ],
     experiencias: ["celebraciones"],
-    puertos: ["marina-botafoc", "benalmadena"],
+    puertos: ["marina-denia", "marina-alicante", "moraira", "altea", "villajoyosa", "marina-internacional"],
   },
 
   // --------------------------------------------------------------------- llaüts
@@ -625,7 +623,7 @@ export const MODELOS: ModeloSemilla[] = [
       "chalecos",
     ],
     experiencias: ["calas-y-snorkel", "atardecer", "pesca"],
-    puertos: ["mao", "ciutadella", "fornells", "portocolom"],
+    puertos: ["xabia", "santa-pola", "calpe", "campomanes", "marina-internacional", "rcn-torrevieja"],
   },
   {
     nombre: "Copino 38",
@@ -661,7 +659,7 @@ export const MODELOS: ModeloSemilla[] = [
       "chalecos",
     ],
     experiencias: ["calas-y-snorkel", "pesca", "atardecer"],
-    puertos: ["portocolom", "port-andratx", "alcudia", "la-savina"],
+    puertos: ["marina-alicante", "el-campello", "les-bassetes", "xabia", "rcn-torrevieja", "benidorm"],
   },
 
   // ------------------------------------------------------------- casas flotantes
@@ -689,7 +687,7 @@ export const MODELOS: ModeloSemilla[] = [
     minimoDias: 2,
     equipamiento: ["nevera", "cocina", "aire-acondicionado", "ducha-popa", "altavoz"],
     experiencias: [],
-    puertos: ["marina-valencia", "port-saplaya", "benalmadena"],
+    puertos: ["santa-pola", "marina-denia", "altea", "moraira", "benidorm", "villajoyosa"],
   },
 ];
 
