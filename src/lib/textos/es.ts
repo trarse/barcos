@@ -13,6 +13,9 @@
 export const es = {
   comun: {
     verBarcos: "Ver barcos",
+    sobreCinco: (nota: string) => `${nota} sobre 5`,
+    sobreCincoConOpiniones: (nota: string, opiniones: string) =>
+      `${nota} sobre 5 según ${opiniones} opiniones`,
     verFicha: "Ver ficha",
     volverPortada: "Volver a la portada",
     cargando: "Cargando",
@@ -68,7 +71,7 @@ export const es = {
     barcosSinLicencia: (n: string) =>
       `Hay ${n} barcos que puedes llevar sin licencia`,
 
-    porQue: "Por qué existe Barlovento",
+    porQue: "Por qué existe Estribor",
     tesisTitular: "Ese barco de 300 € cuesta 674 €",
     tesisUno:
       "Una lancha de 250 caballos quema unos 40 litros a la hora. Cuatro horas de navegación son 132 € de gasóleo. Súmale la limpieza, el amarre, las tasas y el IVA y la cifra anunciada se queda a menos de la mitad de lo que acabas pagando.",
@@ -182,6 +185,25 @@ export const es = {
     otrosTiposEn: (destino: string) => `Otros barcos en ${destino}`,
     todosLosDe: (destino: string) => `Todos los barcos de ${destino}`,
     verLosN: (n: string) => `Ver los ${n} barcos`,
+    guiaOtroIdioma: "La guía de navegación de este puerto está escrita en castellano.",
+    verGuiaEs: "Leerla en castellano",
+  },
+
+  sinLicenciaMunicipio: {
+    titulo: (destino: string) => `Alquiler de barcos sin licencia en ${destino}`,
+    descripcion: (destino: string) =>
+      `Qué puedes alquilar en ${destino} sin titulación náutica y qué barcos van con patrón. Precio final, sin sorpresas.`,
+    resumen: (n: string, destino: string, precio: string) =>
+      `${n} en ${destino} que puedes alquilar sin tener título náutico, desde ${precio} al día con todo incluido.`,
+    bloqueTu: "Los que puedes llevar tú",
+    bloqueTuNota:
+      "Sin ninguna titulación, después de la explicación de seguridad en el pantalán.",
+    bloquePatron: "Los que van con patrón",
+    bloquePatronNota:
+      "La titulación la pone el patrón. Tú eliges adónde ir y él gobierna el barco.",
+    sinFlota: (destino: string) =>
+      `Todavía no hay barcos sin titulación publicados en ${destino}.`,
+    verTodos: (destino: string) => `Ver todos los barcos de ${destino}`,
   },
 
   ficha: {
@@ -342,7 +364,7 @@ export const es = {
     destinos: "Destinos",
     tipos: "Tipos de barco",
     experiencias: "Experiencias",
-    marca: "Barlovento",
+    marca: "Estribor",
     comoFunciona: "Cómo funciona",
     publicar: "Publicar mi barco",
     sinLicencia: "Barcos sin licencia",
@@ -371,6 +393,23 @@ export const es = {
     llaut: "Llaüts",
     "casa-flotante": "Casas flotantes",
   },
+  descripcionTipo: {
+    velero:
+      "Navegación a vela para travesías de varios días. Camarotes, cocina y el menor consumo de combustible de toda la flota: el motor solo entra en puerto y en calmas.",
+    catamaran:
+      "Dos cascos, cero balanceo y una plataforma enorme entre ellos. Es la opción para grupos grandes y para quien se marea: la estabilidad no tiene comparación con un monocasco.",
+    lancha:
+      "Motora de día para moverse rápido entre calas. Llega a todas partes en poco tiempo, pero es donde más pesa el combustible: conviene mirar el consumo antes que la tarifa.",
+    neumatica:
+      "Semirrígida ligera, fácil de gobernar y con poco calado para entrar en calas pequeñas. Los modelos de hasta 15 caballos no requieren titulación.",
+    yate:
+      "Motora grande con camarotes, tripulación y todos los servicios a bordo. Consumo alto y patrón obligatorio, pero es otra forma de estar en el mar.",
+    llaut:
+      "La embarcación tradicional del Mediterráneo: casco de madera, motor lento y poco consumo. Para pasar el día fondeado sin prisa, no hay nada mejor.",
+    "casa-flotante":
+      "Alojamiento amarrado en puerto, con la comodidad de un apartamento y las vistas de un barco. No navega: se duerme a bordo.",
+  },
+
 
   tiposBarcoSingular: {
     velero: "Velero",

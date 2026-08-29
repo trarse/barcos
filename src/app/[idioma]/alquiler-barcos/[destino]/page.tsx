@@ -18,9 +18,10 @@ import {
 } from "@/lib/consultas";
 import { FILTROS_VACIOS } from "@/lib/filtros";
 import { entero, euro } from "@/lib/formato";
-import { esIdioma, IDIOMAS, type Idioma } from "@/lib/idiomas";
+import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS, type Idioma } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
+import { descripcionCorta } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -46,12 +47,12 @@ export async function generateMetadata(
 
   return {
     title: titulo,
-    description: destino.descripcion,
+    description: descripcionCorta(destino, idioma),
     alternates: alternativas({ tipo: "destino", destino: slug }, idioma),
     openGraph: {
       type: "website",
       title: titulo,
-      description: destino.descripcion,
+      description: descripcionCorta(destino, idioma),
       url: alternativas({ tipo: "destino", destino: slug }, idioma).canonical,
     },
   };
@@ -89,6 +90,11 @@ export default async function LandingDestino(
   const otros = destinos.filter((d) => d.slug !== slug).slice(0, 6);
   const busqueda = ruta({ tipo: "busqueda" }, idioma);
   const titulo = `${t.busqueda.tituloGenerico} ${t.busqueda.enDestino(destino.nombre)}`;
+  // La guía del puerto y sus preguntas están escritas a mano en un idioma
+  // concreto. Servirlas dentro de una página declarada en otro sería peor que
+  // no tenerlas: el hreflang prometería algo que la página no cumple, y el
+  // FAQPage marcaría en JSON-LD un idioma que no es el suyo.
+  const prosaTraducida = esIdioma(destino.idiomaProsa) && destino.idiomaProsa === idioma;
 
   return (
     <>
@@ -121,7 +127,7 @@ export default async function LandingDestino(
           </h1>
 
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-texto-suave">
-            {destino.descripcion}
+            {descripcionCorta(destino, idioma)}
           </p>
 
           {total > 0 && (
@@ -239,9 +245,21 @@ export default async function LandingDestino(
               <h2 className="font-display text-2xl font-semibold text-texto sm:text-3xl">
                 {t.destino.navegarEn(destino.nombre)}
               </h2>
-              <div className="mt-5">
-                <Contenido texto={destino.contenido} />
-              </div>
+              {prosaTraducida ? (
+                <div className="mt-5">
+                  <Contenido texto={destino.contenido} />
+                </div>
+              ) : (
+                <p className="mt-5 text-sm leading-relaxed text-texto-suave">
+                  {t.destino.guiaOtroIdioma}{" "}
+                  <Link
+                    className="underline underline-offset-4"
+                    href={ruta({ tipo: "destino", destino: slug }, IDIOMA_POR_DEFECTO)}
+                  >
+                    {t.destino.verGuiaEs}
+                  </Link>
+                </p>
+              )}
             </div>
 
             <aside>
@@ -265,15 +283,17 @@ export default async function LandingDestino(
             </aside>
           </div>
 
-          <div className="mt-14 max-w-3xl">
-            <Faq
-              idioma={idioma}
-              preguntas={destino.preguntas.map((p) => ({
-                pregunta: p.pregunta,
-                respuesta: p.respuesta,
-              }))}
-            />
-          </div>
+          {prosaTraducida && destino.preguntas.length > 0 && (
+            <div className="mt-14 max-w-3xl">
+              <Faq
+                idioma={idioma}
+                preguntas={destino.preguntas.map((p) => ({
+                  pregunta: p.pregunta,
+                  respuesta: p.respuesta,
+                }))}
+              />
+            </div>
+          )}
         </div>
       </section>
 

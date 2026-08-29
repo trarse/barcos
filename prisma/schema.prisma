@@ -1,4 +1,4 @@
-// Esquema de Barlovento.
+// Esquema de Estribor.
 //
 // En desarrollo corre sobre SQLite para que la aplicación funcione sin montar
 // nada. Para producción basta cambiar el provider a "postgresql": el esquema
@@ -30,8 +30,21 @@ model Destino {
   clase       String
   titular     String
   descripcion String
+  /// Traducciones de la descripcion corta. Alimentan el meta description,
+  /// que es el texto que se ve en el resultado de busqueda: servirlo en
+  /// otro idioma es tirar el clic.
+  descripcionEn String?
+  descripcionDe String?
   /// Texto largo de la landing, en Markdown ligero. Es lo que posiciona.
   contenido   String
+  /// Idioma en el que estan escritos `contenido` y las `preguntas`. No se
+  /// traduce nada automaticamente: si no coincide con el idioma de la
+  /// pagina, esos bloques no se pintan ni se marcan en JSON-LD.
+  idiomaProsa String  @default("es")
+  /// Texto propio de la landing "sin licencia" de este municipio. Si esta
+  /// vacio, la pagina existe pero no se indexa: sin texto propio seria una
+  /// pagina mas del monton, que es justo lo que hunde a un marketplace.
+  sinLicencia String?
   latitud     Float
   longitud    Float
   imagen      String
@@ -40,7 +53,7 @@ model Destino {
   destacado   Boolean @default(false)
   orden       Int     @default(100)
 
-  puertos  Puerto[]
+  puertos   Puerto[]
   preguntas Pregunta[]
 
   @@index([destacado, orden])
@@ -63,14 +76,14 @@ model Puerto {
 
 /// Categoría de embarcación: velero, catamarán, lancha...
 model TipoBarco {
-  id           String  @id @default(cuid())
-  slug         String  @unique
-  nombre       String
-  plural       String
-  descripcion  String
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  nombre      String
+  plural      String
+  descripcion String
   /// Si la categoría se puede gobernar sin titulación náutica.
-  sinLicencia  Boolean @default(false)
-  orden        Int     @default(100)
+  sinLicencia Boolean @default(false)
+  orden       Int     @default(100)
 
   barcos Barco[]
 }
@@ -88,16 +101,23 @@ model Equipamiento {
 
 /// Actividad vendida como producto propio: pesca, atardecer, buceo...
 model Experiencia {
-  id          String  @id @default(cuid())
-  slug        String  @unique
+  id          String @id @default(cuid())
+  slug        String @unique
   nombre      String
   titular     String
   descripcion String
+  /// Traducciones de la descripcion corta. Alimentan el meta description,
+  /// que es el texto que se ve en el resultado de busqueda: servirlo en
+  /// otro idioma es tirar el clic.
+  descripcionEn String?
+  descripcionDe String?
   contenido   String
+  /// Idioma en el que estan escritos `contenido` y las `preguntas`.
+  idiomaProsa String @default("es")
   imagen      String
   /// Duración típica en horas, para estimar el consumo.
-  horas       Int     @default(4)
-  orden       Int     @default(100)
+  horas       Int    @default(4)
+  orden       Int    @default(100)
 
   barcos    Barco[]
   preguntas Pregunta[]
@@ -105,14 +125,14 @@ model Experiencia {
 
 /// Quien publica el barco: un particular o una empresa de chárter.
 model Propietario {
-  id            String   @id @default(cuid())
-  nombre        String
+  id             String   @id @default(cuid())
+  nombre         String
   /// "particular" | "empresa"
-  clase         String   @default("particular")
-  desde         DateTime @default(now())
-  respondeEnMin Int      @default(60)
-  superAnfitrion Boolean @default(false)
-  avatar        String?
+  clase          String   @default("particular")
+  desde          DateTime @default(now())
+  respondeEnMin  Int      @default(60)
+  superAnfitrion Boolean  @default(false)
+  avatar         String?
 
   barcos Barco[]
 }
@@ -125,6 +145,10 @@ model Barco {
   modelo      String
   anio        Int
   descripcion String
+  /// Idioma en el que esta escrita `descripcion`. En otro idioma no se
+  /// pinta ni entra en el JSON-LD: una descripcion en castellano dentro de
+  /// un Product declarado en ingles es una senal de idioma equivocada.
+  idiomaProsa String @default("es")
 
   // Ficha técnica
   esloraCm   Int
@@ -134,15 +158,15 @@ model Barco {
   potenciaCv Int @default(0)
 
   // Tarifa. Todo en céntimos de euro.
-  precioBaseDia    Int
-  limpieza         Int @default(0)
-  tasaPortuariaDia Int @default(0)
-  patronDia        Int?
-  fianza           Int @default(0)
+  precioBaseDia     Int
+  limpieza          Int   @default(0)
+  tasaPortuariaDia  Int   @default(0)
+  patronDia         Int?
+  fianza            Int   @default(0)
   /// Consumo medio en litros por hora de navegación.
   consumoLitrosHora Float @default(0)
   /// Descuento porcentual a partir de 7 días (0-100).
-  descuentoSemana  Int @default(0)
+  descuentoSemana   Int   @default(0)
 
   // Condiciones
   requiereTitulacion Boolean @default(true)
@@ -160,9 +184,9 @@ model Barco {
   puertoId      String
   propietarioId String
 
-  tipo         TipoBarco     @relation(fields: [tipoId], references: [id])
-  puerto       Puerto        @relation(fields: [puertoId], references: [id], onDelete: Cascade)
-  propietario  Propietario   @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
+  tipo         TipoBarco      @relation(fields: [tipoId], references: [id])
+  puerto       Puerto         @relation(fields: [puertoId], references: [id], onDelete: Cascade)
+  propietario  Propietario    @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
   imagenes     Imagen[]
   equipamiento Equipamiento[]
   experiencias Experiencia[]
@@ -201,10 +225,12 @@ model Opinion {
 /// Pregunta frecuente. Alimenta el bloque de FAQ y su JSON-LD, que es
 /// la mitad de lo que hace destacar una landing en resultados.
 model Pregunta {
-  id       String @id @default(cuid())
-  pregunta String
+  id        String @id @default(cuid())
+  pregunta  String
   respuesta String
-  orden    Int    @default(0)
+  orden     Int    @default(0)
+  /// A que landing pertenece esta pregunta: "destino" o "sinLicencia".
+  bloque   String @default("destino")
 
   destinoId     String?
   experienciaId String?

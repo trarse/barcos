@@ -31,6 +31,7 @@ export type Pagina =
   | { tipo: "experiencias" }
   | { tipo: "experiencia"; slug: string }
   | { tipo: "sinLicencia" }
+  | { tipo: "sinLicenciaDestino"; destino: string }
   | { tipo: "blog" }
   | { tipo: "articulo"; slug: string }
   | { tipo: "comoFunciona" }
@@ -61,6 +62,8 @@ export function ruta(pagina: Pagina, idioma: Idioma): string {
       return `${raiz}/${segmento("experiencias", idioma)}/${pagina.slug}`;
     case "sinLicencia":
       return `${raiz}/${segmento("sinLicencia", idioma)}`;
+    case "sinLicenciaDestino":
+      return `${raiz}/${segmento("sinLicencia", idioma)}/${pagina.destino}`;
     case "blog":
       return `${raiz}/${segmento("blog", idioma)}`;
     case "articulo":
@@ -125,6 +128,9 @@ export function analizarRuta(
     }
     if (primero === segmento("blog", idioma)) {
       return con({ tipo: "articulo", slug: segundo });
+    }
+    if (primero === segmento("sinLicencia", idioma)) {
+      return con({ tipo: "sinLicenciaDestino", destino: segundo });
     }
     return null;
   }

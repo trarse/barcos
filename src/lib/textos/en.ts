@@ -11,6 +11,9 @@ import type { Textos } from "./es";
 export const en: Textos = {
   comun: {
     verBarcos: "See boats",
+    sobreCinco: (nota) => `${nota} out of 5`,
+    sobreCincoConOpiniones: (nota, opiniones) =>
+      `${nota} out of 5 from ${opiniones} reviews`,
     verFicha: "View boat",
     volverPortada: "Back to home",
     cargando: "Loading",
@@ -65,7 +68,7 @@ export const en: Textos = {
     sinTitulacion: "No licence?",
     barcosSinLicencia: (n) => `${n} boats you can skipper with no licence`,
 
-    porQue: "Why Barlovento exists",
+    porQue: "Why Estribor exists",
     tesisTitular: "That €300 boat costs €674",
     tesisUno:
       "A 250 hp motorboat burns around 40 litres an hour. Four hours out is €132 of diesel. Add cleaning, mooring, port fees and VAT and the advertised figure comes to less than half of what you actually pay.",
@@ -177,6 +180,25 @@ export const en: Textos = {
     otrosTiposEn: (destino) => `Other boats in ${destino}`,
     todosLosDe: (destino) => `Every boat in ${destino}`,
     verLosN: (n) => `See all ${n} boats`,
+    guiaOtroIdioma: "The local sailing guide for this marina is written in Spanish.",
+    verGuiaEs: "Read it in Spanish",
+  },
+
+  sinLicenciaMunicipio: {
+    titulo: (destino) => `Boat hire without a licence in ${destino}`,
+    descripcion: (destino) =>
+      `What you can hire in ${destino} without a boating licence, and which boats come with a skipper. Final price, no surprises.`,
+    resumen: (n, destino, precio) =>
+      `${n} in ${destino} you can hire without holding a boating licence, from ${precio} per day, everything included.`,
+    bloqueTu: "Boats you can helm yourself",
+    bloqueTuNota:
+      "No licence needed, after the safety briefing on the pontoon.",
+    bloquePatron: "Boats that come with a skipper",
+    bloquePatronNota:
+      "The skipper holds the licence. You just choose where to go.",
+    sinFlota: (destino) =>
+      `No licence-free boats listed in ${destino} yet.`,
+    verTodos: (destino) => `See all boats in ${destino}`,
   },
 
   ficha: {
@@ -336,7 +358,7 @@ export const en: Textos = {
     destinos: "Destinations",
     tipos: "Boat types",
     experiencias: "Experiences",
-    marca: "Barlovento",
+    marca: "Estribor",
     comoFunciona: "How it works",
     publicar: "List your boat",
     sinLicencia: "Boats without a licence",
@@ -359,6 +381,23 @@ export const en: Textos = {
     llaut: "Llaüts",
     "casa-flotante": "Houseboats",
   },
+  descripcionTipo: {
+    velero:
+      "Sailing for passages of several days. Cabins, a galley and the lowest fuel bill in the fleet: the engine only runs in and out of harbour and in flat calms.",
+    catamaran:
+      "Two hulls, no roll and a huge platform between them. The choice for large groups and for anyone who gets seasick: no monohull comes close on stability.",
+    lancha:
+      "A day motorboat for moving quickly between coves. It gets everywhere fast, but this is where fuel weighs most: check the consumption before the headline rate.",
+    neumatica:
+      "A light RIB, easy to handle and shallow enough to slip into small coves. Models up to 15 hp require no licence.",
+    yate:
+      "A large motor yacht with cabins, crew and every service on board. High consumption and a skipper is compulsory, but it is a different way of being at sea.",
+    llaut:
+      "The traditional Mediterranean boat: wooden hull, slow engine, little fuel. For a whole day at anchor with no hurry, there is nothing better.",
+    "casa-flotante":
+      "Accommodation moored in the marina, with the comfort of an apartment and the view from a boat. It does not sail: you sleep on board.",
+  },
+
 
   tiposBarcoSingular: {
     velero: "Sailboat",

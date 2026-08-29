@@ -109,6 +109,8 @@ export interface ExperienciaSemilla {
   nombre: string;
   titular: string;
   descripcion: string;
+  descripcionEn: string;
+  descripcionDe: string;
   contenido: string;
   horas: number;
   orden: number;
@@ -122,6 +124,10 @@ export const EXPERIENCIAS: ExperienciaSemilla[] = [
     titular: "Salidas al atardecer en barco",
     descripcion:
       "Tres horas de navegación con la puesta de sol desde el agua. El plan más pedido del verano y el que mejor sale de precio.",
+    descripcionEn:
+      "Three hours afloat with the sunset seen from the water. The most requested plan of the summer and the best value of them all.",
+    descripcionDe:
+      "Drei Stunden auf dem Wasser mit Sonnenuntergang. Der meistgefragte Törn des Sommers und der mit dem besten Preis.",
     contenido: `Salir a última hora de la tarde tiene una ventaja práctica además de la evidente: el viento térmico ya ha caído, el mar se queda plano y las tres horas de navegación consumen la mitad de combustible que una jornada completa.
 
 El formato habitual son entre dos y cuatro horas con patrón incluido, salida sobre las 18:30 o 19:00 según el mes, un fondeo para bañarse mientras hay luz y la vuelta a puerto con el sol ya bajo. Muchos barcos incluyen bebida a bordo.
@@ -148,6 +154,10 @@ Es también la puerta de entrada para quien nunca ha alquilado: no hace falta t�
     titular: "Salidas de pesca en barco",
     descripcion:
       "Curricán, fondo y jigging con equipo a bordo y patrón que conoce las marcas. Licencia de pesca marítima incluida en la mayoría de las salidas.",
+    descripcionEn:
+      "Trolling, bottom fishing and jigging with tackle on board and a skipper who knows the marks. Sea fishing licence included on most trips.",
+    descripcionDe:
+      "Schleppangeln, Grundangeln und Jigging mit Ausrüstung an Bord und einem Skipper, der die Stellen kennt. Angelschein bei den meisten Törns inklusive.",
     contenido: `Una salida de pesca no es alquilar un barco y llevarse una caña. El valor está en el patrón: alguien que sabe dónde está el fondo bueno, a qué hora entra el atún y qué señuelo funciona esta semana.
 
 Las modalidades habituales en la costa española son el curricán de superficie para lampuga, bonito y llampuga en verano; la pesca de fondo sobre roca para pargo, dentón y meros; y el jigging vertical, más deportivo, sobre veriles y bajos.
@@ -174,6 +184,10 @@ Casi todas las salidas incluyen cañas, carretes, señuelos, cebo y la licencia 
     titular: "Rutas de calas y snorkel en barco",
     descripcion:
       "Jornada de fondeos encadenados en calas sin acceso por carretera, con equipo de snorkel a bordo.",
+    descripcionEn:
+      "A day of back-to-back anchorages in coves with no road access, with snorkelling gear on board.",
+    descripcionDe:
+      "Ein Tag mit mehreren Ankerstopps in Buchten ohne Straßenzugang, Schnorchelausrüstung an Bord.",
     contenido: `El plan clásico del Mediterráneo: salir por la mañana, encadenar tres o cuatro fondeos y volver a puerto al atardecer. Lo que lo hace distinto de un día de playa es que las mejores calas de la costa española no tienen acceso rodado, o lo tienen tan complicado que por mar se llega antes y con la mitad de gente.
 
 Las rutas mejor valoradas son las calas de Santanyí en Mallorca, el tramo Dénia-Xàbia con la Cova Tallada, las calas del sur de Menorca y el litoral de Begur en la Costa Brava.
@@ -200,6 +214,10 @@ Casi todos los barcos llevan gafas y tubos a bordo, escalera de baño y nevera. 
     titular: "Avistamiento de delfines y ballenas en barco",
     descripcion:
       "Delfines mulares, listados y calderones en el mar de Alborán y el sur de Tenerife, con las distancias de aproximación que marca la ley.",
+    descripcionEn:
+      "Bottlenose and striped dolphins off the Costa Blanca, always at the approach distances the law requires.",
+    descripcionDe:
+      "Große Tümmler und Streifendelfine vor der Costa Blanca, stets in den gesetzlich vorgeschriebenen Abständen.",
     contenido: `España tiene dos de los mejores puntos de Europa para ver cetáceos desde una embarcación de recreo: el mar de Alborán, entre Málaga y Gibraltar, y la franja sur de Tenerife entre Los Cristianos y Los Gigantes.
 
 En Tenerife hay poblaciones residentes de calderón tropical y delfín mular que no migran, así que el avistamiento es posible los 365 días del año con una probabilidad de éxito superior al 90 % en una salida de tres horas. En Alborán la variedad es mayor —listados, mulares, calderones y algún rorcual en paso— pero más estacional.
@@ -226,6 +244,10 @@ La normativa española fija distancias mínimas de aproximación, prohíbe corta
     titular: "Barcos para celebraciones y grupos",
     descripcion:
       "Despedidas, cumpleaños y eventos de empresa a bordo. Catamaranes y yates con capacidad para grupos grandes y equipo de música.",
+    descripcionEn:
+      "Hen and stag parties, birthdays and company events on board. Catamarans and yachts with room for large groups and a sound system.",
+    descripcionDe:
+      "Junggesellenabschiede, Geburtstage und Firmenevents an Bord. Katamarane und Yachten für große Gruppen, mit Musikanlage.",
     contenido: `Para un grupo, el barco resuelve de golpe el sitio, la actividad y el ambiente. Los catamaranes son la elección natural: la plataforma central es un salón al aire libre, no se balancean fondeados y admiten doce o más personas sin agobio.
 
 El formato habitual son cuatro o cinco horas con patrón, un par de fondeos para bañarse y música a bordo. Conviene aclarar de antemano si se puede subir comida y bebida propias o si el barco lo suministra, porque cambia bastante el presupuesto.

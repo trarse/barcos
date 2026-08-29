@@ -15,6 +15,7 @@ import {
 import { entero, euro } from "@/lib/formato";
 import { esIdioma, type Idioma } from "@/lib/idiomas";
 import { ruta } from "@/lib/rutas";
+import { descripcionCorta } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -106,7 +107,7 @@ export default async function Portada(props: PageProps<"/[idioma]">) {
                   {destino.nombre}
                 </h3>
                 <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-texto-suave">
-                  {destino.descripcion}
+                  {descripcionCorta(destino, idioma)}
                 </p>
                 <p className="mt-3 text-sm font-medium text-acento">
                   {t.portada.nBarcos(entero(cuenta.get(destino.slug) ?? 0))}
@@ -185,7 +186,7 @@ export default async function Portada(props: PageProps<"/[idioma]">) {
                   {t.actividades[exp.slug as keyof typeof t.actividades] ?? exp.nombre}
                 </h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-texto-suave">
-                  {exp.descripcion}
+                  {descripcionCorta(exp, idioma)}
                 </p>
                 <p className="mt-4 text-sm font-medium text-acento">
                   {t.portada.nBarcosHoras(entero(exp._count.barcos), exp.horas)}

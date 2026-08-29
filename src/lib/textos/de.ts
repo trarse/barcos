@@ -10,6 +10,9 @@ import type { Textos } from "./es";
 export const de: Textos = {
   comun: {
     verBarcos: "Boote ansehen",
+    sobreCinco: (nota) => `${nota} von 5`,
+    sobreCincoConOpiniones: (nota, opiniones) =>
+      `${nota} von 5 bei ${opiniones} Bewertungen`,
     verFicha: "Boot ansehen",
     volverPortada: "Zurück zur Startseite",
     cargando: "Wird geladen",
@@ -64,7 +67,7 @@ export const de: Textos = {
     sinTitulacion: "Kein Führerschein?",
     barcosSinLicencia: (n) => `${n} Boote fahren Sie ohne Führerschein`,
 
-    porQue: "Warum es Barlovento gibt",
+    porQue: "Warum es Estribor gibt",
     tesisTitular: "Dieses 300-Euro-Boot kostet 674 Euro",
     tesisUno:
       "Ein Motorboot mit 250 PS verbraucht rund 40 Liter pro Stunde. Vier Stunden auf dem Wasser sind 132 Euro Diesel. Dazu Endreinigung, Liegeplatz, Hafengebühren und Mehrwertsteuer – und der beworbene Preis liegt bei weniger als der Hälfte dessen, was Sie am Ende zahlen.",
@@ -177,6 +180,25 @@ export const de: Textos = {
     otrosTiposEn: (destino) => `Weitere Boote in ${destino}`,
     todosLosDe: (destino) => `Alle Boote in ${destino}`,
     verLosN: (n) => `Alle ${n} Boote ansehen`,
+    guiaOtroIdioma: "Der Revierführer für diesen Hafen ist auf Spanisch verfasst.",
+    verGuiaEs: "Auf Spanisch lesen",
+  },
+
+  sinLicenciaMunicipio: {
+    titulo: (destino) => `Boot mieten ohne Führerschein in ${destino}`,
+    descripcion: (destino) =>
+      `Was Sie in ${destino} ohne Bootsführerschein mieten können und welche Boote mit Skipper fahren. Endpreis ohne Überraschungen.`,
+    resumen: (n, destino, precio) =>
+      `${n} in ${destino}, die Sie ohne Bootsführerschein mieten können, ab ${precio} pro Tag inklusive aller Kosten.`,
+    bloqueTu: "Boote, die Sie selbst fahren dürfen",
+    bloqueTuNota:
+      "Ohne Führerschein, nach der Sicherheitseinweisung am Steg.",
+    bloquePatron: "Boote mit Skipper",
+    bloquePatronNota:
+      "Den Führerschein bringt der Skipper mit. Sie bestimmen nur das Ziel.",
+    sinFlota: (destino) =>
+      `In ${destino} sind noch keine führerscheinfreien Boote gelistet.`,
+    verTodos: (destino) => `Alle Boote in ${destino} ansehen`,
   },
 
   ficha: {
@@ -337,7 +359,7 @@ export const de: Textos = {
     destinos: "Reiseziele",
     tipos: "Bootstypen",
     experiencias: "Erlebnisse",
-    marca: "Barlovento",
+    marca: "Estribor",
     comoFunciona: "So funktioniert es",
     publicar: "Boot vermieten",
     sinLicencia: "Boote ohne Führerschein",
@@ -360,6 +382,23 @@ export const de: Textos = {
     llaut: "Llaüts",
     "casa-flotante": "Hausboote",
   },
+  descripcionTipo: {
+    velero:
+      "Segeln für Törns über mehrere Tage. Kajüten, Pantry und der geringste Kraftstoffverbrauch der ganzen Flotte: Der Motor läuft nur im Hafen und bei Flaute.",
+    catamaran:
+      "Zwei Rümpfe, keine Rollbewegung und eine riesige Plattform dazwischen. Die Wahl für große Gruppen und für alle, die seekrank werden: An Stabilität kommt kein Einrumpfboot heran.",
+    lancha:
+      "Motorboot für den Tag, um schnell zwischen den Buchten zu wechseln. Kommt überall zügig hin, doch hier fällt der Kraftstoff am stärksten ins Gewicht: Schauen Sie eher auf den Verbrauch als auf den Grundpreis.",
+    neumatica:
+      "Leichtes Schlauchboot, einfach zu fahren und mit wenig Tiefgang für kleine Buchten. Modelle bis 15 PS erfordern keinen Führerschein.",
+    yate:
+      "Große Motoryacht mit Kajüten, Crew und allem Service an Bord. Hoher Verbrauch und Skipper vorgeschrieben, dafür eine ganz andere Art, auf See zu sein.",
+    llaut:
+      "Das traditionelle Boot des Mittelmeers: Holzrumpf, langsamer Motor, wenig Verbrauch. Für einen ganzen Tag vor Anker ohne Eile gibt es nichts Besseres.",
+    "casa-flotante":
+      "Unterkunft im Hafen festgemacht, mit dem Komfort einer Wohnung und dem Blick von einem Boot. Es fährt nicht: Man übernachtet an Bord.",
+  },
+
 
   tiposBarcoSingular: {
     velero: "Segelboot",

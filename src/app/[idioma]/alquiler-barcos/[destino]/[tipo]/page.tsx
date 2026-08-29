@@ -59,7 +59,7 @@ export async function generateMetadata(
 
   return {
     title: titulo,
-    description: `${titulo}. ${tipo.descripcion}`,
+    description: `${titulo}. ${t.descripcionTipo[tipo.slug as keyof typeof t.descripcionTipo] ?? tipo.descripcion}`,
     alternates: alternativas(pagina, idioma),
     openGraph: {
       type: "website",
@@ -138,7 +138,8 @@ export default async function LandingDestinoTipo(
           </h1>
 
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-texto-suave">
-            {tipo.descripcion}
+            {t.descripcionTipo[tipo.slug as keyof typeof t.descripcionTipo] ??
+              tipo.descripcion}
           </p>
 
           <p className="mt-5 text-texto-suave">
@@ -180,7 +181,13 @@ export default async function LandingDestinoTipo(
             {t.destino.tipoEn(plural, destino.nombre)}
           </h2>
           <div className="mt-5">
-            <Contenido texto={destino.contenido} />
+            {esIdioma(destino.idiomaProsa) && destino.idiomaProsa === idioma ? (
+              <Contenido texto={destino.contenido} />
+            ) : (
+              <p className="text-sm leading-relaxed text-texto-suave">
+                {t.destino.guiaOtroIdioma}
+              </p>
+            )}
           </div>
 
           {hermanos.length > 1 && (

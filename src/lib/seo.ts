@@ -53,7 +53,8 @@ export function faqJsonLd(preguntas: ParFaq[]) {
 
 export interface ProductoBarco {
   nombre: string;
-  descripcion: string;
+  /** Se omite del marcado si no esta en el idioma de la pagina. */
+  descripcion?: string;
   ruta: string;
   imagenes: string[];
   fabricante: string;
@@ -74,7 +75,7 @@ export function barcoJsonLd(barco: ProductoBarco) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: barco.nombre,
-    description: barco.descripcion,
+    ...(barco.descripcion ? { description: barco.descripcion } : {}),
     image: barco.imagenes.map((img) => (img.startsWith("http") ? img : urlAbsoluta(img))),
     brand: { "@type": "Brand", name: barco.fabricante },
     offers: {

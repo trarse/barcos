@@ -7,6 +7,7 @@ import { listarExperiencias } from "@/lib/consultas";
 import { entero } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
+import { descripcionCorta } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -77,7 +78,7 @@ export default async function Experiencias(
                 </span>
               </div>
               <p className="mt-2.5 flex-1 leading-relaxed text-texto-suave">
-                {exp.descripcion}
+                {descripcionCorta(exp, idioma)}
               </p>
               <p className="mt-4 text-sm font-semibold text-acento">
                 {t.portada.nBarcos(entero(exp._count.barcos))} →

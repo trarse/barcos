@@ -15,6 +15,7 @@ import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
+import { descripcionCorta } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -41,12 +42,12 @@ export async function generateMetadata(
 
   return {
     title: `${nombre} · ${t.nav.experiencias}`,
-    description: experiencia.descripcion,
+    description: descripcionCorta(experiencia, idioma),
     alternates: alternativas({ tipo: "experiencia", slug: actividad }, idioma),
     openGraph: {
       type: "website",
       title: experiencia.titular,
-      description: experiencia.descripcion,
+      description: descripcionCorta(experiencia, idioma),
       url: alternativas({ tipo: "experiencia", slug: actividad }, idioma).canonical,
     },
   };
@@ -62,6 +63,8 @@ export default async function LandingExperiencia(
   if (!experiencia) notFound();
 
   const t = textos(idioma);
+  const prosaTraducida =
+    esIdioma(experiencia.idiomaProsa) && experiencia.idiomaProsa === idioma;
   const barcos = await barcosDeExperiencia(actividad);
   const masBarato = barcos.length > 0 ? Math.min(...barcos.map((b) => b.precioDia)) : 0;
   const nombre =
@@ -95,7 +98,7 @@ export default async function LandingExperiencia(
           </h1>
 
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-texto-suave">
-            {experiencia.descripcion}
+            {descripcionCorta(experiencia, idioma)}
           </p>
 
           {barcos.length > 0 && (
@@ -130,18 +133,26 @@ export default async function LandingExperiencia(
               {t.pie.comoFunciona}
             </h2>
             <div className="mt-5">
-              <Contenido texto={experiencia.contenido} />
+              {prosaTraducida ? (
+                <Contenido texto={experiencia.contenido} />
+              ) : (
+                <p className="text-sm leading-relaxed text-texto-suave">
+                  {t.destino.guiaOtroIdioma}
+                </p>
+              )}
             </div>
 
-            <div className="mt-12">
-              <Faq
-                idioma={idioma}
-                preguntas={experiencia.preguntas.map((p) => ({
-                  pregunta: p.pregunta,
-                  respuesta: p.respuesta,
-                }))}
-              />
-            </div>
+            {prosaTraducida && experiencia.preguntas.length > 0 && (
+              <div className="mt-12">
+                <Faq
+                  idioma={idioma}
+                  preguntas={experiencia.preguntas.map((p) => ({
+                    pregunta: p.pregunta,
+                    respuesta: p.respuesta,
+                  }))}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>

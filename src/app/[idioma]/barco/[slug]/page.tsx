@@ -83,6 +83,11 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
   if (!barco) notFound();
 
   const t = textos(idioma);
+  // La descripcion la escribe el armador en su idioma. Si no coincide con
+  // el de la pagina no se pinta ni entra en el Product: la ficha se sostiene
+  // con los datos tecnicos, el equipamiento y el desglose de precio, que si
+  // estan traducidos.
+  const prosaTraducida = esIdioma(barco.idiomaProsa) && barco.idiomaProsa === idioma;
   const destino = barco.puerto.destino;
   const temporada = temporadaDe(new Date(), destino.mesesAlta);
   const tarifa = tarifaDe(barco);
@@ -131,7 +136,7 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
       <JsonLd
         datos={barcoJsonLd({
           nombre: `${barco.nombre} · ${destino.nombre}`,
-          descripcion: barco.descripcion,
+          descripcion: prosaTraducida ? barco.descripcion : undefined,
           ruta: ruta({ tipo: "barco", slug }, idioma),
           imagenes: [],
           fabricante: barco.fabricante,
@@ -195,6 +200,7 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
             <Estrellas
               nota={barco.valoracion}
               opiniones={barco.numOpiniones}
+              idioma={idioma}
               tamano="grande"
             />
             <span className="text-texto-suave">
@@ -208,9 +214,11 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
             </span>
           </div>
 
-          <p className="mt-6 max-w-[68ch] leading-relaxed text-texto-suave">
-            {barco.descripcion}
-          </p>
+          {prosaTraducida && (
+            <p className="mt-6 max-w-[68ch] leading-relaxed text-texto-suave">
+              {barco.descripcion}
+            </p>
+          )}
 
           <section className="mt-9" aria-labelledby="ficha">
             <h2 id="ficha" className="font-display text-2xl font-semibold text-texto">
@@ -309,7 +317,7 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
                     </p>
                   </div>
                   <div className="mt-1.5">
-                    <Estrellas nota={opinion.nota} />
+                    <Estrellas nota={opinion.nota} idioma={idioma} />
                   </div>
                   <p className="mt-3 leading-relaxed text-texto-suave">{opinion.texto}</p>
                 </article>

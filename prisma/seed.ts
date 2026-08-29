@@ -94,6 +94,8 @@ async function main() {
         nombre: x.nombre,
         titular: x.titular,
         descripcion: x.descripcion,
+        descripcionEn: x.descripcionEn,
+        descripcionDe: x.descripcionDe,
         contenido: x.contenido,
         horas: x.horas,
         orden: x.orden,
@@ -122,7 +124,10 @@ async function main() {
         clase: d.clase,
         titular: d.titular,
         descripcion: d.descripcion,
+        descripcionEn: d.descripcionEn,
+        descripcionDe: d.descripcionDe,
         contenido: d.contenido,
+        sinLicencia: d.sinLicencia ?? null,
         latitud: d.latitud,
         longitud: d.longitud,
         mesesAlta: d.mesesAlta,
@@ -130,7 +135,14 @@ async function main() {
         orden: d.orden,
         imagen: `carta:${d.slug}`,
         preguntas: {
-          create: d.preguntas.map((p, i) => ({ ...p, orden: i })),
+          create: [
+            ...d.preguntas.map((p, i) => ({ ...p, orden: i, bloque: "destino" })),
+            ...(d.preguntasSinLicencia ?? []).map((p, i) => ({
+              ...p,
+              orden: i,
+              bloque: "sinLicencia",
+            })),
+          ],
         },
       },
     });

@@ -50,7 +50,7 @@ export async function generateMetadata(
 
   return {
     title: titulo,
-    description: `${titulo}. ${tipo.descripcion}`,
+    description: `${titulo}. ${t.descripcionTipo[tipo.slug as keyof typeof t.descripcionTipo] ?? tipo.descripcion}`,
     alternates: alternativas({ tipo: "tipoBarco", tipoBarco: slug }, idioma),
     openGraph: {
       type: "website",
@@ -112,7 +112,8 @@ export default async function LandingTipo(props: PageProps<"/[idioma]/tipos/[tip
           </h1>
 
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-texto-suave">
-            {tipo.descripcion}
+            {t.descripcionTipo[tipo.slug as keyof typeof t.descripcionTipo] ??
+              tipo.descripcion}
           </p>
 
           {total > 0 && (

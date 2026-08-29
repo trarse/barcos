@@ -1,4 +1,6 @@
 import { entero, valoracion as formatearNota } from "@/lib/formato";
+import type { Idioma } from "@/lib/idiomas";
+import { textos } from "@/lib/textos";
 
 /**
  * Valoración media. El relleno parcial se hace con un degradado sobre la misma
@@ -7,12 +9,15 @@ import { entero, valoracion as formatearNota } from "@/lib/formato";
 export function Estrellas({
   nota,
   opiniones,
+  idioma,
   tamano = "normal",
 }: {
   nota: number;
   opiniones?: number;
+  idioma: Idioma;
   tamano?: "normal" | "grande";
 }) {
+  const t = textos(idioma);
   const grande = tamano === "grande";
   const px = grande ? "h-4.5 w-4.5" : "h-3.5 w-3.5";
 
@@ -34,8 +39,9 @@ export function Estrellas({
         </span>
       )}
       <span className="sr-only">
-        {formatearNota(nota)} sobre 5
-        {opiniones !== undefined ? ` según ${entero(opiniones)} opiniones` : ""}
+        {opiniones === undefined
+          ? t.comun.sobreCinco(formatearNota(nota))
+          : t.comun.sobreCincoConOpiniones(formatearNota(nota), entero(opiniones))}
       </span>
     </span>
   );

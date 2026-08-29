@@ -71,7 +71,7 @@ export function TarjetaBarco({
         </h3>
 
         <div className="mt-1.5">
-          <Estrellas nota={barco.valoracion} opiniones={barco.opiniones} />
+          <Estrellas nota={barco.valoracion} opiniones={barco.opiniones} idioma={idioma} />
         </div>
 
         <p className="mt-2 text-sm text-texto-suave">
