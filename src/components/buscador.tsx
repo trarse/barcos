@@ -1,4 +1,6 @@
-import { rutas } from "@/lib/seo";
+import type { Idioma } from "@/lib/idiomas";
+import { ruta } from "@/lib/rutas";
+import { textos } from "@/lib/textos";
 
 interface Opcion {
   slug: string;
@@ -15,32 +17,38 @@ interface Opcion {
 export function Buscador({
   destinos,
   tipos,
+  idioma,
   destinoFijo,
   tipoFijo,
   compacto = false,
 }: {
   destinos: Opcion[];
   tipos: Opcion[];
+  idioma: Idioma;
   destinoFijo?: string;
   tipoFijo?: string;
   compacto?: boolean;
 }) {
+  const t = textos(idioma);
+
   return (
     <form
-      action={rutas.busqueda()}
+      action={ruta({ tipo: "busqueda" }, idioma)}
       method="get"
       className={`grid gap-2 rounded-carta border border-borde bg-superficie p-2 shadow-[0_4px_24px_-8px_rgb(var(--sombra)/0.25)] ${
-        compacto ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_0.8fr_auto]"
+        compacto
+          ? "sm:grid-cols-[1fr_1fr_auto]"
+          : "sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_0.8fr_auto]"
       }`}
     >
-      <Campo etiqueta="Destino" htmlFor="q-destino">
+      <Campo etiqueta={t.buscador.destino} htmlFor="q-destino">
         <select
           id="q-destino"
           name="destino"
           defaultValue={destinoFijo ?? ""}
           className="w-full bg-transparent text-base font-medium text-texto outline-none"
         >
-          <option value="">Cualquier destino</option>
+          <option value="">{t.buscador.cualquierDestino}</option>
           {destinos.map((d) => (
             <option key={d.slug} value={d.slug}>
               {d.nombre}
@@ -49,34 +57,35 @@ export function Buscador({
         </select>
       </Campo>
 
-      <Campo etiqueta="Tipo de barco" htmlFor="q-tipo">
+      <Campo etiqueta={t.buscador.tipoBarco} htmlFor="q-tipo">
         <select
           id="q-tipo"
           name="tipo"
           defaultValue={tipoFijo ?? ""}
           className="w-full bg-transparent text-base font-medium text-texto outline-none"
         >
-          <option value="">Cualquier tipo</option>
-          {tipos.map((t) => (
-            <option key={t.slug} value={t.slug}>
-              {t.nombre}
+          <option value="">{t.buscador.cualquierTipo}</option>
+          {tipos.map((tipo) => (
+            <option key={tipo.slug} value={tipo.slug}>
+              {t.tiposBarcoSingular[tipo.slug as keyof typeof t.tiposBarcoSingular] ??
+                tipo.nombre}
             </option>
           ))}
         </select>
       </Campo>
 
       {!compacto && (
-        <Campo etiqueta="Personas" htmlFor="q-capacidad">
+        <Campo etiqueta={t.buscador.personas} htmlFor="q-capacidad">
           <select
             id="q-capacidad"
             name="capacidad"
             defaultValue=""
             className="w-full bg-transparent text-base font-medium text-texto outline-none"
           >
-            <option value="">Las que sean</option>
+            <option value="">{t.buscador.lasQueSean}</option>
             {[2, 4, 6, 8, 10, 12].map((n) => (
               <option key={n} value={n}>
-                {n} o más
+                {t.buscador.oMas(n)}
               </option>
             ))}
           </select>
@@ -87,7 +96,7 @@ export function Buscador({
         type="submit"
         className="rounded-md bg-marca px-6 py-3.5 text-base font-semibold text-fondo transition-opacity hover:opacity-90"
       >
-        Ver barcos
+        {t.buscador.enviar}
       </button>
     </form>
   );

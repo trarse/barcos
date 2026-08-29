@@ -5,9 +5,14 @@
  * valoración en todas sus landings; es exactamente donde se les puede ganar
  * en resultados enriquecidos. Cada función devuelve un objeto plano listo
  * para volcar en un <script type="application/ld+json">.
+ *
+ * Las rutas ya no se construyen aquí: viven en `rutas.ts`, que sabe de
+ * idiomas. Aquí solo se absolutizan.
  */
 
 import { aDecima } from "./formato";
+import { ETIQUETAS, type Idioma } from "./idiomas";
+import { ruta } from "./rutas";
 import { SITIO, urlAbsoluta } from "./sitio";
 
 export interface Miga {
@@ -117,7 +122,7 @@ export function listaJsonLd(nombre: string, elementos: ElementoLista[]) {
   };
 }
 
-/** Organización y buscador del sitio. Va una sola vez, en el layout raíz. */
+/** Organización. Va una sola vez, en el layout raíz. */
 export function organizacionJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -130,39 +135,23 @@ export function organizacionJsonLd() {
   };
 }
 
-export function sitioJsonLd() {
+/** Sitio y buscador interno, en el idioma que se está viendo. */
+export function sitioJsonLd(idioma: Idioma) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITIO.nombre,
-    url: SITIO.url,
-    inLanguage: SITIO.idioma,
+    url: urlAbsoluta(ruta({ tipo: "home" }, idioma)),
+    inLanguage: ETIQUETAS[idioma].hreflang,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: urlAbsoluta("/alquiler-barcos?destino={search_term_string}"),
+        urlTemplate: urlAbsoluta(
+          `${ruta({ tipo: "busqueda" }, idioma)}?destino={search_term_string}`,
+        ),
       },
       "query-input": "required name=search_term_string",
     },
   };
 }
-
-/**
- * Rutas canónicas. Se centralizan aquí para que enlaces internos, sitemap y
- * `canonical` no puedan divergir nunca: una URL con y sin barra final son dos
- * páginas distintas para un buscador.
- */
-export const rutas = {
-  home: () => "/",
-  busqueda: () => "/alquiler-barcos",
-  destino: (destino: string) => `/alquiler-barcos/${destino}`,
-  destinoTipo: (destino: string, tipo: string) => `/alquiler-barcos/${destino}/${tipo}`,
-  tipo: (tipo: string) => `/alquiler-${tipo}`,
-  barco: (slug: string) => `/barco/${slug}`,
-  experiencias: () => "/experiencias",
-  experiencia: (slug: string) => `/experiencias/${slug}`,
-  sinLicencia: () => "/sin-licencia",
-  blog: () => "/blog",
-  articulo: (slug: string) => `/blog/${slug}`,
-} as const;

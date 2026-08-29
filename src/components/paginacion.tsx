@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { escribirFiltros, type Filtros } from "@/lib/filtros";
+import type { Idioma } from "@/lib/idiomas";
+import { textos } from "@/lib/textos";
 
 /**
  * Paginación por enlaces reales.
@@ -12,13 +14,16 @@ export function Paginacion({
   filtros,
   paginas,
   base,
+  idioma,
 }: {
   filtros: Filtros;
   paginas: number;
   base: string;
+  idioma: Idioma;
 }) {
   if (paginas <= 1) return null;
 
+  const t = textos(idioma);
   const actual = Math.min(Math.max(1, filtros.pagina), paginas);
   const numeros = ventana(actual, paginas);
 
@@ -28,14 +33,17 @@ export function Paginacion({
   };
 
   return (
-    <nav aria-label="Paginación" className="mt-10 flex items-center justify-center gap-1.5">
+    <nav
+      aria-label={t.paginacion.etiqueta}
+      className="mt-10 flex items-center justify-center gap-1.5"
+    >
       {actual > 1 && (
         <Link
           href={enlace(actual - 1)}
           rel="prev"
           className="rounded-md border border-borde px-3 py-2 text-sm font-medium text-texto transition-colors hover:bg-superficie-alt"
         >
-          Anterior
+          {t.paginacion.anterior}
         </Link>
       )}
 
@@ -66,7 +74,7 @@ export function Paginacion({
           rel="next"
           className="rounded-md border border-borde px-3 py-2 text-sm font-medium text-texto transition-colors hover:bg-superficie-alt"
         >
-          Siguiente
+          {t.paginacion.siguiente}
         </Link>
       )}
     </nav>

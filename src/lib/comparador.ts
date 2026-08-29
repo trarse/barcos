@@ -9,6 +9,9 @@
  * Todo este módulo es puro: entra texto, salen datos validados.
  */
 
+import type { Idioma } from "./idiomas";
+import { ruta } from "./rutas";
+
 /** Más de tres columnas no caben en una pantalla de móvil sin marearse. */
 export const MAXIMO = 3;
 
@@ -47,9 +50,12 @@ export function estaLleno(seleccion: readonly string[]): boolean {
 }
 
 /** Enlace a la comparativa. `null` si no hay al menos dos barcos que comparar. */
-export function rutaComparativa(seleccion: readonly string[]): string | null {
+export function rutaComparativa(
+  seleccion: readonly string[],
+  idioma: Idioma,
+): string | null {
   if (seleccion.length < 2) return null;
-  return `/comparar?barcos=${escribirSeleccion(seleccion)}`;
+  return `${ruta({ tipo: "comparar" }, idioma)}?barcos=${escribirSeleccion(seleccion)}`;
 }
 
 // ---------------------------------------------------------------- la tabla

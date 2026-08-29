@@ -1,4 +1,6 @@
+import type { Idioma } from "@/lib/idiomas";
 import { faqJsonLd, type ParFaq } from "@/lib/seo";
+import { textos } from "@/lib/textos";
 
 import { JsonLd } from "./json-ld";
 
@@ -11,19 +13,22 @@ import { JsonLd } from "./json-ld";
  */
 export function Faq({
   preguntas,
-  titulo = "Preguntas frecuentes",
+  idioma,
+  titulo,
 }: {
   preguntas: ParFaq[];
+  idioma: Idioma;
   titulo?: string;
 }) {
   if (preguntas.length === 0) return null;
+  const encabezado = titulo ?? textos(idioma).faq.titulo;
 
   return (
     <section aria-labelledby="faq">
       <JsonLd datos={faqJsonLd(preguntas)} />
 
       <h2 id="faq" className="font-display text-2xl font-semibold text-texto sm:text-3xl">
-        {titulo}
+        {encabezado}
       </h2>
 
       <div className="mt-6 divide-y divide-borde border-y border-borde">

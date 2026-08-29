@@ -59,9 +59,17 @@ export function plural(n: number, singular: string, plural_: string): string {
   return `${ENTERO.format(n)} ${n === 1 ? singular : plural_}`;
 }
 
-/** Fecha larga en castellano: "14 de agosto de 2026". */
-export function fechaLarga(fecha: Date): string {
-  return new Intl.DateTimeFormat("es-ES", {
+/**
+ * Fechas.
+ *
+ * Los importes se dejan siempre en formato español porque la moneda es el
+ * euro y el sitio factura en España, pero las fechas sí siguen al idioma: un
+ * lector alemán espera "14. August 2026", no "14 de agosto de 2026".
+ */
+
+/** Fecha larga: "14 de agosto de 2026", "14 August 2026", "14. August 2026". */
+export function fechaLarga(fecha: Date, idioma = "es"): string {
+  return new Intl.DateTimeFormat(idioma, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -69,8 +77,8 @@ export function fechaLarga(fecha: Date): string {
 }
 
 /** Fecha corta para las opiniones: "ago 2026". */
-export function mesYAno(fecha: Date): string {
-  return new Intl.DateTimeFormat("es-ES", {
+export function mesYAno(fecha: Date, idioma = "es"): string {
+  return new Intl.DateTimeFormat(idioma, {
     month: "short",
     year: "numeric",
   }).format(fecha);

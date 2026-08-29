@@ -7,7 +7,12 @@
  * páginas que venden es un blog decorativo.
  */
 
+import type { Idioma } from "@/lib/idiomas";
+import type { Pagina } from "@/lib/rutas";
+
 export interface Articulo {
+  /** Idioma en el que está escrito. No se traduce automáticamente nada. */
+  idioma: Idioma;
   slug: string;
   titulo: string;
   entradilla: string;
@@ -15,12 +20,16 @@ export interface Articulo {
   minutos: number;
   categoria: "Precios" | "Normativa" | "Rutas" | "Medio ambiente";
   cuerpo: string;
-  /** Enlaces internos que se pintan al final del artículo. */
-  relacionados: { texto: string; href: string }[];
+  /**
+   * Enlaces internos que se pintan al final. Se guardan como identidad de
+   * página, no como URL: así apuntan al idioma correcto sin reescribirlos.
+   */
+  relacionados: { texto: string; pagina: Pagina }[];
 }
 
 export const ARTICULOS: Articulo[] = [
   {
+    idioma: "es",
     slug: "cuanto-cuesta-alquilar-un-barco-en-espana",
     titulo: "Cuánto cuesta de verdad alquilar un barco en España",
     entradilla:
@@ -67,12 +76,13 @@ Lo que más baja la factura no es regatear, es elegir bien.
 
 **Plantéate el velero.** Si no tienes prisa, un velero de 12 metros cuesta menos que una lancha de 8 en total, porque el combustible es anecdótico.`,
     relacionados: [
-      { texto: "Ver barcos con el precio final calculado", href: "/alquiler-barcos" },
-      { texto: "Alquiler de veleros en España", href: "/alquiler-velero" },
-      { texto: "Alquiler de barcos en Dénia", href: "/alquiler-barcos/denia" },
+      { texto: "Ver barcos con el precio final calculado", pagina: { tipo: "busqueda" } },
+      { texto: "Alquiler de veleros en España", pagina: { tipo: "tipoBarco", tipoBarco: "velero" } },
+      { texto: "Alquiler de barcos en Dénia", pagina: { tipo: "destino", destino: "denia" } },
     ],
   },
   {
+    idioma: "es",
     slug: "que-titulacion-necesitas-para-llevar-un-barco",
     titulo: "Qué titulación necesitas para llevar un barco en España",
     entradilla:
@@ -112,12 +122,13 @@ Cualquier barco se puede alquilar con patrón profesional. Cuesta entre 150 y 50
 
 Es también la opción sensata si es tu primera vez en una zona que no conoces. Un patrón que sabe dónde está el fondo de arena y a qué hora entra el térmico cambia el día por completo.`,
     relacionados: [
-      { texto: "Barcos que puedes llevar sin licencia", href: "/sin-licencia" },
-      { texto: "Alquiler de neumáticas", href: "/alquiler-neumatica" },
-      { texto: "Ver toda la flota", href: "/alquiler-barcos" },
+      { texto: "Barcos que puedes llevar sin licencia", pagina: { tipo: "sinLicencia" } },
+      { texto: "Alquiler de neumáticas", pagina: { tipo: "tipoBarco", tipoBarco: "neumatica" } },
+      { texto: "Ver toda la flota", pagina: { tipo: "busqueda" } },
     ],
   },
   {
+    idioma: "es",
     slug: "fondear-sin-danar-la-posidonia",
     titulo: "Fondear sin dañar la posidonia: guía práctica",
     entradilla:
@@ -151,12 +162,13 @@ Fondea siempre en un claro de arena aunque tengas que dar dos vueltas buscando. 
 
 Nada de esto es complicado. Es exactamente lo mismo que hace cualquier patrón profesional, y es la diferencia entre que dentro de veinte años el agua siga siendo así o no.`,
     relacionados: [
-      { texto: "Alquiler de barcos en Formentera", href: "/alquiler-barcos/formentera" },
-      { texto: "Alquiler de barcos en Ibiza", href: "/alquiler-barcos/ibiza" },
-      { texto: "Rutas de calas y snorkel", href: "/experiencias/calas-y-snorkel" },
+      { texto: "Alquiler de barcos en Formentera", pagina: { tipo: "destino", destino: "formentera" } },
+      { texto: "Alquiler de barcos en Ibiza", pagina: { tipo: "destino", destino: "ibiza" } },
+      { texto: "Rutas de calas y snorkel", pagina: { tipo: "experiencia", slug: "calas-y-snorkel" } },
     ],
   },
   {
+    idioma: "es",
     slug: "ruta-siete-dias-mallorca-velero",
     titulo: "Ruta de siete días por Mallorca en velero",
     entradilla:
@@ -200,18 +212,31 @@ La Tramuntana no tiene puertos de refugio entre Sant Elm y Sóller: son 26 milla
 
 El térmico del sur entra sobre las 13:00 y sopla del suroeste hasta el atardecer: bueno para navegar a vela, incómodo para fondear en calas orientadas a poniente.`,
     relacionados: [
-      { texto: "Alquiler de veleros en Mallorca", href: "/alquiler-barcos/mallorca/velero" },
-      { texto: "Alquiler de barcos en Mallorca", href: "/alquiler-barcos/mallorca" },
-      { texto: "Alquiler de veleros en España", href: "/alquiler-velero" },
+      { texto: "Alquiler de veleros en Mallorca", pagina: { tipo: "destinoTipo", destino: "mallorca", tipoBarco: "velero" } },
+      { texto: "Alquiler de barcos en Mallorca", pagina: { tipo: "destino", destino: "mallorca" } },
+      { texto: "Alquiler de veleros en España", pagina: { tipo: "tipoBarco", tipoBarco: "velero" } },
     ],
   },
 ];
 
-export function obtenerArticulo(slug: string): Articulo | undefined {
-  return ARTICULOS.find((a) => a.slug === slug);
+export function obtenerArticulo(slug: string, idioma: Idioma): Articulo | undefined {
+  return ARTICULOS.find((a) => a.slug === slug && a.idioma === idioma);
 }
 
-/** Los artículos ordenados del más reciente al más antiguo. */
-export function articulosPorFecha(): Articulo[] {
-  return [...ARTICULOS].sort((a, b) => b.fecha.localeCompare(a.fecha));
+/**
+ * Artículos de un idioma, del más reciente al más antiguo.
+ *
+ * No hay respaldo al castellano a propósito: servir un texto en español
+ * dentro de una página marcada como inglesa es peor que no tener el artículo,
+ * tanto para quien lo lee como para quien lo indexa.
+ */
+export function articulosPorFecha(idioma: Idioma): Articulo[] {
+  return ARTICULOS.filter((a) => a.idioma === idioma).sort((a, b) =>
+    b.fecha.localeCompare(a.fecha),
+  );
+}
+
+/** En qué idiomas existe un artículo. Alimenta el `hreflang`. */
+export function idiomasDelArticulo(slug: string): Idioma[] {
+  return ARTICULOS.filter((a) => a.slug === slug).map((a) => a.idioma);
 }

@@ -51,11 +51,35 @@ export interface Peticion {
 
 export type ClaseLinea = "base" | "descuento" | "obligatorio" | "opcional";
 
+/**
+ * Identificador estable de cada concepto. La interfaz traduce a partir de
+ * esta clave, nunca del texto: si se tradujera leyendo la etiqueta en
+ * castellano, cambiar una palabra rompería los otros idiomas en silencio.
+ */
+export type ClaveLinea =
+  | "alquiler"
+  | "descuento"
+  | "combustible"
+  | "limpieza"
+  | "amarre"
+  | "patron";
+
 export interface Linea {
+  clave: ClaveLinea;
   concepto: string;
   detalle: string;
   importe: number;
   clase: ClaseLinea;
+  /** Días facturados en esta línea, cuando el concepto va por día. */
+  dias?: number;
+  /** Precio unitario por día, en céntimos. */
+  importeUnitario?: number;
+  /** Porcentaje aplicado, solo en la línea de descuento. */
+  porcentaje?: number;
+  /** Litros estimados, solo en la línea de combustible. */
+  litros?: number;
+  /** Horas de navegación asumidas, solo en la línea de combustible. */
+  horas?: number;
 }
 
 export interface Desglose {
@@ -89,20 +113,25 @@ export function calcularDesglose(tarifa: Tarifa, peticion: Peticion): Desglose {
   const baseDia = Math.round(tarifa.precioBaseDia * multiplicador);
   const base = baseDia * dias;
   lineas.push({
+    clave: "alquiler",
     concepto: "Alquiler",
     detalle: `${formatearDias(dias)} × ${euros(baseDia)}`,
     importe: base,
     clase: "base",
+    dias,
+    importeUnitario: baseDia,
   });
 
   // 2. Descuento por estancia larga.
   if (dias >= DIAS_DESCUENTO && tarifa.descuentoSemana > 0) {
     const descuento = Math.round((base * tarifa.descuentoSemana) / 100);
     lineas.push({
+      clave: "descuento",
       concepto: `Descuento ${tarifa.descuentoSemana} %`,
       detalle: `Por reservar ${DIAS_DESCUENTO} días o más`,
       importe: -descuento,
       clase: "descuento",
+      porcentaje: tarifa.descuentoSemana,
     });
   }
 
@@ -110,16 +139,20 @@ export function calcularDesglose(tarifa: Tarifa, peticion: Peticion): Desglose {
   const litros = Math.round(tarifa.consumoLitrosHora * horasDia * dias);
   if (litros > 0) {
     lineas.push({
+      clave: "combustible",
       concepto: "Combustible estimado",
       detalle: `${litros} l · ${horasDia} h de navegación al día`,
       importe: litros * PRECIO_LITRO,
       clase: "obligatorio",
+      litros,
+      horas: horasDia,
     });
   }
 
   // 4. Limpieza final, pago único.
   if (tarifa.limpieza > 0) {
     lineas.push({
+      clave: "limpieza",
       concepto: "Limpieza final",
       detalle: "Pago único",
       importe: tarifa.limpieza,
@@ -130,20 +163,26 @@ export function calcularDesglose(tarifa: Tarifa, peticion: Peticion): Desglose {
   // 5. Amarre y tasas portuarias.
   if (tarifa.tasaPortuariaDia > 0) {
     lineas.push({
+      clave: "amarre",
       concepto: "Amarre y tasas",
       detalle: `${formatearDias(dias)} × ${euros(tarifa.tasaPortuariaDia)}`,
       importe: tarifa.tasaPortuariaDia * dias,
       clase: "obligatorio",
+      dias,
+      importeUnitario: tarifa.tasaPortuariaDia,
     });
   }
 
   // 6. Patrón, solo si se ha pedido y el barco lo ofrece.
   if (peticion.conPatron && tarifa.patronDia !== null) {
     lineas.push({
+      clave: "patron",
       concepto: "Patrón",
       detalle: `${formatearDias(dias)} × ${euros(tarifa.patronDia)}`,
       importe: tarifa.patronDia * dias,
       clase: "opcional",
+      dias,
+      importeUnitario: tarifa.patronDia,
     });
   }
 

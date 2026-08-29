@@ -1,8 +1,10 @@
 import Link from "next/link";
 
-import { entero, eslora, euro } from "@/lib/formato";
 import type { BarcoResumen } from "@/lib/consultas";
-import { rutas } from "@/lib/seo";
+import { entero, eslora, euro } from "@/lib/formato";
+import type { Idioma } from "@/lib/idiomas";
+import { ruta } from "@/lib/rutas";
+import { textos } from "@/lib/textos";
 
 import { BotonComparar } from "./comparador/boton-comparar";
 import { Estrellas } from "./estrellas";
@@ -17,44 +19,53 @@ import { FotoBarco } from "./foto-barco";
  */
 export function TarjetaBarco({
   barco,
+  idioma,
   prioridad = false,
 }: {
   barco: BarcoResumen;
+  idioma: Idioma;
   prioridad?: boolean;
 }) {
+  const t = textos(idioma);
   const extras = barco.precioDia - barco.precioBaseDia;
+  const tipoNombre =
+    t.tiposBarcoSingular[barco.tipoSlug as keyof typeof t.tiposBarcoSingular] ??
+    barco.tipoNombre;
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-carta border border-borde bg-superficie transition-shadow hover:shadow-[0_2px_20px_-4px_rgb(var(--sombra)/0.18)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-superficie-alt">
         <FotoBarco
           token={barco.imagen}
-          alt={`${barco.nombre} en ${barco.puertoNombre}`}
+          alt={`${barco.nombre} · ${barco.puertoNombre}`}
           prioridad={prioridad}
           className="h-full w-full transition-transform duration-500 group-hover:scale-[1.04]"
         />
 
         <div className="absolute left-3 top-3 flex max-w-[60%] flex-wrap gap-1.5">
           {!barco.requiereTitulacion && (
-            <Etiqueta tono="acento">Sin licencia</Etiqueta>
+            <Etiqueta tono="acento">{t.comun.sinLicencia}</Etiqueta>
           )}
           {barco.reservaInstantanea && (
-            <Etiqueta tono="exito">Reserva inmediata</Etiqueta>
+            <Etiqueta tono="exito">{t.comun.reservaInmediata}</Etiqueta>
           )}
         </div>
 
         <div className="absolute right-3 top-3">
-          <BotonComparar slug={barco.slug} nombre={barco.nombre} />
+          <BotonComparar slug={barco.slug} nombre={barco.nombre} idioma={idioma} />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col p-4">
         <p className="text-xs font-medium uppercase tracking-wider text-texto-tenue">
-          {barco.tipoNombre} · {barco.destinoNombre}
+          {tipoNombre} · {barco.destinoNombre}
         </p>
 
         <h3 className="mt-1 font-display text-lg font-semibold leading-snug text-texto">
-          <Link href={rutas.barco(barco.slug)} className="after:absolute after:inset-0">
+          <Link
+            href={ruta({ tipo: "barco", slug: barco.slug }, idioma)}
+            className="after:absolute after:inset-0"
+          >
             {barco.nombre}
           </Link>
         </h3>
@@ -64,8 +75,9 @@ export function TarjetaBarco({
         </div>
 
         <p className="mt-2 text-sm text-texto-suave">
-          {entero(barco.capacidad)} plazas · {eslora(barco.esloraCm)}
-          {barco.camarotes > 0 && ` · ${entero(barco.camarotes)} camarotes`}
+          {entero(barco.capacidad)} {t.comun.plazas} · {eslora(barco.esloraCm)}
+          {barco.camarotes > 0 &&
+            ` · ${entero(barco.camarotes)} ${t.comun.camarotes}`}
         </p>
 
         <p className="mt-1 text-sm text-texto-tenue">{barco.puertoNombre}</p>
@@ -77,14 +89,11 @@ export function TarjetaBarco({
             <span className="cifra font-display text-2xl font-semibold text-texto">
               {euro(barco.precioDia)}
             </span>
-            <span className="text-sm text-texto-suave">al día</span>
+            <span className="text-sm text-texto-suave">{t.comun.alDia}</span>
           </p>
-          <p className="mt-0.5 text-xs font-medium text-exito">
-            Todo incluido, sin extras al pagar
-          </p>
+          <p className="mt-0.5 text-xs font-medium text-exito">{t.comun.sinExtras}</p>
           <p className="cifra mt-1.5 text-xs leading-relaxed text-texto-tenue">
-            Tarifa base {euro(barco.precioBaseDia)} + {euro(extras)} de
-            combustible, limpieza, amarre, tasas e IVA
+            {t.tarjeta.desglose(euro(barco.precioBaseDia), euro(extras))}
           </p>
         </div>
       </div>

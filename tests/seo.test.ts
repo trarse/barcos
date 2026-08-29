@@ -6,7 +6,6 @@ import {
   listaJsonLd,
   migasJsonLd,
   organizacionJsonLd,
-  rutas,
   sitioJsonLd,
 } from "@/lib/seo";
 import { SITIO } from "@/lib/sitio";
@@ -123,40 +122,19 @@ describe("organizacionJsonLd y sitioJsonLd", () => {
       "@type": "Organization",
       name: SITIO.nombre,
     });
-    expect(sitioJsonLd().potentialAction.target.urlTemplate).toContain(
+    expect(sitioJsonLd("es").potentialAction.target.urlTemplate).toContain(
       "search_term_string",
     );
   });
-});
 
-describe("rutas", () => {
-  it("construye las rutas canónicas del sitio", () => {
-    expect(rutas.destino("mallorca")).toBe("/alquiler-barcos/mallorca");
-    expect(rutas.destinoTipo("mallorca", "velero")).toBe(
-      "/alquiler-barcos/mallorca/velero",
-    );
-    expect(rutas.tipo("catamaran")).toBe("/alquiler-catamaran");
-    expect(rutas.barco("bavaria-36")).toBe("/barco/bavaria-36");
+  it("declaran el idioma de cada versión", () => {
+    expect(sitioJsonLd("de").inLanguage).toBe("de");
+    expect(sitioJsonLd("es").inLanguage).toBe("es-ES");
   });
 
-  it("ninguna ruta lleva barra final", () => {
-    const todas = [
-      rutas.home(),
-      rutas.busqueda(),
-      rutas.destino("ibiza"),
-      rutas.destinoTipo("ibiza", "velero"),
-      rutas.tipo("velero"),
-      rutas.barco("x"),
-      rutas.experiencias(),
-      rutas.experiencia("pesca"),
-      rutas.sinLicencia(),
-      rutas.blog(),
-      rutas.articulo("y"),
-    ];
-
-    for (const ruta of todas) {
-      if (ruta === "/") continue;
-      expect(ruta.endsWith("/")).toBe(false);
-    }
+  it("el buscador declarado apunta a la ruta de su idioma", () => {
+    expect(sitioJsonLd("de").potentialAction.target.urlTemplate).toContain(
+      "/de/bootsverleih",
+    );
   });
 });

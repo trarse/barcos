@@ -100,7 +100,7 @@ describe("calcularDesglose", () => {
       conPatron: false,
     });
 
-    expect(d.lineas.some((l) => l.concepto === "Patrón")).toBe(false);
+    expect(d.lineas.some((l) => l.clave === "patron")).toBe(false);
   });
 
   it("no cobra patrón si el barco no lo ofrece, aunque se pida", () => {
@@ -109,7 +109,7 @@ describe("calcularDesglose", () => {
       { dias: 3, temporada: "media", conPatron: true },
     );
 
-    expect(d.lineas.some((l) => l.concepto === "Patrón")).toBe(false);
+    expect(d.lineas.some((l) => l.clave === "patron")).toBe(false);
   });
 
   it("deja la fianza fuera del total porque se bloquea, no se cobra", () => {
@@ -120,7 +120,15 @@ describe("calcularDesglose", () => {
     });
 
     expect(d.fianza).toBe(100_000);
-    expect(d.lineas.some((l) => l.concepto.includes("Fianza"))).toBe(false);
+
+    // La propiedad de verdad: cambiar la fianza no mueve ni un céntimo del
+    // total, porque se bloquea y no se cobra.
+    const conFianzaEnorme = calcularDesglose(
+      { ...TARIFA, fianza: 5_000_000 },
+      { dias: 2, temporada: "media", conPatron: false },
+    );
+    expect(conFianzaEnorme.total).toBe(d.total);
+    expect(conFianzaEnorme.lineas).toEqual(d.lineas);
   });
 
   it("escala el combustible con las horas de navegación", () => {
@@ -148,7 +156,41 @@ describe("calcularDesglose", () => {
     );
 
     expect(d.lineas).toHaveLength(1);
-    expect(d.lineas[0].concepto).toBe("Alquiler");
+    expect(d.lineas[0].clave).toBe("alquiler");
+  });
+
+  it("cada línea lleva una clave estable para poder traducirla", () => {
+    const d = calcularDesglose(TARIFA, {
+      dias: 7,
+      temporada: "alta",
+      conPatron: true,
+    });
+
+    expect(d.lineas.map((l) => l.clave)).toEqual([
+      "alquiler",
+      "descuento",
+      "combustible",
+      "limpieza",
+      "amarre",
+      "patron",
+    ]);
+  });
+
+  it("las líneas por día llevan los datos para recomponer el detalle", () => {
+    const d = calcularDesglose(TARIFA, {
+      dias: 4,
+      temporada: "media",
+      conPatron: true,
+    });
+
+    const alquiler = d.lineas.find((l) => l.clave === "alquiler")!;
+    expect(alquiler.dias).toBe(4);
+    expect(alquiler.importeUnitario).toBe(30_000);
+    expect(alquiler.importe).toBe(alquiler.dias! * alquiler.importeUnitario!);
+
+    const combustible = d.lineas.find((l) => l.clave === "combustible")!;
+    expect(combustible.litros).toBe(320);
+    expect(combustible.horas).toBe(4);
   });
 
   it("trata media jornada como un día completo", () => {

@@ -80,12 +80,20 @@ describe("estaLleno", () => {
 
 describe("rutaComparativa", () => {
   it("no hay comparativa con menos de dos barcos", () => {
-    expect(rutaComparativa([])).toBeNull();
-    expect(rutaComparativa(["uno"])).toBeNull();
+    expect(rutaComparativa([], "es")).toBeNull();
+    expect(rutaComparativa(["uno"], "es")).toBeNull();
   });
 
   it("construye el enlace con la selección", () => {
-    expect(rutaComparativa(["uno", "dos"])).toBe("/comparar?barcos=uno,dos");
+    expect(rutaComparativa(["uno", "dos"], "es")).toBe(
+      "/es/comparar?barcos=uno,dos",
+    );
+  });
+
+  it("respeta el idioma en el que se está navegando", () => {
+    expect(rutaComparativa(["uno", "dos"], "de")).toBe(
+      "/de/vergleichen?barcos=uno,dos",
+    );
   });
 });
 

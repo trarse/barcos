@@ -1,6 +1,8 @@
 "use client";
 
 import { estaLleno } from "@/lib/comparador";
+import type { Idioma } from "@/lib/idiomas";
+import { textos } from "@/lib/textos";
 
 import { alternarBarco, useSeleccion } from "./almacen";
 
@@ -10,7 +12,16 @@ import { alternarBarco, useSeleccion } from "./almacen";
  * Se apoya en `z-10` porque el título de la tarjeta lleva un enlace que cubre
  * toda la superficie: sin eso, pulsar aquí abriría la ficha.
  */
-export function BotonComparar({ slug, nombre }: { slug: string; nombre: string }) {
+export function BotonComparar({
+  slug,
+  nombre,
+  idioma,
+}: {
+  slug: string;
+  nombre: string;
+  idioma: Idioma;
+}) {
+  const t = textos(idioma);
   const seleccion = useSeleccion();
   const marcado = seleccion.includes(slug);
   const lleno = estaLleno(seleccion);
@@ -22,11 +33,7 @@ export function BotonComparar({ slug, nombre }: { slug: string; nombre: string }
           ? "border-transparent bg-acento text-white"
           : "border-borde bg-superficie/90 text-texto-suave hover:text-texto"
       }`}
-      title={
-        lleno && !marcado
-          ? "Se quitará el primero que elegiste"
-          : "Comparar este barco con otros"
-      }
+      title={lleno && !marcado ? t.tarjeta.seQuitaraPrimero : t.tarjeta.compararEste}
     >
       <input
         type="checkbox"
@@ -34,7 +41,7 @@ export function BotonComparar({ slug, nombre }: { slug: string; nombre: string }
         onChange={() => alternarBarco(slug)}
         className="h-3.5 w-3.5 accent-[var(--acento)]"
       />
-      Comparar
+      {t.tarjeta.comparar}
       <span className="sr-only">{nombre}</span>
     </label>
   );

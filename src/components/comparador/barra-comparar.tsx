@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import { MAXIMO, rutaComparativa } from "@/lib/comparador";
+import type { Idioma } from "@/lib/idiomas";
+import { textos } from "@/lib/textos";
 
 import { quitarBarco, useSeleccion, vaciarSeleccion } from "./almacen";
 
@@ -12,19 +14,20 @@ import { quitarBarco, useSeleccion, vaciarSeleccion } from "./almacen";
  * Solo aparece cuando hay algo elegido, y avisa de que hace falta un segundo
  * barco en vez de dejar el botón muerto sin explicar por qué.
  */
-export function BarraComparar() {
+export function BarraComparar({ idioma }: { idioma: Idioma }) {
+  const t = textos(idioma);
   const seleccion = useSeleccion();
   if (seleccion.length === 0) return null;
 
-  const ruta = rutaComparativa(seleccion);
+  const destino = rutaComparativa(seleccion, idioma);
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-3 sm:p-4">
       <div className="pointer-events-auto mx-auto flex max-w-3xl flex-wrap items-center gap-3 rounded-carta border border-borde-fuerte bg-superficie p-3 shadow-[0_8px_32px_-8px_rgb(var(--sombra)/0.35)]">
         <p className="text-sm font-medium text-texto">
-          {seleccion.length} de {MAXIMO}
+          {t.comparar.barra.deTres(seleccion.length, MAXIMO)}
           <span className="ml-1.5 font-normal text-texto-suave">
-            para comparar
+            {t.comparar.barra.paraComparar}
           </span>
         </p>
 
@@ -35,7 +38,7 @@ export function BarraComparar() {
                 type="button"
                 onClick={() => quitarBarco(slug)}
                 className="flex items-center gap-1 rounded border border-borde px-2 py-1 text-xs text-texto-suave transition-colors hover:border-acento hover:text-acento"
-                aria-label={`Quitar ${slug} de la comparativa`}
+                aria-label={t.comparar.barra.quitar(nombreCorto(slug))}
               >
                 <span className="max-w-32 truncate">{nombreCorto(slug)}</span>
                 <span aria-hidden="true">×</span>
@@ -50,19 +53,19 @@ export function BarraComparar() {
             onClick={vaciarSeleccion}
             className="rounded-md px-2.5 py-2 text-sm text-texto-suave transition-colors hover:text-texto"
           >
-            Vaciar
+            {t.comparar.barra.vaciar}
           </button>
 
-          {ruta ? (
+          {destino ? (
             <Link
-              href={ruta}
+              href={destino}
               className="rounded-md bg-marca px-4 py-2.5 text-sm font-semibold text-fondo transition-opacity hover:opacity-90"
             >
-              Comparar
+              {t.comparar.barra.comparar}
             </Link>
           ) : (
             <span className="rounded-md border border-borde px-4 py-2.5 text-sm text-texto-tenue">
-              Elige otro más
+              {t.comparar.barra.eligeOtro}
             </span>
           )}
         </div>
