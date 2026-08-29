@@ -14,6 +14,7 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { MODELOS, OPINIONES, FACTOR_DESTINO } from "./datos/barcos";
 import { EQUIPAMIENTO, EXPERIENCIAS, TIPOS } from "./datos/catalogo";
 import { DESTINOS } from "./datos/destinos";
+import { LUGARES } from "./datos/lugares";
 
 const prisma = new PrismaClient({
   adapter: new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! }),
@@ -58,6 +59,8 @@ async function limpiar() {
   await prisma.opinion.deleteMany();
   await prisma.imagen.deleteMany();
   await prisma.pregunta.deleteMany();
+  await prisma.lugarDesde.deleteMany();
+  await prisma.lugar.deleteMany();
   await prisma.barco.deleteMany();
   await prisma.experiencia.deleteMany();
   await prisma.equipamiento.deleteMany();
@@ -264,7 +267,49 @@ async function main() {
     }
   }
 
-  console.log(`Listo: ${DESTINOS.length} destinos, ${puertos.size} puertos y ${total} barcos.`);
+  // Los lugares van al final: sus accesos apuntan a destinos ya creados.
+  const porSlug = new Map<string, string>();
+  for (const d of await prisma.destino.findMany({ select: { id: true, slug: true } })) {
+    porSlug.set(d.slug, d.id);
+  }
+
+  console.log("Sembrando destinos con nombre propio…");
+  for (const l of LUGARES) {
+    const lugar = await prisma.lugar.create({
+      data: {
+        slug: l.slug,
+        nombre: l.nombre,
+        provincia: l.provincia,
+        titular: l.titular,
+        titularEn: l.titularEn,
+        titularDe: l.titularDe,
+        descripcion: l.descripcion,
+        descripcionEn: l.descripcionEn,
+        descripcionDe: l.descripcionDe,
+        contenido: l.contenido,
+        latitud: l.latitud,
+        longitud: l.longitud,
+        clase: l.clase,
+        orden: l.orden,
+        imagen: `carta:${l.slug}`,
+        preguntas: {
+          create: l.preguntas.map((p, i) => ({ ...p, orden: i, bloque: "lugar" })),
+        },
+      },
+    });
+
+    for (const a of l.accesos) {
+      const destinoId = porSlug.get(a.destino);
+      if (!destinoId) throw new Error(`El lugar ${l.slug} sale de ${a.destino}, que no existe`);
+      await prisma.lugarDesde.create({
+        data: { lugarId: lugar.id, destinoId, minutos: a.minutos, sinTitulo: a.sinTitulo },
+      });
+    }
+  }
+
+  console.log(
+    `Listo: ${DESTINOS.length} destinos, ${puertos.size} puertos, ${total} barcos y ${LUGARES.length} lugares.`,
+  );
 }
 
 main()

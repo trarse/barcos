@@ -176,12 +176,26 @@ export const de: Textos = {
     sinFlota: (destino) => `In ${destino} ist noch keine Flotte eingestellt.`,
     verTodosDe: (n, destino) => `Alle ${n} Boote in ${destino} ansehen`,
     otrosDestinos: "Weitere Reiseziele",
+    adondeSeLlega: (destino) => `Wohin es von ${destino} aus geht`,
     barcosEn: (destino) => `Boote in ${destino}`,
     otrosTiposEn: (destino) => `Weitere Boote in ${destino}`,
     todosLosDe: (destino) => `Alle Boote in ${destino}`,
     verLosN: (n) => `Alle ${n} Boote ansehen`,
     guiaOtroIdioma: "Der Revierführer für diesen Hafen ist auf Spanisch verfasst.",
     verGuiaEs: "Auf Spanisch lesen",
+  },
+
+  lugar: {
+    titulo: "Reiseziele",
+    entradilla:
+      "Die Orte, für die man an dieser Küste ein Boot mietet. Jeweils mit den Häfen, von denen aus man hinkommt, und der Fahrzeit.",
+    comoLlegar: (lugar) => `Anfahrt nach ${lugar}`,
+    desde: (puerto) => `Ab ${puerto}`,
+    minutos: (n) => `${n} Min. Fahrt`,
+    sinTitulo: "Ohne Führerschein erreichbar",
+    conPatron: "Skipper oder Führerschein nötig",
+    verBarcos: (puerto) => `Boote in ${puerto} ansehen`,
+    otrosLugares: "Weitere Ziele an dieser Küste",
   },
 
   sinLicenciaMunicipio: {

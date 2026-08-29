@@ -173,7 +173,6 @@ En la ficha de cada barco indicamos si exige titulación. Los requisitos los fij
     orden: 7,
     puertos: [
       { slug: "marina-alicante", nombre: "Marina Deportiva de Alicante", latitud: 38.3376, longitud: -0.4838 },
-      { slug: "santa-pola", nombre: "Puerto de Santa Pola", latitud: 38.1899, longitud: -0.5842 },
     ],
     preguntas: [
       {
@@ -768,6 +767,80 @@ Una cosa útil si no hablas español: esta es la zona con más residentes britá
         pregunta: "¿Puedo reservar y navegar en inglés en Torrevieja?",
         respuesta:
           "Sí. Es la zona con más residentes británicos y nórdicos de la costa, así que alquilar en inglés es lo habitual y hay patrones que lo hablan. La reserva, el contrato y el contacto con el patrón los tienes en tu idioma.",
+      },
+    ],
+  },
+  {
+    slug: "santa-pola",
+    nombre: "Santa Pola",
+    provincia: "Alicante",
+    comunidad: "Comunitat Valenciana",
+    clase: "costa",
+    titular: "Alquiler de barcos en Santa Pola",
+    descripcion:
+      "Tabarca a media hora, que es la salida más corta de toda la costa. Puerto grande, de pescadores, y el trampolín natural a la isla.",
+    descripcionEn:
+      "Tabarca half an hour away, the shortest crossing on the whole coast. A big working fishing port and the natural springboard to the island.",
+    descripcionDe:
+      "Tabarca in einer halben Stunde, die kürzeste Überfahrt der ganzen Küste. Großer Fischereihafen und das natürliche Sprungbrett zur Insel.",
+    contenido: `Santa Pola existe en el mapa náutico por una razón muy concreta: es el puerto más cercano a Tabarca. Son unas 4 millas, media hora de navegación, y eso lo cambia todo. Desde Alicante la isla son 11 millas y una hora larga; desde aquí es una salida de media mañana.
+
+El puerto es grande y sigue siendo pesquero de verdad, con la lonja funcionando y las barcas de siempre amarradas al lado de las de alquiler. No tiene el postureo de otros puertos de la costa y se agradece: se aparca bien, se sale rápido y el ambiente es el de un sitio que trabaja.
+
+La salida obligada es Tabarca. Se ve desde la bocana, así que ni siquiera hace falta saber navegar para orientarse: se pone proa a la isla y en media hora estás. Es la única isla habitada de la Comunitat Valenciana y la primera reserva marina que se declaró en España, con lo que eso implica: hay zonas donde no se puede pescar ni recoger nada, y conviene confirmar antes de salir qué está permitido ese día.
+
+Además de la isla, la costa de aquí da más de lo que parece. El Cabo de Santa Pola cierra la bahía por el norte, con la sierra cayendo al mar y la Cala del Palmeral al pie. Hacia el sur se abre la playa del Pinet y las salinas, un tramo llano y poco visitado desde el agua.
+
+El viento manda bastante en esta zona. El levante levanta mar de fondo en el canal entre la costa y Tabarca, y cuando entra fuerte la travesía se pone incómoda aunque sea corta. Con el parte en la mano no hay problema, pero es de los sitios donde conviene mirarlo antes de reservar y no el mismo día.`,
+    latitud: 38.1908,
+    longitud: -0.5658,
+    mesesAlta: "7,8",
+    destacado: true,
+    orden: 8,
+    puertos: [
+      { slug: "santa-pola", nombre: "Puerto de Santa Pola", latitud: 38.1899, longitud: -0.5842 },
+    ],
+    preguntas: [
+      {
+        pregunta: "¿Por qué salir de Santa Pola y no de Alicante?",
+        respuesta:
+          "Por Tabarca. Desde aquí son unas 4 millas y media hora; desde Alicante, 11 millas y una hora larga. Si el plan es la isla, la diferencia es una mañana entera de aprovechamiento.",
+      },
+      {
+        pregunta: "¿Se ve Tabarca desde el puerto de Santa Pola?",
+        respuesta:
+          "Sí, se ve desde la bocana. Se pone proa a la isla y en media hora estás, lo que hace de esta la salida más sencilla de orientar de toda la provincia.",
+      },
+      {
+        pregunta: "¿Cuándo conviene no salir hacia Tabarca?",
+        respuesta:
+          "Con levante fuerte. Levanta mar de fondo en el canal entre la costa y la isla y la travesía se pone incómoda aunque sea corta. Conviene mirar el parte antes de reservar, no el mismo día.",
+      },
+    ],
+    sinLicencia: `Santa Pola es, con diferencia, el mejor sitio de la provincia para alquilar sin titulación si lo que quieres es llegar a Tabarca. El motivo es la distancia: unas 4 millas, media hora de navegación, con la isla a la vista desde la bocana. Es la única salida de la costa donde ese destino entra dentro de lo razonable con una embarcación pequeña.
+
+Sin ningún título puedes gobernar una embarcación de poca eslora y potencia limitada, de día y sin alejarte, después de la explicación de seguridad en el pantalán. Te cuentan cómo arrancar y parar, cómo fondear, hasta dónde puedes llegar y qué hacer si el motor falla. Desde aquí eso da para la bahía, la Cala del Palmeral bajo el Cabo de Santa Pola, y en día tranquilo la propia Tabarca.
+
+Con patrón la cosa se abre y desaparece la duda: la titulación la pone él, el barco puede ser mayor y la travesía deja de depender de que el día acompañe. Es lo que elige la mayoría de los grupos, y repartido entre seis u ocho personas la diferencia por cabeza es pequeña.
+
+Sobre Tabarca hay que decir dos cosas. La primera es que es reserva marina, la primera declarada en España, y hay zonas donde no se puede pescar ni recoger nada; el balizamiento está señalizado y hay que respetarlo. La segunda es que el levante levanta mar de fondo en el canal, y con una embarcación pequeña eso se nota mucho más que con una grande. Mira el parte antes de reservar y, si hay duda, pregunta en el pantalán: te van a decir la verdad, porque a ellos tampoco les interesa que salgas con mal día.
+
+En la ficha de cada barco indicamos si exige titulación. Los requisitos los fija la normativa y se revisan cada cierto tiempo.`,
+    preguntasSinLicencia: [
+      {
+        pregunta: "¿Puedo ir a Tabarca sin licencia desde Santa Pola?",
+        respuesta:
+          "En día tranquilo y con una embarcación de las que no exigen título, es la única salida de la costa donde resulta razonable: son 4 millas y se ve la isla desde la bocana. Con patrón, sin ninguna duda y con cualquier tiempo que permita salir.",
+      },
+      {
+        pregunta: "¿Qué puedo alquilar en Santa Pola sin titulación?",
+        respuesta:
+          "Embarcaciones de poca eslora y potencia limitada, de día, tras la explicación de seguridad en el pantalán. Para barcos mayores hace falta título o alquilar con patrón. En cada ficha viene indicado.",
+      },
+      {
+        pregunta: "¿Qué pasa si hay levante?",
+        respuesta:
+          "Que el canal entre la costa y Tabarca levanta mar de fondo, y con una embarcación pequeña se nota mucho. Con levante fuerte lo sensato es quedarse en la bahía o cambiar de día. Pregunta en el pantalán antes de salir.",
       },
     ],
   },

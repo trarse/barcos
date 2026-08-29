@@ -48,6 +48,7 @@ export const FACTOR_DESTINO: Record<string, number> = {
   benidorm: 0.9,
   villajoyosa: 0.8,
   alicante: 0.85,
+  "santa-pola": 0.8,
   "el-campello": 0.8,
   torrevieja: 0.8,
 };

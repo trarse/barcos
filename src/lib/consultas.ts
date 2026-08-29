@@ -130,6 +130,45 @@ export const obtenerDestino = cache(async (slug: string) =>
   }),
 );
 
+/**
+ * Destinos con nombre propio: la isla, el peñón, la cueva. Se piden con sus
+ * accesos porque el valor de la página está justo ahí — en enlazar el sitio
+ * que la gente busca con el puerto que se lo vende.
+ */
+export const listarLugares = cache(async () =>
+  db.lugar.findMany({
+    orderBy: { orden: "asc" },
+    include: {
+      accesos: {
+        orderBy: { minutos: "asc" },
+        include: { destino: { select: { slug: true, nombre: true } } },
+      },
+    },
+  }),
+);
+
+export const obtenerLugar = cache(async (slug: string) =>
+  db.lugar.findUnique({
+    where: { slug },
+    include: {
+      accesos: {
+        orderBy: { minutos: "asc" },
+        include: { destino: { select: { slug: true, nombre: true } } },
+      },
+      preguntas: { orderBy: { orden: "asc" } },
+    },
+  }),
+);
+
+/** Los lugares a los que se llega desde un puerto, del más cercano al más lejano. */
+export const lugaresDesde = cache(async (destinoSlug: string) =>
+  db.lugarDesde.findMany({
+    where: { destino: { slug: destinoSlug } },
+    orderBy: { minutos: "asc" },
+    include: { lugar: { select: { slug: true, nombre: true, clase: true } } },
+  }),
+);
+
 /** Cuántos barcos hay amarrados en cada destino. Alimenta las tarjetas. */
 export const contarPorDestino = cache(async () => {
   const puertos = await db.puerto.findMany({

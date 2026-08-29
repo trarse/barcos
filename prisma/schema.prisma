@@ -21,40 +21,41 @@ datasource db {
 
 /// Zona de navegación: una isla, una costa o una ciudad portuaria.
 model Destino {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  nombre      String
-  provincia   String
-  comunidad   String
+  id            String  @id @default(cuid())
+  slug          String  @unique
+  nombre        String
+  provincia     String
+  comunidad     String
   /// "isla" | "costa" | "ciudad"
-  clase       String
-  titular     String
-  descripcion String
+  clase         String
+  titular       String
+  descripcion   String
   /// Traducciones de la descripcion corta. Alimentan el meta description,
   /// que es el texto que se ve en el resultado de busqueda: servirlo en
   /// otro idioma es tirar el clic.
   descripcionEn String?
   descripcionDe String?
   /// Texto largo de la landing, en Markdown ligero. Es lo que posiciona.
-  contenido   String
+  contenido     String
   /// Idioma en el que estan escritos `contenido` y las `preguntas`. No se
   /// traduce nada automaticamente: si no coincide con el idioma de la
   /// pagina, esos bloques no se pintan ni se marcan en JSON-LD.
-  idiomaProsa String  @default("es")
+  idiomaProsa   String  @default("es")
   /// Texto propio de la landing "sin licencia" de este municipio. Si esta
   /// vacio, la pagina existe pero no se indexa: sin texto propio seria una
   /// pagina mas del monton, que es justo lo que hunde a un marketplace.
-  sinLicencia String?
-  latitud     Float
-  longitud    Float
-  imagen      String
+  sinLicencia   String?
+  latitud       Float
+  longitud      Float
+  imagen        String
   /// Meses de temporada alta, separados por comas: "6,7,8,9"
-  mesesAlta   String  @default("7,8")
-  destacado   Boolean @default(false)
-  orden       Int     @default(100)
+  mesesAlta     String  @default("7,8")
+  destacado     Boolean @default(false)
+  orden         Int     @default(100)
 
   puertos   Puerto[]
   preguntas Pregunta[]
+  accesos   LugarDesde[]
 
   @@index([destacado, orden])
 }
@@ -101,23 +102,23 @@ model Equipamiento {
 
 /// Actividad vendida como producto propio: pesca, atardecer, buceo...
 model Experiencia {
-  id          String @id @default(cuid())
-  slug        String @unique
-  nombre      String
-  titular     String
-  descripcion String
+  id            String  @id @default(cuid())
+  slug          String  @unique
+  nombre        String
+  titular       String
+  descripcion   String
   /// Traducciones de la descripcion corta. Alimentan el meta description,
   /// que es el texto que se ve en el resultado de busqueda: servirlo en
   /// otro idioma es tirar el clic.
   descripcionEn String?
   descripcionDe String?
-  contenido   String
+  contenido     String
   /// Idioma en el que estan escritos `contenido` y las `preguntas`.
-  idiomaProsa String @default("es")
-  imagen      String
+  idiomaProsa   String  @default("es")
+  imagen        String
   /// Duración típica en horas, para estimar el consumo.
-  horas       Int    @default(4)
-  orden       Int    @default(100)
+  horas         Int     @default(4)
+  orden         Int     @default(100)
 
   barcos    Barco[]
   preguntas Pregunta[]
@@ -222,6 +223,59 @@ model Opinion {
   @@index([barcoId])
 }
 
+/// Sitio con nombre propio al que se va en barco: una isla, un peñon, una
+/// cueva. No es un municipio con puerto, es el motivo por el que se sale.
+///
+/// Es el hueco mas grande del sector: los agregadores tienen pagina de
+/// ciudad pero ninguna de destino, y "tabarca en barco" se busca mas que
+/// media provincia junta.
+model Lugar {
+  id            String  @id @default(cuid())
+  slug          String  @unique
+  nombre        String
+  provincia     String
+  titular       String
+  /// El title de la pagina, que es el elemento que mas pesa. Traducido a
+  /// mano: componerlo con una formula perderia el matiz de cada sitio.
+  titularEn     String?
+  titularDe     String?
+  descripcion   String
+  descripcionEn String?
+  descripcionDe String?
+  /// Texto largo de la pagina. Sin el, la pagina existe pero no se indexa.
+  contenido     String
+  /// Idioma en el que estan escritos `contenido` y sus preguntas.
+  idiomaProsa   String  @default("es")
+  latitud       Float
+  longitud      Float
+  imagen        String
+  /// "isla" | "cabo" | "cala" | "cueva"
+  clase         String  @default("cala")
+  orden         Int     @default(100)
+
+  accesos   LugarDesde[]
+  preguntas Pregunta[]
+}
+
+/// Desde que puerto se llega a un lugar y cuanto se tarda. Es lo que
+/// convierte una pagina de destino en una pagina que vende: enlaza el
+/// sitio que la gente busca con la landing que tiene los barcos.
+model LugarDesde {
+  id        String  @id @default(cuid())
+  lugarId   String
+  destinoId String
+  /// Tiempo de navegacion aproximado, en minutos.
+  minutos   Int
+  /// Si se puede llegar con una embarcacion de las que no exigen titulacion.
+  sinTitulo Boolean @default(false)
+
+  lugar   Lugar   @relation(fields: [lugarId], references: [id], onDelete: Cascade)
+  destino Destino @relation(fields: [destinoId], references: [id], onDelete: Cascade)
+
+  @@unique([lugarId, destinoId])
+  @@index([destinoId])
+}
+
 /// Pregunta frecuente. Alimenta el bloque de FAQ y su JSON-LD, que es
 /// la mitad de lo que hace destacar una landing en resultados.
 model Pregunta {
@@ -230,14 +284,17 @@ model Pregunta {
   respuesta String
   orden     Int    @default(0)
   /// A que landing pertenece esta pregunta: "destino" o "sinLicencia".
-  bloque   String @default("destino")
+  bloque    String @default("destino")
 
   destinoId     String?
   experienciaId String?
+  lugarId       String?
 
   destino     Destino?     @relation(fields: [destinoId], references: [id], onDelete: Cascade)
   experiencia Experiencia? @relation(fields: [experienciaId], references: [id], onDelete: Cascade)
+  lugar       Lugar?       @relation(fields: [lugarId], references: [id], onDelete: Cascade)
 
   @@index([destinoId])
   @@index([experienciaId])
+  @@index([lugarId])
 }

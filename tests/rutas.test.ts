@@ -22,13 +22,16 @@ import {
 const PAGINAS: Pagina[] = [
   { tipo: "home" },
   { tipo: "busqueda" },
-  { tipo: "destino", destino: "ibiza" },
-  { tipo: "destinoTipo", destino: "ibiza", tipoBarco: "catamaran" },
+  { tipo: "destino", destino: "denia" },
+  { tipo: "destinoTipo", destino: "denia", tipoBarco: "catamaran" },
   { tipo: "tipoBarco", tipoBarco: "lancha" },
-  { tipo: "barco", slug: "lagoon-42-palma" },
+  { tipo: "barco", slug: "quicksilver-activ-675-calpe" },
   { tipo: "experiencias" },
   { tipo: "experiencia", slug: "pesca" },
   { tipo: "sinLicencia" },
+  { tipo: "sinLicenciaDestino", destino: "benidorm" },
+  { tipo: "lugares" },
+  { tipo: "lugar", slug: "tabarca" },
   { tipo: "blog" },
   { tipo: "articulo", slug: "ruta-siete-dias-mallorca-velero" },
   { tipo: "comoFunciona" },
@@ -105,13 +108,16 @@ describe("ruta", () => {
     const paginas: Pagina[] = [
       { tipo: "home" },
       { tipo: "busqueda" },
-      { tipo: "destino", destino: "ibiza" },
-      { tipo: "destinoTipo", destino: "ibiza", tipoBarco: "catamaran" },
+      { tipo: "destino", destino: "denia" },
+      { tipo: "destinoTipo", destino: "denia", tipoBarco: "catamaran" },
       { tipo: "tipoBarco", tipoBarco: "lancha" },
-      { tipo: "barco", slug: "lagoon-42-palma" },
+      { tipo: "barco", slug: "quicksilver-activ-675-calpe" },
       { tipo: "experiencias" },
       { tipo: "experiencia", slug: "pesca" },
       { tipo: "sinLicencia" },
+  { tipo: "sinLicenciaDestino", destino: "benidorm" },
+  { tipo: "lugares" },
+  { tipo: "lugar", slug: "tabarca" },
       { tipo: "blog" },
       { tipo: "articulo", slug: "x" },
       { tipo: "comoFunciona" },
@@ -283,5 +289,23 @@ describe("reescriturasLocalizadas", () => {
   it("ninguna regla se repite", () => {
     const fuentes = reglas.map((r) => r.source);
     expect(new Set(fuentes).size).toBe(fuentes.length);
+  });
+
+  it("traduce la URL de la landing sin licencia por municipio", () => {
+    expect(ruta({ tipo: "sinLicenciaDestino", destino: "benidorm" }, "es")).toBe(
+      "/es/sin-licencia/benidorm",
+    );
+    expect(ruta({ tipo: "sinLicenciaDestino", destino: "benidorm" }, "en")).toBe(
+      "/en/boat-hire-without-licence/benidorm",
+    );
+    expect(ruta({ tipo: "sinLicenciaDestino", destino: "benidorm" }, "de")).toBe(
+      "/de/boot-mieten-ohne-fuehrerschein/benidorm",
+    );
+  });
+
+  it("traduce la URL de los destinos con nombre propio", () => {
+    expect(ruta({ tipo: "lugar", slug: "tabarca" }, "es")).toBe("/es/destinos/tabarca");
+    expect(ruta({ tipo: "lugar", slug: "tabarca" }, "en")).toBe("/en/destinations/tabarca");
+    expect(ruta({ tipo: "lugar", slug: "tabarca" }, "de")).toBe("/de/reiseziele/tabarca");
   });
 });

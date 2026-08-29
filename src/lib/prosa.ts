@@ -20,3 +20,13 @@ export function descripcionCorta(
   if (idioma === "de") return entidad.descripcionDe ?? entidad.descripcion;
   return entidad.descripcion;
 }
+
+/** Titular en el idioma de la página. Mismo criterio que la descripción. */
+export function titularCorto(
+  entidad: { titular: string; titularEn: string | null; titularDe: string | null },
+  idioma: Idioma,
+): string {
+  if (idioma === "en") return entidad.titularEn ?? entidad.titular;
+  if (idioma === "de") return entidad.titularDe ?? entidad.titular;
+  return entidad.titular;
+}

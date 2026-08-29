@@ -43,6 +43,7 @@ export const SEGMENTOS = {
   blog: { es: "blog", en: "guides", de: "ratgeber" },
   comoFunciona: { es: "como-funciona", en: "how-it-works", de: "so-funktioniert-es" },
   publicar: { es: "registrar-barco", en: "list-your-boat", de: "boot-vermieten" },
+  lugares: { es: "destinos", en: "destinations", de: "reiseziele" },
 } as const satisfies Record<string, Record<Idioma, string>>;
 
 export type ClaveSegmento = keyof typeof SEGMENTOS;
@@ -132,6 +133,7 @@ export function reescriturasLocalizadas(): { source: string; destination: string
       blog: "blog",
       comoFunciona: "como-funciona",
       publicar: "registrar-barco",
+      lugares: "destinos",
     };
 
     for (const [clave, carpeta] of Object.entries(carpetas) as [ClaveSegmento, string][]) {

@@ -176,12 +176,26 @@ export const en: Textos = {
     sinFlota: (destino) => `No boats listed in ${destino} yet.`,
     verTodosDe: (n, destino) => `See all ${n} boats in ${destino}`,
     otrosDestinos: "Other destinations",
+    adondeSeLlega: (destino) => `Where you can get to from ${destino}`,
     barcosEn: (destino) => `Boats in ${destino}`,
     otrosTiposEn: (destino) => `Other boats in ${destino}`,
     todosLosDe: (destino) => `Every boat in ${destino}`,
     verLosN: (n) => `See all ${n} boats`,
     guiaOtroIdioma: "The local sailing guide for this marina is written in Spanish.",
     verGuiaEs: "Read it in Spanish",
+  },
+
+  lugar: {
+    titulo: "Destinations",
+    entradilla:
+      "The places people hire a boat for on this coast. Each one with the harbours it is reached from and how long it takes.",
+    comoLlegar: (lugar) => `Getting to ${lugar}`,
+    desde: (puerto) => `From ${puerto}`,
+    minutos: (n) => `${n} min under way`,
+    sinTitulo: "Reachable without a licence",
+    conPatron: "Skipper or licence required",
+    verBarcos: (puerto) => `See boats in ${puerto}`,
+    otrosLugares: "Other destinations on this coast",
   },
 
   sinLicenciaMunicipio: {

@@ -11,6 +11,7 @@ import { TarjetaBarco } from "@/components/tarjeta-barco";
 import {
   buscarBarcos,
   listarDestinos,
+  lugaresDesde,
   listarEquipamiento,
   listarTipos,
   obtenerDestino,
@@ -85,6 +86,11 @@ export default async function LandingDestino(
       tiposEnDestino(slug),
       listarDestinos(),
     ]);
+
+  // Adónde se llega desde aquí. Enlazar el puerto con el destino que la
+  // gente busca por su nombre es lo que hace que las dos páginas se
+  // sostengan la una a la otra.
+  const alcanzables = await lugaresDesde(slug);
 
   const masBarato = barcos.length > 0 ? Math.min(...barcos.map((b) => b.precioDia)) : 0;
   const otros = destinos.filter((d) => d.slug !== slug).slice(0, 6);
@@ -296,6 +302,36 @@ export default async function LandingDestino(
           )}
         </div>
       </section>
+
+      {alcanzables.length > 0 && (
+        <section className="border-t border-borde bg-superficie">
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+            <h2 className="font-display text-2xl font-semibold text-texto">
+              {t.destino.adondeSeLlega(destino.nombre)}
+            </h2>
+            <ul className="mt-6 grid gap-px overflow-hidden rounded-carta border border-borde bg-borde sm:grid-cols-2 lg:grid-cols-3">
+              {alcanzables.map((a) => (
+                <li key={a.id} className="bg-fondo p-5">
+                  <p className="font-display text-lg font-semibold text-texto">
+                    <Link
+                      className="hover:text-acento"
+                      href={ruta({ tipo: "lugar", slug: a.lugar.slug }, idioma)}
+                    >
+                      {a.lugar.nombre}
+                    </Link>
+                  </p>
+                  <p className="cifra mt-1 text-sm text-texto-suave">
+                    {t.lugar.minutos(entero(a.minutos))}
+                  </p>
+                  <p className="mt-2 text-xs font-medium uppercase tracking-wider text-texto-tenue">
+                    {a.sinTitulo ? t.lugar.sinTitulo : t.lugar.conPatron}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <h2 className="font-display text-2xl font-semibold text-texto">

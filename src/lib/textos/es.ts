@@ -181,12 +181,26 @@ export const es = {
     verTodosDe: (n: string, destino: string) =>
       `Ver los ${n} barcos de ${destino}`,
     otrosDestinos: "Otros destinos",
+    adondeSeLlega: (destino: string) => `Adónde se llega desde ${destino}`,
     barcosEn: (destino: string) => `Barcos en ${destino}`,
     otrosTiposEn: (destino: string) => `Otros barcos en ${destino}`,
     todosLosDe: (destino: string) => `Todos los barcos de ${destino}`,
     verLosN: (n: string) => `Ver los ${n} barcos`,
     guiaOtroIdioma: "La guía de navegación de este puerto está escrita en castellano.",
     verGuiaEs: "Leerla en castellano",
+  },
+
+  lugar: {
+    titulo: "Destinos",
+    entradilla:
+      "Los sitios por los que se alquila un barco en esta costa. Cada uno con los puertos desde los que se llega y cuánto se tarda.",
+    comoLlegar: (lugar: string) => `Cómo llegar a ${lugar}`,
+    desde: (puerto: string) => `Desde ${puerto}`,
+    minutos: (n: string) => `${n} min de navegación`,
+    sinTitulo: "Alcanzable sin titulación",
+    conPatron: "Requiere patrón o titulación",
+    verBarcos: (puerto: string) => `Ver barcos en ${puerto}`,
+    otrosLugares: "Otros destinos de la costa",
   },
 
   sinLicenciaMunicipio: {
