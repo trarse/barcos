@@ -360,6 +360,30 @@ export async function desgloseDeBarco(
   return calcularDesglose(tarifaDe(barco), { dias, temporada, conPatron });
 }
 
+/**
+ * Barcos de la comparativa, en el mismo orden en que los eligió el usuario.
+ * Prisma devuelve las filas en el orden que quiere, así que se reordenan aquí:
+ * si las columnas bailan respecto a lo que se seleccionó, la tabla confunde.
+ */
+export const barcosParaComparar = cache(async (slugs: readonly string[]) => {
+  if (slugs.length === 0) return [];
+
+  const filas = await db.barco.findMany({
+    where: { publicado: true, slug: { in: [...slugs] } },
+    include: {
+      tipo: true,
+      puerto: { include: { destino: true } },
+      imagenes: { orderBy: { orden: "asc" }, take: 1 },
+      equipamiento: { orderBy: { nombre: "asc" } },
+    },
+  });
+
+  const porSlug = new Map(filas.map((f) => [f.slug, f]));
+  return slugs
+    .map((slug) => porSlug.get(slug))
+    .filter((f): f is (typeof filas)[number] => f !== undefined);
+});
+
 /** Todos los slugs publicados, para `generateStaticParams` y el sitemap. */
 export const slugsDeBarcos = cache(async () =>
   db.barco.findMany({

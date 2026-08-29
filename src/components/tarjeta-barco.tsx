@@ -4,6 +4,7 @@ import { entero, eslora, euro } from "@/lib/formato";
 import type { BarcoResumen } from "@/lib/consultas";
 import { rutas } from "@/lib/seo";
 
+import { BotonComparar } from "./comparador/boton-comparar";
 import { Estrellas } from "./estrellas";
 import { FotoBarco } from "./foto-barco";
 
@@ -33,13 +34,17 @@ export function TarjetaBarco({
           className="h-full w-full transition-transform duration-500 group-hover:scale-[1.04]"
         />
 
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+        <div className="absolute left-3 top-3 flex max-w-[60%] flex-wrap gap-1.5">
           {!barco.requiereTitulacion && (
             <Etiqueta tono="acento">Sin licencia</Etiqueta>
           )}
           {barco.reservaInstantanea && (
             <Etiqueta tono="exito">Reserva inmediata</Etiqueta>
           )}
+        </div>
+
+        <div className="absolute right-3 top-3">
+          <BotonComparar slug={barco.slug} nombre={barco.nombre} />
         </div>
       </div>
 

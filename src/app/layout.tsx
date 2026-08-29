@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Fraunces } from "next/font/google";
 
 import { Cabecera } from "@/components/cabecera";
+import { BarraComparar } from "@/components/comparador/barra-comparar";
 import { JsonLd } from "@/components/json-ld";
 import { Pie } from "@/components/pie";
 import { organizacionJsonLd, sitioJsonLd } from "@/lib/seo";
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Cabecera />
         <main className="flex-1">{children}</main>
         <Pie />
+        <BarraComparar />
       </body>
     </html>
   );

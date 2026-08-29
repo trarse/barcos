@@ -165,38 +165,6 @@
     background-size: 56px 56px;
   }
 
-  /* El icono del botón de tema. Se resuelve en CSS con los mismos tres
-     estados que los tokens de color —sistema, claro forzado, oscuro
-     forzado— para que el botón nunca contradiga lo que se está viendo. */
-  .icono-claro {
-    display: block;
-  }
-  .icono-oscuro {
-    display: none;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-tema="claro"]) .icono-claro {
-      display: none;
-    }
-    :root:not([data-tema="claro"]) .icono-oscuro {
-      display: block;
-    }
-  }
-
-  :root[data-tema="oscuro"] .icono-claro {
-    display: none;
-  }
-  :root[data-tema="oscuro"] .icono-oscuro {
-    display: block;
-  }
-  :root[data-tema="claro"] .icono-claro {
-    display: block;
-  }
-  :root[data-tema="claro"] .icono-oscuro {
-    display: none;
-  }
-
   /* Isóbata: la línea de sonda que separa secciones. */
   .isobata {
     height: 1px;
@@ -206,6 +174,52 @@
       transparent 10px 18px
     );
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Reglas que deciden `display`.
+   Van SIN capa a propósito: lo que está fuera de `@layer` gana a cualquier
+   capa, incluida `utilities`. Dentro de `@layer components` las perdería
+   contra la clase `grid` o `block` que lleve el propio elemento, por mucha
+   especificidad que se les ponga.
+--------------------------------------------------------------------------- */
+
+/* Comparativa: plegar las filas donde los barcos coinciden. Una casilla y un
+   selector hermano, sin una línea de JavaScript. */
+#solo-diferencias:checked ~ .tabla-comparativa [data-igual="si"] {
+  display: none;
+}
+
+/* El icono del botón de tema, con los mismos tres estados que los tokens de
+   color —sistema, claro forzado, oscuro forzado— para que el botón nunca
+   contradiga lo que se está viendo. */
+.icono-claro {
+  display: block;
+}
+.icono-oscuro {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .icono-claro {
+    display: none;
+  }
+  :root:not([data-tema="claro"]) .icono-oscuro {
+    display: block;
+  }
+}
+
+:root[data-tema="oscuro"] .icono-claro {
+  display: none;
+}
+:root[data-tema="oscuro"] .icono-oscuro {
+  display: block;
+}
+:root[data-tema="claro"] .icono-claro {
+  display: block;
+}
+:root[data-tema="claro"] .icono-oscuro {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

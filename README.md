@@ -36,7 +36,7 @@ levantar nada. La semilla deja 12 destinos, 33 puertos y 76 barcos.
 npm test && npx tsc --noEmit && npx eslint . && npm run build
 ```
 
-Deben salir 82 tests en verde, 0 errores de tipos, 0 avisos de lint y 159
+Deben salir 107 tests en verde, 0 errores de tipos, 0 avisos de lint y 159
 páginas generadas.
 
 ## Cómo está montado
@@ -69,6 +69,7 @@ se bloquea, no se cobra.
 | `/barco/{slug}` | SSG · ISR 1 h | Ficha del barco (76) |
 | `/experiencias/{actividad}` | SSG · ISR 1 h | Experiencia como producto (5) |
 | `/blog/{slug}` | SSG | Guías (4) |
+| `/comparar` | Dinámica · `noindex` | Comparativa lado a lado |
 
 **Las landings no leen `searchParams`.** Hacerlo las convertiría en páginas
 dinámicas y perderían el prerenderizado, que es justo lo que necesitan las
@@ -87,6 +88,23 @@ una penalización manual.
 
 `robots.ts` no bloquea a ningún rastreador —tampoco a los de IA— pero sí cierra
 las búsquedas con filtros, que son miles de combinaciones del mismo contenido.
+
+### El comparador
+
+Ninguna plataforma del sector deja poner dos barcos uno al lado del otro. La
+selección vive en la URL (`/comparar?barcos=a,b,c`), así que una comparativa se
+manda por WhatsApp y se abre igual al otro lado.
+
+`src/lib/comparador.ts` es puro: resuelve qué barco gana cada fila y cruza el
+equipamiento marcando lo que diferencia a unos de otros. Al llegar al tope de
+tres, pulsar un cuarto desplaza el más antiguo en vez de ignorar la pulsación.
+
+El estado del cliente usa `useSyncExternalStore` sobre `localStorage`, que es
+la API de React para esto. Leer el almacenamiento en un efecto y copiarlo al
+estado provoca render en cascada y desajuste de hidratación.
+
+El filtro «solo diferencias» es **CSS puro**: una casilla y un selector
+hermano, sin una línea de JavaScript.
 
 ### Identidad visual
 
@@ -145,7 +163,6 @@ eso y nada más.
 
 - Autenticación y área de propietario (el formulario de alta es un `mailto`).
 - Reservas reales: pasarela de pago, calendario de disponibilidad y contrato.
-- Comparador lado a lado de 2-3 barcos, que está en el plan y no en el código.
 - Fotografía real de la flota.
 - Traducciones. La arquitectura de URLs está pensada para `hreflang`, pero
   ahora mismo solo hay castellano.
