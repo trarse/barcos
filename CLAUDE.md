@@ -76,8 +76,9 @@ artículos del blog por esto y por geografía equivocada.
   `prisma/seed.ts`, o la segunda siembra falla por slug duplicado.
 - Los tipos de ruta (`PageProps`) los genera Next en el build: tras crear una
   página, `npm run build` antes de que `tsc` deje de quejarse.
-- `NEXT_PUBLIC_URL` **sin definir en producción** deja los canónicos apuntando
-  a `localhost:3050`. Pendiente al desplegar.
+- `NEXT_PUBLIC_URL` es de donde salen canonical, hreflang, sitemap y JSON-LD.
+  El build se niega a compilar en un despliegue si falta o apunta a localhost;
+  en local solo avisa. Pasos completos en `DESPLIEGUE.md`.
 
 ## Dónde está lo demás
 
