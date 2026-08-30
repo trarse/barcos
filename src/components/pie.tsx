@@ -58,7 +58,9 @@ export function Pie({ idioma }: { idioma: Idioma }) {
         { texto: t.pie.comoFunciona, pagina: { tipo: "comoFunciona" } },
         { texto: t.pie.publicar, pagina: { tipo: "publicar" } },
         { texto: t.pie.sinLicencia, pagina: { tipo: "sinLicencia" } },
-        { texto: t.pie.guias, pagina: { tipo: "blog" } },
+        { texto: t.pie.guias, pagina: { tipo: "guias" } },
+        { texto: t.pie.destinosNombre, pagina: { tipo: "lugares" } },
+        { texto: t.pie.blog, pagina: { tipo: "blog" } },
       ],
     },
   ];

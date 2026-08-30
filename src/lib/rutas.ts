@@ -34,6 +34,8 @@ export type Pagina =
   | { tipo: "sinLicenciaDestino"; destino: string }
   | { tipo: "lugares" }
   | { tipo: "lugar"; slug: string }
+  | { tipo: "guias" }
+  | { tipo: "guia"; slug: string }
   | { tipo: "blog" }
   | { tipo: "articulo"; slug: string }
   | { tipo: "comoFunciona" }
@@ -70,6 +72,10 @@ export function ruta(pagina: Pagina, idioma: Idioma): string {
       return `${raiz}/${segmento("lugares", idioma)}`;
     case "lugar":
       return `${raiz}/${segmento("lugares", idioma)}/${pagina.slug}`;
+    case "guias":
+      return `${raiz}/${segmento("guias", idioma)}`;
+    case "guia":
+      return `${raiz}/${segmento("guias", idioma)}/${pagina.slug}`;
     case "blog":
       return `${raiz}/${segmento("blog", idioma)}`;
     case "articulo":
@@ -113,6 +119,7 @@ export function analizarRuta(
     if (primero === segmento("experiencias", idioma)) return con({ tipo: "experiencias" });
     if (primero === segmento("blog", idioma)) return con({ tipo: "blog" });
     if (primero === segmento("lugares", idioma)) return con({ tipo: "lugares" });
+    if (primero === segmento("guias", idioma)) return con({ tipo: "guias" });
     if (primero === segmento("sinLicencia", idioma)) return con({ tipo: "sinLicencia" });
     if (primero === segmento("comoFunciona", idioma)) return con({ tipo: "comoFunciona" });
     if (primero === segmento("publicar", idioma)) return con({ tipo: "publicar" });
@@ -141,6 +148,9 @@ export function analizarRuta(
     }
     if (primero === segmento("lugares", idioma)) {
       return con({ tipo: "lugar", slug: segundo });
+    }
+    if (primero === segmento("guias", idioma)) {
+      return con({ tipo: "guia", slug: segundo });
     }
     return null;
   }

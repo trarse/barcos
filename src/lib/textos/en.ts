@@ -37,6 +37,7 @@ export const en: Textos = {
   nav: {
     irPortada: (marca) => `${marca}, back to home`,
     alquilar: "Rent",
+    destinos: "Destinations",
     experiencias: "Experiences",
     sinLicencia: "No licence",
     guias: "Guides",
@@ -183,6 +184,19 @@ export const en: Textos = {
     verLosN: (n) => `See all ${n} boats`,
     guiaOtroIdioma: "The local sailing guide for this marina is written in Spanish.",
     verGuiaEs: "Read it in Spanish",
+  },
+
+  guias: {
+    titulo: "Guides",
+    entradilla:
+      "What to know before hiring a boat and before listing one. Reviewed every season; no publication date, because they do not age the way news does.",
+    paraNavegar: "For people hiring a boat",
+    paraArmadores: "For boat owners",
+    revisada: (fecha) => `Reviewed on ${fecha}`,
+    minutos: (n) => `${n} min read`,
+    seguirPor: "Carry on here",
+    otras: "Other guides",
+    vacio: "No guides published in this language yet.",
   },
 
   lugar: {
@@ -377,6 +391,8 @@ export const en: Textos = {
     publicar: "List your boat",
     sinLicencia: "Boats without a licence",
     guias: "Sailing guides",
+    destinosNombre: "Places worth sailing to",
+    blog: "Blog",
     derechos: (anio, marca) => `© ${anio} ${marca}. Prices include VAT.`,
   },
 

@@ -32,6 +32,8 @@ const PAGINAS: Pagina[] = [
   { tipo: "sinLicenciaDestino", destino: "benidorm" },
   { tipo: "lugares" },
   { tipo: "lugar", slug: "tabarca" },
+  { tipo: "guias" },
+  { tipo: "guia", slug: "que-titulacion-necesito-para-llevar-un-barco" },
   { tipo: "blog" },
   { tipo: "articulo", slug: "ruta-siete-dias-mallorca-velero" },
   { tipo: "comoFunciona" },
@@ -94,7 +96,9 @@ describe("ruta", () => {
     expect(ruta({ tipo: "sinLicencia" }, "de")).toBe(
       "/de/boot-mieten-ohne-fuehrerschein",
     );
-    expect(ruta({ tipo: "blog" }, "en")).toBe("/en/guides");
+    expect(ruta({ tipo: "blog" }, "en")).toBe("/en/blog");
+    expect(ruta({ tipo: "guias" }, "en")).toBe("/en/guides");
+    expect(ruta({ tipo: "guias" }, "de")).toBe("/de/ratgeber");
     expect(ruta({ tipo: "comparar" }, "de")).toBe("/de/vergleichen");
     expect(ruta({ tipo: "publicar" }, "en")).toBe("/en/list-your-boat");
   });
@@ -118,6 +122,8 @@ describe("ruta", () => {
   { tipo: "sinLicenciaDestino", destino: "benidorm" },
   { tipo: "lugares" },
   { tipo: "lugar", slug: "tabarca" },
+  { tipo: "guias" },
+  { tipo: "guia", slug: "que-titulacion-necesito-para-llevar-un-barco" },
       { tipo: "blog" },
       { tipo: "articulo", slug: "x" },
       { tipo: "comoFunciona" },

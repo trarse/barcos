@@ -39,6 +39,7 @@ export const es = {
   nav: {
     irPortada: (marca: string) => `${marca}, ir a la portada`,
     alquilar: "Alquilar",
+    destinos: "Destinos",
     experiencias: "Experiencias",
     sinLicencia: "Sin licencia",
     guias: "Guías",
@@ -188,6 +189,19 @@ export const es = {
     verLosN: (n: string) => `Ver los ${n} barcos`,
     guiaOtroIdioma: "La guía de navegación de este puerto está escrita en castellano.",
     verGuiaEs: "Leerla en castellano",
+  },
+
+  guias: {
+    titulo: "Guías",
+    entradilla:
+      "Lo que hay que saber antes de alquilar y antes de publicar un barco. Se revisan cada temporada; no llevan fecha de publicación porque no envejecen igual que una noticia.",
+    paraNavegar: "Para quien va a alquilar",
+    paraArmadores: "Para quien tiene un barco",
+    revisada: (fecha: string) => `Revisada el ${fecha}`,
+    minutos: (n: string) => `${n} min de lectura`,
+    seguirPor: "Seguir por aquí",
+    otras: "Otras guías",
+    vacio: "Todavía no hay guías publicadas en este idioma.",
   },
 
   lugar: {
@@ -383,6 +397,8 @@ export const es = {
     publicar: "Publicar mi barco",
     sinLicencia: "Barcos sin licencia",
     guias: "Guías de navegación",
+    destinosNombre: "Destinos con nombre propio",
+    blog: "Blog",
     derechos: (anio: number, marca: string) =>
       `© ${anio} ${marca}. Precios con IVA incluido.`,
   },

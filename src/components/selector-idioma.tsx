@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ETIQUETAS, IDIOMAS, type Idioma } from "@/lib/idiomas";
-import { traducirRuta } from "@/lib/rutas";
+import { IDIOMAS_ARTICULO, IDIOMAS_GUIA } from "@/datos/disponibilidad";
+import { analizarRuta, ruta, traducirRuta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
 
 /**
@@ -14,9 +15,29 @@ import { textos } from "@/lib/textos";
  * cambiar de lengua desde la ficha de un barco y acabar en el inicio es un
  * clásico que obliga a repetir toda la búsqueda.
  *
+ * Cuando la página actual solo existe en un idioma —una guía o un artículo
+ * sin traducir— la opción lleva al índice de esa sección en el otro idioma,
+ * no a una URL que devolvería 404. Enlazar internamente a páginas que no
+ * existen es de las cosas que más ensucian un rastreo.
+ *
  * Va con `<details>` nativo: se abre sin JavaScript, el navegador ya gestiona
  * el teclado y el foco, y los enlaces están en el HTML para que se rastreen.
  */
+/** Adónde lleva cambiar a `otro` desde la ruta actual, sin acabar en un 404. */
+function destinoEn(pathname: string, otro: Idioma): string {
+  const analizada = analizarRuta(pathname);
+  if (!analizada) return traducirRuta(pathname, otro);
+
+  const pagina = analizada.pagina;
+  if (pagina.tipo === "guia" && !(IDIOMAS_GUIA[pagina.slug] ?? []).includes(otro)) {
+    return ruta({ tipo: "guias" }, otro);
+  }
+  if (pagina.tipo === "articulo" && !(IDIOMAS_ARTICULO[pagina.slug] ?? []).includes(otro)) {
+    return ruta({ tipo: "blog" }, otro);
+  }
+  return ruta(pagina, otro);
+}
+
 export function SelectorIdioma({ idioma }: { idioma: Idioma }) {
   const pathname = usePathname();
   const t = textos(idioma);
@@ -38,7 +59,7 @@ export function SelectorIdioma({ idioma }: { idioma: Idioma }) {
         {IDIOMAS.map((otro) => (
           <li key={otro}>
             <Link
-              href={traducirRuta(pathname, otro)}
+              href={destinoEn(pathname, otro)}
               hrefLang={otro}
               lang={otro}
               aria-current={otro === idioma ? "true" : undefined}

@@ -36,6 +36,7 @@ export const de: Textos = {
   nav: {
     irPortada: (marca) => `${marca}, zur Startseite`,
     alquilar: "Mieten",
+    destinos: "Reiseziele",
     experiencias: "Erlebnisse",
     sinLicencia: "Ohne Führerschein",
     guias: "Ratgeber",
@@ -183,6 +184,19 @@ export const de: Textos = {
     verLosN: (n) => `Alle ${n} Boote ansehen`,
     guiaOtroIdioma: "Der Revierführer für diesen Hafen ist auf Spanisch verfasst.",
     verGuiaEs: "Auf Spanisch lesen",
+  },
+
+  guias: {
+    titulo: "Ratgeber",
+    entradilla:
+      "Was man vor dem Mieten und vor dem Inserieren eines Bootes wissen sollte. Jede Saison überprüft; ohne Veröffentlichungsdatum, denn sie altern nicht wie Nachrichten.",
+    paraNavegar: "Für alle, die ein Boot mieten",
+    paraArmadores: "Für Bootseigner",
+    revisada: (fecha) => `Geprüft am ${fecha}`,
+    minutos: (n) => `${n} Min. Lesezeit`,
+    seguirPor: "Hier weiterlesen",
+    otras: "Weitere Ratgeber",
+    vacio: "In dieser Sprache sind noch keine Ratgeber veröffentlicht.",
   },
 
   lugar: {
@@ -378,6 +392,8 @@ export const de: Textos = {
     publicar: "Boot vermieten",
     sinLicencia: "Boote ohne Führerschein",
     guias: "Törn-Ratgeber",
+    destinosNombre: "Ziele mit Namen",
+    blog: "Blog",
     derechos: (anio, marca) => `© ${anio} ${marca}. Preise inklusive MwSt.`,
   },
 

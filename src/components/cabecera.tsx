@@ -14,9 +14,10 @@ export function Cabecera({ idioma }: { idioma: Idioma }) {
 
   const navegacion: { pagina: Pagina; texto: string }[] = [
     { pagina: { tipo: "busqueda" }, texto: t.nav.alquilar },
+    { pagina: { tipo: "lugares" }, texto: t.nav.destinos },
     { pagina: { tipo: "experiencias" }, texto: t.nav.experiencias },
     { pagina: { tipo: "sinLicencia" }, texto: t.nav.sinLicencia },
-    { pagina: { tipo: "blog" }, texto: t.nav.guias },
+    { pagina: { tipo: "guias" }, texto: t.nav.guias },
   ];
 
   return (
