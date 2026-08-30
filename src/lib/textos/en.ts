@@ -436,7 +436,7 @@ export const en: Textos = {
     lancha:
       "A day motorboat for moving quickly between coves. It gets everywhere fast, but this is where fuel weighs most: check the consumption before the headline rate.",
     neumatica:
-      "A light RIB, easy to handle and shallow enough to slip into small coves. Models up to 15 hp require no licence.",
+      "A light RIB, easy to handle and shallow enough to slip into small coves. The smaller models need no licence: each boat's listing says whether one is required.",
     yate:
       "A large motor yacht with cabins, crew and every service on board. High consumption and a skipper is compulsory, but it is a different way of being at sea.",
     llaut:

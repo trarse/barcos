@@ -111,7 +111,7 @@ Los requisitos de titulación los fija la normativa y se revisan cada cierto tie
       {
         pregunta: "¿Necesito licencia para alquilar en Dénia?",
         respuesta:
-          "Depende del barco. Hay neumáticas de hasta 15 caballos que se gobiernan sin ningún título tras una explicación de seguridad en el pantalán. Para lanchas más potentes o veleros hace falta al menos licencia de navegación o PER.",
+          "Depende del barco. Hay embarcaciones pequeñas, de eslora y potencia limitadas, que se gobiernan sin ningún título tras una explicación de seguridad en el pantalán; para las demás hace falta al menos licencia de navegación o PER. Los límites los fija la normativa y se revisan, así que la que manda es la ficha de cada barco: ahí dice si exige titulación.",
       },
       {
         pregunta: "¿Cuánto cuesta alquilar una lancha en Dénia?",

@@ -437,7 +437,7 @@ export const de: Textos = {
     lancha:
       "Motorboot für den Tag, um schnell zwischen den Buchten zu wechseln. Kommt überall zügig hin, doch hier fällt der Kraftstoff am stärksten ins Gewicht: Schauen Sie eher auf den Verbrauch als auf den Grundpreis.",
     neumatica:
-      "Leichtes Schlauchboot, einfach zu fahren und mit wenig Tiefgang für kleine Buchten. Modelle bis 15 PS erfordern keinen Führerschein.",
+      "Leichtes Schlauchboot, einfach zu fahren und mit wenig Tiefgang für kleine Buchten. Die kleineren Modelle erfordern keinen Führerschein: Ob einer nötig ist, steht bei jedem Boot.",
     yate:
       "Große Motoryacht mit Kajüten, Crew und allem Service an Bord. Hoher Verbrauch und Skipper vorgeschrieben, dafür eine ganz andere Art, auf See zu sein.",
     llaut:

@@ -46,7 +46,7 @@ export const TIPOS: TipoSemilla[] = [
     nombre: "Neumática",
     plural: "Neumáticas",
     descripcion:
-      "Semirrígida ligera, fácil de gobernar y con poco calado para entrar en calas pequeñas. Los modelos de hasta 15 caballos no requieren titulación.",
+      "Semirrígida ligera, fácil de gobernar y con poco calado para entrar en calas pequeñas. Los modelos más pequeños se gobiernan sin titulación: la ficha de cada barco dice si la exige.",
     sinLicencia: true,
     orden: 4,
   },
@@ -188,11 +188,11 @@ Casi todas las salidas incluyen cañas, carretes, señuelos, cebo y la licencia 
       "A day of back-to-back anchorages in coves with no road access, with snorkelling gear on board.",
     descripcionDe:
       "Ein Tag mit mehreren Ankerstopps in Buchten ohne Straßenzugang, Schnorchelausrüstung an Bord.",
-    contenido: `El plan clásico del Mediterráneo: salir por la mañana, encadenar tres o cuatro fondeos y volver a puerto al atardecer. Lo que lo hace distinto de un día de playa es que las mejores calas de la costa española no tienen acceso rodado, o lo tienen tan complicado que por mar se llega antes y con la mitad de gente.
+    contenido: `El plan clásico de esta costa: salir por la mañana, encadenar tres o cuatro paradas y volver a puerto al atardecer. Lo que lo hace distinto de un día de playa es que las mejores calas de la Costa Blanca no tienen acceso rodado, o lo tienen tan complicado que por mar se llega antes y con la mitad de gente.
 
-Las rutas mejor valoradas son las calas de Santanyí en Mallorca, el tramo Dénia-Xàbia con la Cova Tallada, las calas del sur de Menorca y el litoral de Begur en la Costa Brava.
+Los tramos que mejor funcionan son tres. El de Dénia a Xàbia, con el Cabo de San Antonio y la Cova Tallada. El de Xàbia a Moraira, doblando el Cap de la Nau, donde están la Granadella, Els Arcs y la Cala Moraig. Y el Cabo de las Huertas, entre El Campello y Alicante, que es el más corto de todos y el único al que se llega sin titulación.
 
-Casi todos los barcos llevan gafas y tubos a bordo, escalera de baño y nevera. Fondear sobre posidonia está prohibido en Baleares y sancionado con multas altas: busca las zonas de arena o las boyas ecológicas.`,
+Casi todos los barcos llevan gafas y tubos a bordo, escalera de baño y nevera. Buena parte de esta costa tiene pradera de posidonia, que está protegida: en cada zona hay reglas sobre dónde se puede parar y dónde no, y cambian. Pregúntalo en el club antes de salir.`,
     horas: 5,
     orden: 3,
     preguntas: [
@@ -213,28 +213,30 @@ Casi todos los barcos llevan gafas y tubos a bordo, escalera de baño y nevera. 
     nombre: "Avistamiento de cetáceos",
     titular: "Avistamiento de delfines y ballenas en barco",
     descripcion:
-      "Delfines mulares, listados y calderones en el mar de Alborán y el sur de Tenerife, con las distancias de aproximación que marca la ley.",
+      "Delfines mulares y listados frente a la Costa Blanca, siempre con las distancias de aproximación que marca la ley.",
     descripcionEn:
       "Bottlenose and striped dolphins off the Costa Blanca, always at the approach distances the law requires.",
     descripcionDe:
       "Große Tümmler und Streifendelfine vor der Costa Blanca, stets in den gesetzlich vorgeschriebenen Abständen.",
-    contenido: `España tiene dos de los mejores puntos de Europa para ver cetáceos desde una embarcación de recreo: el mar de Alborán, entre Málaga y Gibraltar, y la franja sur de Tenerife entre Los Cristianos y Los Gigantes.
+    contenido: `Frente a la Costa Blanca hay delfín mular y delfín listado, y en paso alguna otra especie. No es un espectáculo garantizado ni conviene que nadie te lo venda como tal: son animales salvajes en mar abierto y hay días que no aparecen.
 
-En Tenerife hay poblaciones residentes de calderón tropical y delfín mular que no migran, así que el avistamiento es posible los 365 días del año con una probabilidad de éxito superior al 90 % en una salida de tres horas. En Alborán la variedad es mayor —listados, mulares, calderones y algún rorcual en paso— pero más estacional.
+Lo que sí se puede decir es cuándo hay más posibilidades. Mar en calma, primera hora de la mañana y salir de la costa, que es donde están. Por eso estas salidas van siempre con patrón: no es solo por la titulación, es que saber dónde mirar cambia por completo el resultado.
 
-La normativa española fija distancias mínimas de aproximación, prohíbe cortar el rumbo del grupo y limita el tiempo de permanencia. Las embarcaciones autorizadas llevan un distintivo azul; navegar con patrón conocedor de la zona es la diferencia entre ver animales de lejos y tener un buen avistamiento sin molestarlos.`,
+Y hay una parte que importa más que ver o no ver. La aproximación a cetáceos está regulada por el **Real Decreto 1727/2007**, que define un espacio de protección alrededor del animal con distancias, velocidades y maniobras permitidas y prohibidas. Sin entrar en cifras que se revisan: no se persigue, no se corta el rumbo del grupo, no se separa a las crías, no se entra en el agua y no se les da de comer. La norma vigente es la que manda, y el patrón de la salida la conoce.
+
+Casi todo el mundo hace justo lo contrario de lo que debe cuando aparecen. Lo contamos entero en el artículo del blog.`,
     horas: 3,
     orden: 4,
     preguntas: [
       {
         pregunta: "¿Qué probabilidad hay de ver cetáceos?",
         respuesta:
-          "En el sur de Tenerife supera el 90 % en una salida de tres horas, porque hay poblaciones residentes de calderón y delfín mular. En el mar de Alborán es algo menor y más estacional.",
+          "No hay una cifra honesta que dar: son animales salvajes y hay días que no aparecen. Las mejores posibilidades son con mar en calma, a primera hora y separándose de la costa. Quien te prometa un porcentaje te está vendiendo algo que no controla.",
       },
       {
         pregunta: "¿A qué distancia se pueden acercar los barcos?",
         respuesta:
-          "La normativa fija una zona de exclusión de 60 metros y otra de permanencia restringida de 300, con prohibición de cortar el rumbo del grupo y límite de tiempo. Las embarcaciones autorizadas llevan un distintivo azul.",
+          "El Real Decreto 1727/2007 define un espacio de protección alrededor del animal, con distancias de aproximación, velocidades y maniobras permitidas y prohibidas, y con un límite de tiempo. Las cifras exactas las fija esa norma y se revisan, así que la referencia es el texto vigente. Lo que no cambia: no se persigue, no se corta el rumbo del grupo y no se entra en el agua.",
       },
     ],
   },

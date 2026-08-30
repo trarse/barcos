@@ -448,7 +448,7 @@ export const es = {
     lancha:
       "Motora de día para moverse rápido entre calas. Llega a todas partes en poco tiempo, pero es donde más pesa el combustible: conviene mirar el consumo antes que la tarifa.",
     neumatica:
-      "Semirrígida ligera, fácil de gobernar y con poco calado para entrar en calas pequeñas. Los modelos de hasta 15 caballos no requieren titulación.",
+      "Semirrígida ligera, fácil de gobernar y con poco calado para entrar en calas pequeñas. Los modelos más pequeños se gobiernan sin titulación: la ficha de cada barco dice si la exige.",
     yate:
       "Motora grande con camarotes, tripulación y todos los servicios a bordo. Consumo alto y patrón obligatorio, pero es otra forma de estar en el mar.",
     llaut:

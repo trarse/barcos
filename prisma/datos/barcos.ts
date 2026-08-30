@@ -62,7 +62,7 @@ export const MODELOS: ModeloSemilla[] = [
     anio: 2022,
     tipo: "neumatica",
     descripcion:
-      "Semirrígida de 4,7 metros con motor de 15 caballos: la máxima potencia que se puede gobernar sin ningún título. Entra en calas donde no cabe nada más y se maneja en diez minutos de explicación en el pantalán.",
+      "Semirrígida de 4,7 metros, de las que se gobiernan sin ningún título tras la explicación de seguridad del pantalán. Entra en calas donde no cabe nada más y se maneja en diez minutos.",
     esloraCm: 470,
     capacidad: 5,
     camarotes: 0,

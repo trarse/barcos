@@ -52,10 +52,33 @@ Corolario: el `hreflang` solo declara idiomas que existen de verdad, y el
 selector de idioma no enlaza a páginas que no existen (cae al índice de la
 sección). Hay un test que vigila el mapa de disponibilidad.
 
-**3. No se publica información de dónde fondear.** Ni tenida, ni sondas, ni qué
-vientos abrigan una cala. Eso es información de seguridad de la vida humana en
-el mar y no se publica **hasta que haya seguro revisado**. Las páginas de
-destino cuentan *qué es* un sitio y *cómo se llega*, nunca dónde echar el ancla.
+**3. No se dan instrucciones de fondeo.** Revisada el 30/08/2026, porque la
+redacción anterior —«no se publica información de dónde fondear»— prohibía de
+hecho medio sitio: el contenido se escribió antes que la regla y nunca se
+auditó contra ella.
+
+La línea está en si el texto **sustituye al criterio de quien va al timón**.
+
+*No se publica*, porque alguien podría fondear guiándose por ello:
+
+- **Tenida**: sobre qué fondo agarra el ancla y sobre cuál no.
+- **Sondas**: profundidades, metros de cadena, dónde hay resguardo.
+- **Abrigo**: con qué vientos se está seguro en una cala concreta.
+- **Fichas de fondeadero** y guías de cómo fondear, en cualquier forma.
+
+*Sí se publica*, porque es descripción y no instrucción:
+
+- Que un sitio existe, qué es y cuánto se tarda en llegar.
+- Que una zona está protegida o regulada, **remitiendo siempre a confirmarlo**
+  con el club o la autoridad competente. Nunca cuál es la norma concreta.
+- Que un fondeadero es popular o está concurrido en agosto.
+
+La duda se resuelve en contra de publicar. Y lo que ya esté escrito se revisa
+**antes de traducirlo**: un fallo de este tipo traducido son tres páginas
+equivocadas en vez de una.
+
+Lo que sigue intacto: **fichas de fondeadero, no, hasta que haya seguro
+revisado.**
 
 **4. Las cifras legales, con fecha o sin cifra.** Límites de eslora, potencia,
 millas, importes de sanción: los fija la normativa y se revisan. O se citan con
