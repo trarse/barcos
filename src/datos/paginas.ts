@@ -72,6 +72,7 @@ const ES: PaginasFijas = {
       "El Real Decreto 875/2014 permite gobernar sin titulación embarcaciones de motor de hasta 5 metros de eslora y potencia máxima de 15 caballos, y motos náuticas dentro de un circuito cerrado y vigilado. La condición es recibir una instrucción previa de la empresa de alquiler y no alejarse más de 2 millas de un puerto o lugar de abrigo, siempre de día.",
       "Con esas restricciones se llega perfectamente a las calas de la misma bahía, que es para lo que la mayoría de la gente alquila. Lo que no se puede hacer es cruzar entre islas, salir de noche ni navegar con mar formada: para eso hacen falta título y un barco más grande, o contratar patrón.",
       "La alternativa que casi nadie menciona: cualquier barco de esta web se puede alquilar con patrón profesional incluido. Sale más caro que una neumática pequeña, pero abre toda la flota sin necesidad de ningún papel.",
+      "Una advertencia que conviene tener presente: los requisitos de titulación los fija la normativa y se revisan cada cierto tiempo. Lo que lees aquí es lo vigente en la última revisión de esta página, pero antes de reservar mira siempre la ficha del barco, que es la que indica si exige título, y consúltalo en la fuente oficial si te juegas el viaje.",
     ],
     faq: [
       {
@@ -249,6 +250,7 @@ const EN: PaginasFijas = {
       "Royal Decree 875/2014 allows anyone to skipper a motorboat of up to 5 metres in length with a maximum output of 15 hp (11.03 kW), plus jet skis inside a closed, supervised circuit. The conditions are a briefing from the hire company beforehand, staying within 2 nautical miles of a harbour or place of shelter, and sailing in daylight only.",
       "Within those limits you reach the coves of your own bay comfortably, which is what most people hire a boat for. What you cannot do is cross between islands, go out after dark or sail in a swell: for that you need a licence and a bigger boat, or a skipper.",
       "The option almost nobody mentions: every boat on this site can be hired with a professional skipper. It costs more than a small RIB, but it opens the whole fleet without a single piece of paperwork.",
+      "One caveat worth keeping in mind: licence requirements are set by regulation and are revised from time to time. What you read here is what applied when this page was last reviewed. Before booking, always check the boat's own listing, which states whether a licence is required, and confirm with the official source if your trip depends on it.",
     ],
     faq: [
       {
@@ -426,6 +428,7 @@ const DE: PaginasFijas = {
       "Das Königliche Dekret 875/2014 erlaubt das Führen von Motorbooten bis 5 Meter Länge und höchstens 15 PS (11,03 kW) ohne jede Befähigung, dazu Jetskis innerhalb eines abgesperrten, beaufsichtigten Bereichs. Bedingung sind eine Einweisung durch den Vermieter, ein Abstand von höchstens 2 Seemeilen zu einem Hafen oder Schutzort und Fahrt nur bei Tageslicht.",
       "Innerhalb dieser Grenzen erreichen Sie die Buchten der eigenen Bucht bequem – und genau dafür mieten die meisten ein Boot. Nicht möglich sind Überfahrten zwischen den Inseln, Fahrten nach Einbruch der Dunkelheit und Seegang: dafür braucht es einen Schein und ein größeres Boot, oder einen Skipper.",
       "Die Möglichkeit, die kaum jemand erwähnt: Jedes Boot auf dieser Seite lässt sich mit Berufsskipper mieten. Das kostet mehr als ein kleines Schlauchboot, öffnet aber die gesamte Flotte ohne ein einziges Dokument.",
+      "Ein Hinweis, den man im Kopf behalten sollte: Die Führerscheinanforderungen legt der Gesetzgeber fest und werden von Zeit zu Zeit überarbeitet. Was hier steht, galt bei der letzten Prüfung dieser Seite. Prüfen Sie vor der Buchung immer das Inserat des Bootes, in dem steht, ob ein Führerschein nötig ist, und bestätigen Sie es bei der offiziellen Stelle, wenn Ihre Reise davon abhängt.",
     ],
     faq: [
       {

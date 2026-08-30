@@ -19,5 +19,8 @@ export const IDIOMAS_GUIA: Record<string, Idioma[]> = {
 };
 
 export const IDIOMAS_ARTICULO: Record<string, Idioma[]> = {
+  "que-hacer-si-aparecen-delfines": ["es"],
+  "cruzarse-con-un-crucero-canal-de-puerto": ["es"],
+  "posidonia-tabarca-por-que-el-agua-es-asi": ["es"],
   "cuanto-cuesta-alquilar-un-barco-en-espana": ["es"],
 };
