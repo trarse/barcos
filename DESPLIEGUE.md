@@ -24,7 +24,11 @@ Hoy corre sobre SQLite, que vale para desarrollo pero no para producción.
       suficiente para empezar).
 - [ ] En `prisma/schema.prisma`, cambiar el `provider` del datasource de
       `sqlite` a `postgresql`. El esquema evita a propósito los tipos nativos
-      de Postgres, así que es un cambio de una línea.
+      de Postgres, así que por ese lado no hay nada más que tocar.
+- [ ] **Y el adaptador, que no es una línea.** `src/lib/db.ts` instancia
+      `PrismaBetterSqlite3` directamente. Desde Prisma 7 la conexión va por
+      driver adapter, así que hay que añadir `@prisma/adapter-pg` y elegir uno
+      u otro según el entorno, para que el desarrollo local siga en SQLite.
 - [ ] `DATABASE_URL` en el entorno de producción con la cadena de conexión.
 - [ ] `npx prisma db push` contra esa base y luego `npm run db:seed`.
 
@@ -80,8 +84,8 @@ haciendo su trabajo.
 
 ## 4. Antes de dar el sitio por publicado
 
-- [ ] `npm run verificar` en verde. Incluye tests, tipos, lint, build y la
-      auditoría SEO de las 644 páginas.
+- [ ] `npm run verificar` en verde **contra Postgres**, no solo contra SQLite.
+      Incluye tests, tipos, lint, build y la auditoría SEO de las 644 páginas.
 - [ ] **Abrir `https://estribor.es/robots.txt` en el navegador.** Tiene que
       permitir el rastreo y apuntar al sitemap del dominio real. Desplegar con
       un `noindex` o un `Disallow: /` de pruebas es el fallo más común y más

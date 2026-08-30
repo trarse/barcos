@@ -1,0 +1,288 @@
+===============================================================================
+ESTRIBOR - LO QUE FALTA
+Fichero: C:\Users\kety follen\Desktop\deepseek\barcos\PENDIENTE.txt
+Revision: 30 de agosto de 2026
+===============================================================================
+
+Este es el unico mapa de lo que queda. Si algo no esta aqui, no esta pendiente.
+Va dentro del repositorio a proposito: se versiona, viaja al USB y lo lee la
+siguiente sesion.
+
+Las reglas del proyecto estan en CLAUDE.md. Los pasos de publicacion en
+DESPLIEGUE.md. El porque de cada decision, en los mensajes de los commits.
+
+
+===============================================================================
+0. COMO ESTA HOY
+===============================================================================
+
+  644 paginas construidas, 608 indexables
+  611 URLs en el sitemap, solo indexables, comprobado en las dos direcciones
+  175 tests en 12 ficheros, 0 errores de tipos, 0 avisos de lint
+  1 solo aviso en la auditoria SEO: los canonical apuntan a localhost hasta
+    que exista NEXT_PUBLIC_URL en produccion
+
+  11 municipios de la Costa Blanca      11 landings sin-licencia
+   7 destinos con nombre propio          4 experiencias
+   4 guias perennes (1 programada)       4 articulos      4 ocasiones
+  96 fichas de barco, TODAS FICTICIAS hasta que llegue el censo
+
+  Traduccion entregada y verificada: 21.005 palabras por idioma, ingles y
+  aleman, los 36 bloques con umbral superan las 300 palabras. ESPERANDO A
+  PODER ENTRAR (ver M1).
+
+  Ultimos commits: d4ce15b (sitemap) y 07fc8ab (regla 4 y experiencias).
+
+
+===============================================================================
+1. LO QUE DESCUBRI HOY Y NO ESTABA ESCRITO EN NINGUN SITIO
+===============================================================================
+
+Auditado contra el codigo, no contra el plan. El plan da por hechas cinco
+cosas que no lo estan:
+
+  1. NO HAY CAPTURA DE CORREO (plan 2.7). Lo unico que capta es un enlace
+     mailto en /registrar-barco.
+  2. NO HAY MEDICION (plan 5.4 y 5.5). Ni Analytics, ni el evento
+     sin_resultados.
+  3. NO HAY PAGINAS LEGALES ni banner de consentimiento (plan 2.8).
+  4. NO HAY REDIRECCIONES 301 de los ocho destinos podados (plan 1.5).
+     next.config.ts tiene reescrituras y cero redirects.
+  5. NO EXISTE EL HUB costa-blanca (plan 1.4).
+
+Y dos correcciones a documentos que decian algo que no era:
+
+  6. DESPLIEGUE.md dice que pasar a Postgres es "un cambio de una linea".
+     No lo es: src/lib/db.ts instancia PrismaBetterSqlite3 directamente.
+     Hacen falta el provider, el adaptador @prisma/adapter-pg y elegir uno u
+     otro segun entorno. Ya corregido en DESPLIEGUE.md.
+  7. El commit 0a274db decia que la experiencia de cetaceos estaba
+     "reescrita". No lo estaba: solo anadio 22 lineas y ninguna toco el
+     castellano. Corregido en 07fc8ab.
+
+
+POR QUE EL PUNTO 1 Y EL 2 MANDAN SOBRE TODO LO DEMAS
+-----------------------------------------------------
+
+El go/no-go del 15 de marzo se decide con cuatro senales:
+
+    Impresiones en GSC / mes    >= 1.500     <- las da Search Console sola
+    Consultas en top 10         >= 3         <- las da Search Console sola
+    Correos de clientes         >= 60        <- SIN INSTRUMENTO
+    Armadores interesados       >= 15        <- SIN INSTRUMENTO
+
+Un mailto genera correos, pero convierte malisimo y no dice de que pagina ni
+de que puerto vino nadie. No se puede contar ni atribuir.
+
+El plan dice que en la ventana de validacion (nov-feb) no se programa nada
+nuevo. Correcto. Pero eso obliga a que el instrumento este puesto ANTES del
+25 de octubre, o pasamos cuatro meses recogiendo media tarjeta de puntuacion
+y en marzo se decide a ciegas sobre el lado de la oferta, que es justo el que
+el plan dice que no esta demostrado.
+
+
+===============================================================================
+2. MI PARTE - EL CODIGO
+===============================================================================
+En orden. Cada bloque dice de que depende.
+
+-------------------------------------------------------------------------------
+M2. INTEGRAR LOS LOTES 4, 5 Y 7            SE PUEDE HACER HOY, no depende de nada
+-------------------------------------------------------------------------------
+Blog, guias y ocasiones son listas en src/datos/ indexadas por slug e idioma.
+Una traduccion es una entrada nueva. Sin tocar el esquema.
+12 piezas x 2 idiomas = 24 paginas nuevas.
+
+  - Anadir las entradas EN y DE.
+  - Actualizar src/datos/disponibilidad.ts, que alimenta el selector de idioma
+    y el hreflang. Hay un test que lo compara con la realidad.
+  - Revisar enlacesVivos(): un texto ingles puede enlazar a una guia que solo
+    existe en castellano.
+  - Escalonar publicaDesde. Veinticuatro paginas el mismo dia es el patron que
+    peor se lee desde fuera.
+
+Es lo primero que voy a tocar en cuanto me lo digas.
+
+-------------------------------------------------------------------------------
+M1. LOS CAMPOS DE TRADUCCION               desbloquea 42.010 palabras ya hechas
+-------------------------------------------------------------------------------
+Hoy cada texto largo guarda UNA version y UNA etiqueta de idioma. No hay donde
+meter la traduccion. Afecta a Destino.contenido, Destino.sinLicencia,
+Lugar.contenido, Experiencia.contenido y Experiencia.titular.
+
+El caso feo: Pregunta NO TIENE campo de idioma. Las 95 preguntas viajan con el
+idiomaProsa de su padre. Hay que elegir entre columnas paralelas
+(preguntaEn/respuestaEn), coherente con el patron descripcionEn/De que ya usa
+el esquema, o una fila por idioma, mas limpio pero toca seed, consultas y el
+JSON-LD de FAQPage.
+
+Arrastra detras:
+  - idiomasIndexables() en src/lib/indexacion.ts. Hoy devuelve [idiomaProsa]
+    porque solo cabe un idioma. Tiene que contar palabras POR IDIOMA. Es el
+    corazon de la regla 1 y lo usan las dos plantillas y el sitemap.
+  - src/lib/prosa.ts, prisma/seed.ts y los cuatro ficheros de prisma/datos/.
+  - Las cuatro plantillas que pintan prosa.
+  - src/app/sitemap.ts: la version inglesa entra sola al pasar a indexable.
+  - El hreflang de esas paginas pasa a ser cierto. Hoy declara EN y DE
+    apuntando a paginas noindex.
+  - tests/ y el mapa de disponibilidad.
+
+Criterio de salida: npm run verificar en verde y las paginas indexables suben
+de 608 a 644.
+
+-------------------------------------------------------------------------------
+M3. LA CAPTACION                       sin esto, medio go/no-go es ciego
+-------------------------------------------------------------------------------
+Es la primera vez que la aplicacion escribe algo. Hasta ahora solo lee.
+
+  - Tabla de suscripciones: correo, variante, puerto o municipio, idioma,
+    pagina de origen, fecha, confirmado.
+  - Ruta POST con validacion Zod, que ya esta en el proyecto.
+  - Las dos variantes del plan: "avisame cuando abrais en mi puerto" y
+    "avisame si cambia la normativa". La segunda es la lista de correo mas
+    valiosa del proyecto el dia del giro normativo, y la regla 5 obliga a
+    redactarla sin insinuar que el giro existe.
+  - Sustituir el mailto de /registrar-barco por un formulario de armador. Ese
+    alimenta la senal "armadores interesados >= 15".
+  - Anti-spam sin terceros: honeypot y limite por IP. Un captcha de Google
+    exige consentimiento previo y complica el bloque legal.
+  - Doble confirmacion por correo, o justificar por escrito por que no.
+  - Los tres idiomas, y una cadena sin traducir tiene que seguir siendo un
+    error de compilacion.
+
+DEPENDE DE UNA DECISION TUYA: donde se guardan los correos (ver seccion 5).
+
+-------------------------------------------------------------------------------
+M4. LEGALES Y CONSENTIMIENTO               bloquea M5. Los textos son tuyos.
+-------------------------------------------------------------------------------
+No se puede pedir un correo sin politica de privacidad, ni cargar Analytics
+sin consentimiento previo. Esto es lo que hace legal M3 y M5.
+
+  - Tres paginas nuevas en src/lib/rutas.ts con URL traducida en tres idiomas:
+    aviso legal, privacidad y cookies. Nueve paginas.
+  - Banner de consentimiento propio, sin terceros, que por defecto no cargue
+    nada. Rechazar tan facil como aceptar.
+  - Enlaces en el pie, que ya lee de la base y no puede desincronizarse.
+  - Entran al sitemap: son paginas legitimas.
+
+-------------------------------------------------------------------------------
+M5. MEDICION                               depende de M4
+-------------------------------------------------------------------------------
+  - GA4 detras del consentimiento.
+  - EL EVENTO sin_resultados CON PUERTO Y FECHA. Es el unico dato del sitio
+    que dice donde falta inventario, y el plan quiere que gobierne la agenda
+    comercial de cada lunes. Se dispara en el buscador y en las landings
+    cuando la consulta devuelve cero.
+  - Eventos de la captacion, separados por variante.
+  - Validar datos estructurados con la herramienta de resultados enriquecidos:
+    FAQPage, TouristAttraction, ItemList, BreadcrumbList.
+  - Core Web Vitals en movil y 4G real, no en localhost.
+
+-------------------------------------------------------------------------------
+M6. LOS DOS RESTOS DE LA PODA
+-------------------------------------------------------------------------------
+  - Redirecciones 301 de mallorca, ibiza, menorca, formentera, barcelona,
+    malaga, costa-brava y valencia. Ocho slugs x 3 idiomas. Diez minutos, y
+    evitan 404 si algo se indexo antes de la poda.
+  - Hub costa-blanca como destino padre (plan 1.4). Antes de construirlo
+    compruebo si canibaliza con las once landings de municipio. Si lo hace, te
+    lo digo y no lo hago.
+
+-------------------------------------------------------------------------------
+M7. POSTGRES Y DESPLIEGUE
+-------------------------------------------------------------------------------
+  - Provider del datasource, dependencia @prisma/adapter-pg y eleccion de
+    adaptador segun entorno, para que el desarrollo siga en SQLite.
+  - npm run verificar entero CONTRA POSTGRES, no solo contra SQLite.
+  - El dia del despliegue: abrir robots.txt y sitemap.xml en el dominio real,
+    a mano. Es el paso que no se puede saltar.
+
+-------------------------------------------------------------------------------
+M8. EL CENSO, CUANDO LLEGUE
+-------------------------------------------------------------------------------
+Sustituir los 96 barcos ficticios por los reales, y comprobar que ninguna
+landing cruza el umbral de 6 barcos hacia abajo al hacerlo. El censo es tuyo;
+el trabajo de meterlo, mio.
+
+
+===============================================================================
+3. LA PARTE DE DEEPSEEK - EL CONTENIDO
+===============================================================================
+Detalle completo en ENCARGO-DEEPSEEK.txt (Desktop\deepseek\variasCosas\).
+
+  ENCARGADO (~21.950 palabras)
+    A   Fondeo: auditoria, reescritura y retraduccion
+    B   Retraducir los 4 textos corregidos en 07fc8ab
+    C1  Engordar 7 guias de navegacion por debajo de 250 palabras
+    C3  El cluster de rutas, que no existe
+
+  LA OTRA MITAD, DESPUES (~21.800 palabras)
+    C2  Cuatro destinos con nombre propio nuevos
+    C4  Cuatro guias perennes
+    C5  Cuatro articulos de blog
+
+
+===============================================================================
+4. TU PARTE - LO QUE NO ES CODIGO
+===============================================================================
+
+  YA          Comprar estribor.es. Auto-renovacion y bloqueo de transferencia
+              EL MISMO DIA: a partir del despliegue ese dominio acumula
+              antiguedad SEO y perderlo por una tarjeta caducada seria el
+              error mas caro del proyecto.
+              Nameservers a Cloudflare. Reenvio de hola@estribor.es.
+
+  SEPT/OCT    Base PostgreSQL (Neon o Supabase, capa gratuita).
+              Alojamiento: Cloudflare Pages o Netlify. NO el plan Hobby de
+              Vercel, que prohibe el uso comercial.
+              NEXT_PUBLIC_URL y DATABASE_URL en el panel, no en un fichero.
+              Textos legales (plantillas oficiales, coste 0).
+
+  ANTES DE    Search Console como propiedad de DOMINIO, no de prefijo de URL.
+  PUBLICAR    Enviar el sitemap. Bing Webmaster desde Search Console.
+              Perfil de Empresa en Google de la base de Alicante.
+
+  EL GRANDE   EL CENSO. Los 96 barcos son inventados. La regla de los 6 barcos
+              reales la aplica el codigo solo, asi que aunque se publique todo
+              lo demas manana, las landings de municipio NO entran al indice
+              hasta que haya flota de verdad.
+
+
+===============================================================================
+5. DECISIONES QUE ESPERAN A QUE ME DIGAS
+===============================================================================
+
+  1. LA REGLA 3, REESCRITA HOY. Esta en CLAUDE.md. Antes decia "no se publica
+     informacion de donde fondear", que auditada prohibia medio sitio: el
+     contenido se escribio antes que la regla y nunca se comparo con ella.
+     Ahora la linea es si el texto sustituye al criterio de quien va al timon.
+     APROBARLA O CORREGIRLA. De ella depende cuanto texto reescribe DeepSeek.
+
+  2. DONDE SE GUARDAN LOS CORREOS (M3). Postgres es lo coherente, pero exige
+     que la base este viva antes del 25 de octubre.
+
+  3. LOS OTROS DOS ERRORES del documento de traduccion. Confirme dos de los
+     cuatro que senalaste ("24 paginas nuevas por idioma" eran 12; "8 de 11"
+     eran 7) y los corregi. Los otros dos no los encuentro.
+
+  4. SI OFRECEIS SALIDAS DE CETACEOS EN ESTA COSTA. Reescribi la pagina a la
+     Costa Blanca sin porcentajes ni cifras inventadas, pero si el producto no
+     existe aqui, la pagina se retira en vez de reescribirse.
+
+
+===============================================================================
+6. LO QUE ESTA DECIDIDO Y NO SE TOCA
+===============================================================================
+
+  - Las siete reglas de CLAUDE.md. La 3 acaba de cambiar; el resto no.
+  - Solo Costa Blanca. Baleares, Barcelona, Malaga, Valencia, Costa Brava y
+    Canarias estan podadas a proposito.
+  - El umbral de indexacion no se baja nunca. Si un texto se queda corto, se
+    alarga el texto.
+  - Nada de autenticacion, panel, calendario, reservas ni pagos hasta el
+    go/no-go del 15 de marzo de 2027.
+  - Traducir la prosa al ingles estaba aplazado a marzo a proposito. Se ha
+    adelantado. Eso NO adelanta el resto del bloque 8.
+  - No ejecutar npm audit fix --force. Motivo largo en CLAUDE.md.
+
+===============================================================================
