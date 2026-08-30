@@ -33,6 +33,17 @@ y lugares.
 
 ---
 
+## 1.b El cliente de Prisma se genera en la instalación
+
+`src/generated/` está en `.gitignore`, así que el cliente **no viaja en el
+repositorio**: lo crea el script `postinstall` al instalar dependencias. Sin él,
+un clon limpio no compila.
+
+**Comprobar:** que la plataforma de despliegue ejecuta `npm install` (o
+`npm ci`) **con** devDependencies antes del build. La CLI de Prisma vive ahí, y
+es la que genera el cliente. Si el panel tiene una opción de «instalar solo
+dependencias de producción», hay que dejarla desactivada.
+
 ## 2. Alojamiento
 
 - [ ] **Cloudflare Pages** o **Netlify**. No usar el plan Hobby de Vercel:

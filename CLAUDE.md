@@ -80,6 +80,24 @@ artículos del blog por esto y por geografía equivocada.
   El build se niega a compilar en un despliegue si falta o apunta a localhost;
   en local solo avisa. Pasos completos en `DESPLIEGUE.md`.
 
+## El aviso de npm audit que NO hay que "arreglar"
+
+`npm audit` reporta 3 vulnerabilidades altas por `deepmerge-ts < 8`. Antes de
+tocar nada, esto es lo que hay:
+
+- Llega **solo** por la CLI de Prisma (`prisma` → `@prisma/config`), que es
+  herramienta de build. **No aparece en el bundle de producción**, comprobado
+  buscándolo en `.next/server`.
+- Lo que procesa ese merge es nuestro propio `prisma.config.ts`. Nunca entra
+  ahí nada que controle un visitante, así que el fallo (agotamiento de pila
+  con grafos recursivos) no es alcanzable desde fuera.
+- El único «arreglo» que ofrece npm es **bajar Prisma a 6.12**, que es una
+  versión mayor hacia atrás y rompería el proyecto entero: driver adapters,
+  API de Prisma 7 y el esquema.
+
+Riesgo evaluado y asumido. Se revisa cuando Prisma actualice `@prisma/config`.
+**No ejecutar `npm audit fix --force`.**
+
 ## Dónde está lo demás
 
 El plan de marketing y el de proyecto están en `E:\proyecto-barcos\`. Los
