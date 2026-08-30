@@ -191,6 +191,22 @@ export const es = {
     verGuiaEs: "Leerla en castellano",
   },
 
+  ocasiones: {
+    titulo: "Ocasiones",
+    entradilla:
+      "Despedidas, cumpleaños, eventos de empresa y pedidas. Un barco entero para el grupo, con el precio repartido entre los que vais.",
+    desdePorPersona: (precio: string, plazas: string) =>
+      `Desde ${precio} por persona repartiendo entre ${plazas}, con patrón incluido.`,
+    desdePlazas: (n: string) => `Desde ${n} plazas`,
+    flotaTitulo: (n: string) => `Barcos de ${n} plazas o más`,
+    flotaNota:
+      "Solo salen los que caben para el grupo y pueden ir con patrón. El precio de cada ficha es el final: divídelo entre los que vayáis.",
+    presupuestoTitulo: "Esto va por presupuesto",
+    presupuestoTexto:
+      "Con factura, seguro documentado y precio cerrado en 24 horas. No pasa por el carrito porque una empresa o una boda necesitan papeles que un botón de pagar no da.",
+    otras: "Otras ocasiones",
+  },
+
   guias: {
     titulo: "Guías",
     entradilla:
@@ -399,6 +415,7 @@ export const es = {
     guias: "Guías de navegación",
     destinosNombre: "Destinos con nombre propio",
     blog: "Blog",
+    ocasiones: "Ocasiones",
     derechos: (anio: number, marca: string) =>
       `© ${anio} ${marca}. Precios con IVA incluido.`,
   },

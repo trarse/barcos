@@ -186,6 +186,22 @@ export const en: Textos = {
     verGuiaEs: "Read it in Spanish",
   },
 
+  ocasiones: {
+    titulo: "Occasions",
+    entradilla:
+      "Hen and stag parties, birthdays, company events and proposals. The whole boat for your group, with the price split between you.",
+    desdePorPersona: (precio, plazas) =>
+      `From ${precio} per person split between ${plazas}, skipper included.`,
+    desdePlazas: (n) => `From ${n} berths`,
+    flotaTitulo: (n) => `Boats with ${n} berths or more`,
+    flotaNota:
+      "Only boats that fit your group and can sail with a skipper. The price on each listing is the final one: divide it between you.",
+    presupuestoTitulo: "This one goes by quote",
+    presupuestoTexto:
+      "With an invoice, documented insurance and a fixed price within 24 hours. It does not go through the checkout because a company or a wedding needs paperwork a pay button cannot give.",
+    otras: "Other occasions",
+  },
+
   guias: {
     titulo: "Guides",
     entradilla:
@@ -393,6 +409,7 @@ export const en: Textos = {
     guias: "Sailing guides",
     destinosNombre: "Places worth sailing to",
     blog: "Blog",
+    ocasiones: "Occasions",
     derechos: (anio, marca) => `© ${anio} ${marca}. Prices include VAT.`,
   },
 

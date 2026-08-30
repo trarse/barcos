@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { listarDestinos, listarExperiencias, listarLugares } from "@/lib/consultas";
+
 import type { Idioma } from "@/lib/idiomas";
 import { ruta, type Pagina } from "@/lib/rutas";
 import { SITIO } from "@/lib/sitio";
@@ -7,35 +9,32 @@ import { textos } from "@/lib/textos";
 
 import { Burgee } from "./burgee";
 
-const DESTINOS = ["mallorca", "ibiza", "menorca", "denia", "valencia", "barcelona"];
 const TIPOS = ["velero", "catamaran", "lancha", "neumatica", "llaut", "yate"];
-const ACTIVIDADES = [
-  "atardecer",
-  "pesca",
-  "calas-y-snorkel",
-  "avistamiento-cetaceos",
-  "celebraciones",
-];
 
-/** Nombre visible de un destino: el slug capitalizado sirve para todos. */
-const NOMBRES_DESTINO: Record<string, string> = {
-  mallorca: "Mallorca",
-  ibiza: "Ibiza",
-  menorca: "Menorca",
-  denia: "Dénia",
-  valencia: "Valencia",
-  barcelona: "Barcelona",
-};
 
-export function Pie({ idioma }: { idioma: Idioma }) {
+/**
+ * Pie del sitio.
+ *
+ * Los destinos, lugares y actividades se leen de la base y no de una lista
+ * escrita a mano: el pie sale en todas las páginas, así que una lista que no
+ * cuadre con el catálogo son enlaces rotos en el sitio entero. Ya pasó al
+ * podar el catálogo a la Costa Blanca.
+ */
+export async function Pie({ idioma }: { idioma: Idioma }) {
+  const [destinos, lugares, actividades] = await Promise.all([
+    listarDestinos(),
+    listarLugares(),
+    listarExperiencias(),
+  ]);
+
   const t = textos(idioma);
 
   const columnas: { titulo: string; enlaces: { texto: string; pagina: Pagina }[] }[] = [
     {
       titulo: t.pie.destinos,
-      enlaces: DESTINOS.map((slug) => ({
-        texto: NOMBRES_DESTINO[slug] ?? slug,
-        pagina: { tipo: "destino", destino: slug } as Pagina,
+      enlaces: destinos.slice(0, 8).map((d) => ({
+        texto: d.nombre,
+        pagina: { tipo: "destino", destino: d.slug } as Pagina,
       })),
     },
     {
@@ -47,9 +46,16 @@ export function Pie({ idioma }: { idioma: Idioma }) {
     },
     {
       titulo: t.pie.experiencias,
-      enlaces: ACTIVIDADES.map((slug) => ({
-        texto: t.actividades[slug as keyof typeof t.actividades],
-        pagina: { tipo: "experiencia", slug } as Pagina,
+      enlaces: actividades.map((a) => ({
+        texto: t.actividades[a.slug as keyof typeof t.actividades] ?? a.nombre,
+        pagina: { tipo: "experiencia", slug: a.slug } as Pagina,
+      })),
+    },
+    {
+      titulo: t.pie.destinosNombre,
+      enlaces: lugares.map((l) => ({
+        texto: l.nombre,
+        pagina: { tipo: "lugar", slug: l.slug } as Pagina,
       })),
     },
     {
@@ -59,7 +65,7 @@ export function Pie({ idioma }: { idioma: Idioma }) {
         { texto: t.pie.publicar, pagina: { tipo: "publicar" } },
         { texto: t.pie.sinLicencia, pagina: { tipo: "sinLicencia" } },
         { texto: t.pie.guias, pagina: { tipo: "guias" } },
-        { texto: t.pie.destinosNombre, pagina: { tipo: "lugares" } },
+        { texto: t.pie.ocasiones, pagina: { tipo: "ocasiones" } },
         { texto: t.pie.blog, pagina: { tipo: "blog" } },
       ],
     },

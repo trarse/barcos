@@ -186,6 +186,22 @@ export const de: Textos = {
     verGuiaEs: "Auf Spanisch lesen",
   },
 
+  ocasiones: {
+    titulo: "Anlässe",
+    entradilla:
+      "Junggesellenabschiede, Geburtstage, Firmenevents und Heiratsanträge. Das ganze Boot für Ihre Gruppe, der Preis geteilt durch alle.",
+    desdePorPersona: (precio, plazas) =>
+      `Ab ${precio} pro Person bei ${plazas} Teilnehmenden, Skipper inklusive.`,
+    desdePlazas: (n) => `Ab ${n} Plätzen`,
+    flotaTitulo: (n) => `Boote mit ${n} Plätzen oder mehr`,
+    flotaNota:
+      "Nur Boote, die für die Gruppe reichen und mit Skipper fahren können. Der Preis im Inserat ist der Endpreis: einfach durch die Gruppe teilen.",
+    presupuestoTitulo: "Das läuft über ein Angebot",
+    presupuestoTexto:
+      "Mit Rechnung, dokumentierter Versicherung und Festpreis innerhalb von 24 Stunden. Nicht über den Warenkorb, weil eine Firma oder eine Hochzeit Unterlagen braucht, die ein Bezahlknopf nicht liefert.",
+    otras: "Weitere Anlässe",
+  },
+
   guias: {
     titulo: "Ratgeber",
     entradilla:
@@ -394,6 +410,7 @@ export const de: Textos = {
     guias: "Törn-Ratgeber",
     destinosNombre: "Ziele mit Namen",
     blog: "Blog",
+    ocasiones: "Anlässe",
     derechos: (anio, marca) => `© ${anio} ${marca}. Preise inklusive MwSt.`,
   },
 

@@ -238,34 +238,4 @@ La normativa española fija distancias mínimas de aproximación, prohíbe corta
       },
     ],
   },
-  {
-    slug: "celebraciones",
-    nombre: "Celebraciones",
-    titular: "Barcos para celebraciones y grupos",
-    descripcion:
-      "Despedidas, cumpleaños y eventos de empresa a bordo. Catamaranes y yates con capacidad para grupos grandes y equipo de música.",
-    descripcionEn:
-      "Hen and stag parties, birthdays and company events on board. Catamarans and yachts with room for large groups and a sound system.",
-    descripcionDe:
-      "Junggesellenabschiede, Geburtstage und Firmenevents an Bord. Katamarane und Yachten für große Gruppen, mit Musikanlage.",
-    contenido: `Para un grupo, el barco resuelve de golpe el sitio, la actividad y el ambiente. Los catamaranes son la elección natural: la plataforma central es un salón al aire libre, no se balancean fondeados y admiten doce o más personas sin agobio.
-
-El formato habitual son cuatro o cinco horas con patrón, un par de fondeos para bañarse y música a bordo. Conviene aclarar de antemano si se puede subir comida y bebida propias o si el barco lo suministra, porque cambia bastante el presupuesto.
-
-Ten en cuenta dos cosas: la capacidad legal del barco no se puede superar ni por una persona, y en muchos puertos hay limitaciones de horario y de volumen de música. Todo eso aparece en las condiciones de cada ficha.`,
-    horas: 5,
-    orden: 5,
-    preguntas: [
-      {
-        pregunta: "¿Cuántas personas caben en un barco de alquiler?",
-        respuesta:
-          "Lo marca la capacidad legal de la embarcación, que figura en su despacho y no se puede superar. Los catamaranes de alquiler admiten habitualmente entre diez y doce pasajeros en salidas de día.",
-      },
-      {
-        pregunta: "¿Se puede llevar comida y bebida a bordo?",
-        respuesta:
-          "Depende del barco. Muchos lo permiten sin coste y otros ofrecen catering propio. Viene indicado en las condiciones de cada ficha; si no aparece, pregunta al propietario antes de reservar.",
-      },
-    ],
-  },
 ];
