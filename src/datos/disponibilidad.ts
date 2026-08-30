@@ -24,3 +24,10 @@ export const IDIOMAS_ARTICULO: Record<string, Idioma[]> = {
   "posidonia-tabarca-por-que-el-agua-es-asi": ["es"],
   "cuanto-cuesta-alquilar-un-barco-en-espana": ["es"],
 };
+
+export const IDIOMAS_OCASION: Record<string, Idioma[]> = {
+  despedidas: ["es"],
+  cumpleanos: ["es"],
+  "eventos-de-empresa": ["es"],
+  "pedidas-y-bodas": ["es"],
+};

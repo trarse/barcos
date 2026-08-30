@@ -169,6 +169,29 @@ export const lugaresDesde = cache(async (destinoSlug: string) =>
   }),
 );
 
+/**
+ * Barcos por destino que sirven a quien no tiene titulación: los que no la
+ * exigen más los que pueden ir con patrón. Es el mismo criterio que usa la
+ * landing «sin licencia», y se necesita fuera de ella para que el sitemap no
+ * declare páginas que van a emitir noindex.
+ */
+export const contarSinTitulacion = cache(async () => {
+  const filas = await db.barco.findMany({
+    where: {
+      publicado: true,
+      OR: [{ requiereTitulacion: false }, { patronDia: { not: null } }],
+    },
+    select: { puerto: { select: { destino: { select: { slug: true } } } } },
+  });
+
+  const cuenta = new Map<string, number>();
+  for (const fila of filas) {
+    const slug = fila.puerto.destino.slug;
+    cuenta.set(slug, (cuenta.get(slug) ?? 0) + 1);
+  }
+  return cuenta;
+});
+
 /** Cuántos barcos hay amarrados en cada destino. Alimenta las tarjetas. */
 export const contarPorDestino = cache(async () => {
   const puertos = await db.puerto.findMany({
@@ -351,7 +374,14 @@ export const obtenerBarco = cache(async (slug: string) =>
     include: {
       tipo: true,
       propietario: true,
-      puerto: { include: { destino: true } },
+      // El recuento de puertos decide si el título de la ficha necesita
+      // llevar el puerto: dos barcos del mismo modelo en el mismo municipio
+      // pero en muelles distintos tendrían el mismo title si no.
+      puerto: {
+        include: {
+          destino: { include: { _count: { select: { puertos: true } } } },
+        },
+      },
       imagenes: { orderBy: { orden: "asc" } },
       equipamiento: { orderBy: { nombre: "asc" } },
       experiencias: { orderBy: { orden: "asc" } },
@@ -411,7 +441,14 @@ export const barcosParaComparar = cache(async (slugs: readonly string[]) => {
     where: { publicado: true, slug: { in: [...slugs] } },
     include: {
       tipo: true,
-      puerto: { include: { destino: true } },
+      // El recuento de puertos decide si el título de la ficha necesita
+      // llevar el puerto: dos barcos del mismo modelo en el mismo municipio
+      // pero en muelles distintos tendrían el mismo title si no.
+      puerto: {
+        include: {
+          destino: { include: { _count: { select: { puertos: true } } } },
+        },
+      },
       imagenes: { orderBy: { orden: "asc" }, take: 1 },
       equipamiento: { orderBy: { nombre: "asc" } },
     },

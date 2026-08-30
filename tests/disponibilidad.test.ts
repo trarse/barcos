@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { ARTICULOS } from "@/datos/blog";
-import { IDIOMAS_ARTICULO, IDIOMAS_GUIA } from "@/datos/disponibilidad";
+import {
+  IDIOMAS_ARTICULO,
+  IDIOMAS_GUIA,
+  IDIOMAS_OCASION,
+} from "@/datos/disponibilidad";
 import { GUIAS } from "@/datos/guias";
+import { OCASIONES } from "@/datos/ocasiones";
 
 /**
  * El mapa de disponibilidad existe para no mandar el texto de las guías al
@@ -32,5 +37,9 @@ describe("mapa de disponibilidad", () => {
 
   it("coincide con los artículos que existen de verdad", () => {
     expect(normalizar(IDIOMAS_ARTICULO)).toEqual(idiomasReales(ARTICULOS));
+  });
+
+  it("coincide con las ocasiones que existen de verdad", () => {
+    expect(normalizar(IDIOMAS_OCASION)).toEqual(idiomasReales(OCASIONES));
   });
 });

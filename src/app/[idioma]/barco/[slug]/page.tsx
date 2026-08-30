@@ -56,7 +56,20 @@ export async function generateMetadata(
   const t = textos(idioma);
   const temporada = temporadaDe(new Date(), barco.puerto.destino.mesesAlta);
   const precio = precioTodoIncluidoPorDia(tarifaDe(barco), temporada);
-  const titulo = `${barco.nombre} ${t.busqueda.enDestino(barco.puerto.destino.nombre)}`;
+  // Si el municipio tiene varios puertos, el título los distingue: sin esto
+  // dos barcos iguales en Calpe y en Les Bassetes comparten <title>.
+  const base = `${barco.nombre} ${t.busqueda.enDestino(barco.puerto.destino.nombre)}`;
+  // El nombre del puerto suele repetir el del municipio ("Real Club Náutico
+  // de Calpe" dentro de Calpe): se recorta esa parte para no gastar en el
+  // title los caracteres que Google recorta.
+  const puertoCorto = barco.puerto.nombre
+    .replace(new RegExp(`\s*(de\s+)?${barco.puerto.destino.nombre}\s*$`, "i"), "")
+    .replace(/^(Puerto|Marina|Club Náutico|Real Club Náutico)\s+(de\s+)?/i, "")
+    .trim();
+  const titulo =
+    barco.puerto.destino._count.puertos > 1 && puertoCorto
+      ? `${base} — ${puertoCorto}`
+      : base;
 
   return {
     title: titulo,

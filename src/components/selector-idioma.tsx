@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ETIQUETAS, IDIOMAS, type Idioma } from "@/lib/idiomas";
-import { IDIOMAS_ARTICULO, IDIOMAS_GUIA } from "@/datos/disponibilidad";
+import {
+  IDIOMAS_ARTICULO,
+  IDIOMAS_GUIA,
+  IDIOMAS_OCASION,
+} from "@/datos/disponibilidad";
 import { analizarRuta, ruta, traducirRuta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
 
@@ -34,6 +38,9 @@ function destinoEn(pathname: string, otro: Idioma): string {
   }
   if (pagina.tipo === "articulo" && !(IDIOMAS_ARTICULO[pagina.slug] ?? []).includes(otro)) {
     return ruta({ tipo: "blog" }, otro);
+  }
+  if (pagina.tipo === "ocasion" && !(IDIOMAS_OCASION[pagina.slug] ?? []).includes(otro)) {
+    return ruta({ tipo: "ocasiones" }, otro);
   }
   return ruta(pagina, otro);
 }

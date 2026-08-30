@@ -104,7 +104,7 @@ Vete con patrón. No por incapacidad: por aprovechar el día. La primera salida 
   {
     idioma: "es",
     slug: "contrato-de-alquiler-de-embarcacion",
-    titulo: "El contrato de alquiler de embarcación: qué tiene que llevar",
+    titulo: "Contrato de alquiler de embarcación: qué debe llevar",
     entradilla:
       "Lo que se firma antes de soltar amarras protege a las dos partes. Qué cláusulas no pueden faltar, cuáles generan discusiones y qué se documenta antes de salir.",
     revisada: "2026-08-30",
