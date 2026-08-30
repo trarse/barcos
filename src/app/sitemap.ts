@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { ARTICULOS } from "@/datos/blog";
 import { GUIAS } from "@/datos/guias";
 import { OCASIONES } from "@/datos/ocasiones";
+import { soloPublicados } from "@/lib/publicacion";
 import {
   contarSinTitulacion,
   listarDestinos,
@@ -148,21 +149,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // El contenido editorial solo existe en el idioma en que está escrito: no
     // se declaran alternativas que no hay ni URLs que darían 404.
-    ...OCASIONES.map((o) => ({
+    ...soloPublicados(OCASIONES).map((o) => ({
       url: urlAbsoluta(ruta({ tipo: "ocasion", slug: o.slug }, o.idioma)),
       lastModified: ahora,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),
 
-    ...GUIAS.map((g) => ({
+    ...soloPublicados(GUIAS).map((g) => ({
       url: urlAbsoluta(ruta({ tipo: "guia", slug: g.slug }, g.idioma)),
       lastModified: new Date(g.revisada),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
 
-    ...ARTICULOS.map((a) => ({
+    ...soloPublicados(ARTICULOS).map((a) => ({
       url: urlAbsoluta(ruta({ tipo: "articulo", slug: a.slug }, a.idioma)),
       lastModified: new Date(a.fecha),
       changeFrequency: "monthly" as const,

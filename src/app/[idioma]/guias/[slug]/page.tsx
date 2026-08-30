@@ -16,7 +16,8 @@ import { Contenido } from "@/components/contenido";
 import { Faq } from "@/components/faq";
 import { JsonLd } from "@/components/json-ld";
 import { Migas, migasBase } from "@/components/migas";
-import { GUIAS, guiasDe, idiomasDeLaGuia, obtenerGuia } from "@/datos/guias";
+import { guiasDe, idiomasDeLaGuia, obtenerGuia } from "@/datos/guias";
+import { enlacesVivos } from "@/lib/enlaces";
 import { esIdioma, ETIQUETAS, IDIOMAS } from "@/lib/idiomas";
 import { ruta } from "@/lib/rutas";
 import { SITIO, urlAbsoluta } from "@/lib/sitio";
@@ -33,8 +34,11 @@ function alternativasGuia(slug: string, idioma: string) {
 }
 
 export function generateStaticParams() {
+  // Solo lo ya publicado: una guía programada para dentro de un mes no debe
+  // tener página hasta que llegue su fecha. `dynamicParams` la sirve sola ese
+  // día sin necesidad de volver a desplegar.
   return IDIOMAS.flatMap((idioma) =>
-    GUIAS.filter((g) => g.idioma === idioma).map((g) => ({ idioma, slug: g.slug })),
+    guiasDe(idioma).map((g) => ({ idioma, slug: g.slug })),
   );
 }
 
@@ -69,6 +73,8 @@ export default async function PaginaGuia(props: PageProps<"/[idioma]/guias/[slug
 
   const t = textos(idioma);
   const otras = guiasDe(idioma).filter((g) => g.slug !== slug);
+  // No se enlaza a lo que todavía no se ha publicado.
+  const relacionados = enlacesVivos(guia.relacionados, idioma);
 
   return (
     <>
@@ -121,13 +127,13 @@ export default async function PaginaGuia(props: PageProps<"/[idioma]/guias/[slug
             </div>
           )}
 
-          {guia.relacionados.length > 0 && (
+          {relacionados.length > 0 && (
             <section className="mt-14 border-t border-borde pt-8">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">
                 {t.guias.seguirPor}
               </h2>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {guia.relacionados.map((r) => (
+                {relacionados.map((r) => (
                   <li key={r.texto}>
                     <Link
                       href={ruta(r.pagina, idioma)}

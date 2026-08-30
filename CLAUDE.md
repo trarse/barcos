@@ -85,3 +85,24 @@ artículos del blog por esto y por geografía equivocada.
 El plan de marketing y el de proyecto están en `E:\proyecto-barcos\`. Los
 mensajes de los commits explican el porqué de cada decisión, no solo el qué:
 merece la pena leerlos antes de deshacer algo que parezca raro.
+
+## Publicación programada
+
+Guías, artículos y ocasiones admiten `publicaDesde` (AAAA-MM-DD). Hasta esa
+fecha el contenido no se pinta, no aparece en los índices, no entra en el
+sitemap y no genera página: para el mundo no existe. Sin el campo, publicado.
+
+Sirve para lo que el calendario editorial necesita: escribir doce piezas en
+enero y que salgan una por semana sin que nadie tenga que acordarse. Publicar
+veinte páginas el mismo día es además el patrón que peor se lee desde fuera.
+
+Dos detalles que costaron un fallo cada uno:
+
+- `generateStaticParams` filtra por fecha, así que una pieza programada no
+  tiene página hasta su día. `dynamicParams` la sirve sola ese día **sin
+  necesidad de volver a desplegar**.
+- Los enlaces relacionados se filtran con `enlacesVivos()`. Un texto escrito
+  hoy puede enlazar a otro que aún no ha salido, y eso serían enlaces internos
+  a 404. El enlace no se borra: aparece solo cuando su destino existe.
+
+Cuando exista el panel del armador, editará este mismo campo.

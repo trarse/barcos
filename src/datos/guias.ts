@@ -13,9 +13,11 @@
  */
 
 import type { Idioma } from "@/lib/idiomas";
+import type { Programable } from "@/lib/publicacion";
+import { estaPublicado, soloPublicados } from "@/lib/publicacion";
 import type { Pagina } from "@/lib/rutas";
 
-export interface Guia {
+export interface Guia extends Programable {
   /** Idioma en el que está escrita. No se traduce automáticamente nada. */
   idioma: Idioma;
   slug: string;
@@ -180,6 +182,9 @@ Cualquier modelo que encuentres —incluido cualquier resumen como este— es un
   {
     idioma: "es",
     slug: "cuanto-puede-ganar-tu-barco",
+    // Programada: sale sola el 15 de septiembre. El calendario editorial se
+    // escribe entero de una vez y va publicándose sin que nadie se acuerde.
+    publicaDesde: "2026-09-15",
     titulo: "Cuánto puede ganar tu barco alquilado",
     entradilla:
       "Qué entra, qué sale y qué queda. Las cuentas reales de alquilar una embarcación en la Costa Blanca, con los gastos que casi nadie suma.",
@@ -258,17 +263,18 @@ Alquilar tu barco tiene implicaciones fiscales y, según cómo se explote, requi
 ];
 
 export function obtenerGuia(slug: string, idioma: Idioma): Guia | undefined {
-  return GUIAS.find((g) => g.slug === slug && g.idioma === idioma);
+  const guia = GUIAS.find((g) => g.slug === slug && g.idioma === idioma);
+  return guia && estaPublicado(guia) ? guia : undefined;
 }
 
 /** Guías de un idioma. Las de cliente primero: son las de más búsqueda. */
 export function guiasDe(idioma: Idioma): Guia[] {
-  return GUIAS.filter((g) => g.idioma === idioma).sort((a, b) =>
+  return soloPublicados(GUIAS.filter((g) => g.idioma === idioma)).sort((a, b) =>
     a.publico === b.publico ? 0 : a.publico === "cliente" ? -1 : 1,
   );
 }
 
 /** En qué idiomas existe una guía. Alimenta el hreflang sin prometer de más. */
 export function idiomasDeLaGuia(slug: string): Idioma[] {
-  return GUIAS.filter((g) => g.slug === slug).map((g) => g.idioma);
+  return soloPublicados(GUIAS.filter((g) => g.slug === slug)).map((g) => g.idioma);
 }

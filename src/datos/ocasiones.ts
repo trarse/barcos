@@ -15,9 +15,11 @@
  */
 
 import type { Idioma } from "@/lib/idiomas";
+import type { Programable } from "@/lib/publicacion";
+import { estaPublicado, soloPublicados } from "@/lib/publicacion";
 import type { Pagina } from "@/lib/rutas";
 
-export interface Ocasion {
+export interface Ocasion extends Programable {
   idioma: Idioma;
   slug: string;
   nombre: string;
@@ -224,13 +226,14 @@ export const OCASIONES: Ocasion[] = [
 ];
 
 export function obtenerOcasion(slug: string, idioma: Idioma): Ocasion | undefined {
-  return OCASIONES.find((o) => o.slug === slug && o.idioma === idioma);
+  const ocasion = OCASIONES.find((o) => o.slug === slug && o.idioma === idioma);
+  return ocasion && estaPublicado(ocasion) ? ocasion : undefined;
 }
 
 export function ocasionesDe(idioma: Idioma): Ocasion[] {
-  return OCASIONES.filter((o) => o.idioma === idioma);
+  return soloPublicados(OCASIONES.filter((o) => o.idioma === idioma));
 }
 
 export function idiomasDeLaOcasion(slug: string): Idioma[] {
-  return OCASIONES.filter((o) => o.slug === slug).map((o) => o.idioma);
+  return soloPublicados(OCASIONES.filter((o) => o.slug === slug)).map((o) => o.idioma);
 }

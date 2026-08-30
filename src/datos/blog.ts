@@ -8,9 +8,11 @@
  */
 
 import type { Idioma } from "@/lib/idiomas";
+import type { Programable } from "@/lib/publicacion";
+import { estaPublicado, soloPublicados } from "@/lib/publicacion";
 import type { Pagina } from "@/lib/rutas";
 
-export interface Articulo {
+export interface Articulo extends Programable {
   /** Idioma en el que está escrito. No se traduce automáticamente nada. */
   idioma: Idioma;
   slug: string;
@@ -242,7 +244,8 @@ Lo que más baja la factura no es regatear, es elegir bien.
 ];
 
 export function obtenerArticulo(slug: string, idioma: Idioma): Articulo | undefined {
-  return ARTICULOS.find((a) => a.slug === slug && a.idioma === idioma);
+  const articulo = ARTICULOS.find((a) => a.slug === slug && a.idioma === idioma);
+  return articulo && estaPublicado(articulo) ? articulo : undefined;
 }
 
 /**
@@ -253,12 +256,12 @@ export function obtenerArticulo(slug: string, idioma: Idioma): Articulo | undefi
  * tanto para quien lo lee como para quien lo indexa.
  */
 export function articulosPorFecha(idioma: Idioma): Articulo[] {
-  return ARTICULOS.filter((a) => a.idioma === idioma).sort((a, b) =>
+  return soloPublicados(ARTICULOS.filter((a) => a.idioma === idioma)).sort((a, b) =>
     b.fecha.localeCompare(a.fecha),
   );
 }
 
 /** En qué idiomas existe un artículo. Alimenta el `hreflang`. */
 export function idiomasDelArticulo(slug: string): Idioma[] {
-  return ARTICULOS.filter((a) => a.slug === slug).map((a) => a.idioma);
+  return soloPublicados(ARTICULOS.filter((a) => a.slug === slug)).map((a) => a.idioma);
 }

@@ -21,10 +21,11 @@ import { Faq } from "@/components/faq";
 import { JsonLd } from "@/components/json-ld";
 import { Migas, migasBase } from "@/components/migas";
 import { TarjetaBarco } from "@/components/tarjeta-barco";
-import { idiomasDeLaOcasion, obtenerOcasion, OCASIONES, ocasionesDe } from "@/datos/ocasiones";
+import { idiomasDeLaOcasion, obtenerOcasion, ocasionesDe } from "@/datos/ocasiones";
 import { buscarBarcos } from "@/lib/consultas";
 import { FILTROS_VACIOS } from "@/lib/filtros";
 import { entero, euro } from "@/lib/formato";
+import { enlacesVivos } from "@/lib/enlaces";
 import { esIdioma, ETIQUETAS, IDIOMAS } from "@/lib/idiomas";
 import { ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
@@ -43,7 +44,7 @@ function alternativasOcasion(slug: string, idioma: string) {
 
 export function generateStaticParams() {
   return IDIOMAS.flatMap((idioma) =>
-    OCASIONES.filter((o) => o.idioma === idioma).map((o) => ({ idioma, slug: o.slug })),
+    ocasionesDe(idioma).map((o) => ({ idioma, slug: o.slug })),
   );
 }
 
@@ -80,6 +81,7 @@ export default async function PaginaOcasion(
 
   const t = textos(idioma);
   const otras = ocasionesDe(idioma).filter((o) => o.slug !== slug);
+  const relacionados = enlacesVivos(ocasion.relacionados, idioma);
 
   const { barcos, total } = await buscarBarcos({
     ...FILTROS_VACIOS,
@@ -174,13 +176,13 @@ export default async function PaginaOcasion(
         <section className="mt-14 max-w-3xl">
           <Faq idioma={idioma} preguntas={ocasion.preguntas} />
 
-          {ocasion.relacionados.length > 0 && (
+          {relacionados.length > 0 && (
             <div className="mt-12 border-t border-borde pt-8">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">
                 {t.guias.seguirPor}
               </h2>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {ocasion.relacionados.map((r) => (
+                {relacionados.map((r) => (
                   <li key={r.texto}>
                     <Link
                       href={ruta(r.pagina, idioma)}
