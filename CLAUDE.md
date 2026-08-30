@@ -21,9 +21,26 @@ cualquiera, preguntar.
 
 **1. Regla de indexación.** Una landing programática solo se indexa si tiene
 **6 barcos o más** y **250 palabras o más de texto propio**. Si no, emite
-`noindex, follow` — el `follow` para que el rastreo siga a las fichas. Está
-implementada en `sin-licencia/[destino]` y en `destinos/[lugar]`. Si algún día
-un texto se queda a 245 palabras, se alarga el texto; **no se baja el umbral**.
+`noindex, follow` — el `follow` para que el rastreo siga a las fichas. Si algún
+día un texto se queda a 245 palabras, se alarga el texto; **no se baja el
+umbral**.
+
+La regla vive en `src/lib/indexacion.ts` y **se aplica por idioma**, no una vez
+y en castellano. La prosa está escrita en una lengua y no se traduce sola: la
+versión inglesa de la misma landing existe, pero sin texto propio no llega al
+umbral. Por eso `idiomasIndexables()` devuelve una lista de idiomas y no un sí
+o un no. La usan las dos plantillas (`sin-licencia/[destino]`,
+`destinos/[lugar]`) y el sitemap, para que no puedan volver a desincronizarse.
+
+Corolario: **en el sitemap solo entra lo indexable, y por idioma**. Declarar
+ahí una URL que emite `noindex` es mandarle al buscador dos órdenes opuestas
+sobre la misma página, y lo que se pierde no es esa URL sino la confianza en el
+sitemap entero. `npm run seo` lo comprueba en las dos direcciones.
+
+El recuento de barcos de esta regla es el de la **unión**: un barco que no
+exige titulación y además ofrece patrón sale en los dos bloques de la landing,
+y sumar los dos totales lo contaría dos veces. Contarlo dos veces es bajar el
+umbral por la puerta de atrás.
 
 **2. Nada de castellano dentro de una página inglesa o alemana.** Todo el
 contenido escrito a mano lleva un campo `idiomaProsa` (o vive en los ficheros

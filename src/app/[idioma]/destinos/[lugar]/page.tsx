@@ -26,14 +26,12 @@ import { Migas, migasBase } from "@/components/migas";
 import { listarLugares, obtenerLugar } from "@/lib/consultas";
 import { entero } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
+import { esIndexable } from "@/lib/indexacion";
 import { descripcionCorta, titularCorto } from "@/lib/prosa";
 import { alternativas, ruta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
-
-/** Igual que en las demás landings: sin texto propio no se indexa. */
-const MINIMO_PALABRAS = 250;
 
 export async function generateStaticParams() {
   const lugares = await listarLugares();
@@ -49,8 +47,11 @@ export async function generateMetadata(
   const lugar = await obtenerLugar(slug);
   if (!lugar) return { title: "404" };
 
-  const propio = lugar.idiomaProsa === idioma;
-  const palabras = propio ? lugar.contenido.trim().split(/\s+/).length : 0;
+  // Sin flota que contar: aquí la regla de indexación es solo la del texto.
+  const indexable = esIndexable(idioma, {
+    prosa: lugar.contenido,
+    idiomaProsa: lugar.idiomaProsa,
+  });
 
   return {
     title: titularCorto(lugar, idioma),
@@ -62,7 +63,7 @@ export async function generateMetadata(
       description: descripcionCorta(lugar, idioma),
       url: alternativas({ tipo: "lugar", slug }, idioma).canonical,
     },
-    robots: palabras >= MINIMO_PALABRAS ? undefined : { index: false, follow: true },
+    robots: indexable ? undefined : { index: false, follow: true },
   };
 }
 

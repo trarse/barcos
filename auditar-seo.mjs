@@ -110,6 +110,46 @@ for (const p of paginas) {
   }
 }
 
+/**
+ * El sitemap contra las páginas construidas.
+ *
+ * Es la comprobación que faltaba, y por eso el fallo vivió sin verse: el
+ * auditor miraba las páginas una a una pero nunca abría el sitemap. Una URL
+ * con `noindex` dentro del sitemap le manda al buscador dos órdenes opuestas
+ * sobre la misma página, y lo que se pierde no es esa URL: es la confianza en
+ * el sitemap entero.
+ */
+const noindexPorUrl = new Map(paginas.filter((p) => p.url).map((p) => [p.url, p.noindex]));
+
+let sitemap;
+try {
+  sitemap = readFileSync(join(RAIZ, "sitemap.xml.body"), "utf8");
+} catch {
+  fallos.push("no se generó sitemap.xml");
+}
+
+if (sitemap) {
+  const ruta = (u) => sinBarra(new URL(u).pathname);
+  const locs = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => ruta(m[1]));
+  const enSitemap = new Set(locs);
+
+  for (const url of enSitemap) {
+    if (!publicas.has(url)) fallos.push(`sitemap: ${url} no existe`);
+    else if (noindexPorUrl.get(url)) fallos.push(`sitemap: ${url} emite noindex`);
+  }
+
+  for (const [url, noindex] of noindexPorUrl) {
+    if (!noindex && !enSitemap.has(url)) fallos.push(`fuera del sitemap: ${url}`);
+  }
+
+  // Un `alternate` que apunta a una URL que el sitemap no declara describe un
+  // grupo de idiomas al que le falta un miembro.
+  for (const m of sitemap.matchAll(/<xhtml:link[^>]*href="([^"]*)"/g)) {
+    const url = ruta(m[1]);
+    if (!enSitemap.has(url)) fallos.push(`sitemap: alternate a ${url}, que no está en el sitemap`);
+  }
+}
+
 for (const [clave, refs] of titulos) {
   if (refs.length > 1)
     fallos.push(

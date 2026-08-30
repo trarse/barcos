@@ -13,7 +13,8 @@ import {
   paresDestinoTipo,
   slugsDeBarcos,
 } from "@/lib/consultas";
-import { IDIOMAS } from "@/lib/idiomas";
+import { IDIOMAS, type Idioma } from "@/lib/idiomas";
+import { idiomasIndexables } from "@/lib/indexacion";
 import { ruta, todasLasRutas, type Pagina } from "@/lib/rutas";
 import { urlAbsoluta } from "@/lib/sitio";
 
@@ -31,40 +32,47 @@ import { urlAbsoluta } from "@/lib/sitio";
  * REGLA IMPORTANTE: aquí solo entra lo que es indexable. Meter en el sitemap
  * una página que emite `noindex` es mandarle al buscador dos órdenes opuestas
  * sobre la misma URL, y lo que se gana es que desconfíe del sitemap entero.
- * Por eso las landings «sin licencia» se filtran con el mismo umbral que usa
- * la propia página, y el contenido editorial solo se declara en el idioma en
- * el que existe de verdad.
+ *
+ * La regla se aplica POR IDIOMA, no una vez y en castellano. La prosa de una
+ * landing está escrita en una lengua y no se traduce sola: la versión inglesa
+ * de la misma URL existe, pero sin texto propio no llega al umbral y emite
+ * `noindex`. Filtrar en castellano y luego declarar los tres idiomas fue
+ * exactamente el fallo que metió 36 URL con `noindex` en este fichero.
+ *
+ * Por lo mismo, un `alternate` solo apunta a versiones indexables: declarar
+ * como alternativa una URL que el buscador va a descartar es describirle un
+ * grupo de idiomas que no existe.
  */
 
 type Frecuencia = "daily" | "weekly" | "monthly";
 
-/** Los mismos umbrales que aplica `sin-licencia/[destino]`. */
-const MINIMO_BARCOS = 6;
-const MINIMO_PALABRAS = 250;
-
-function palabras(texto: string | null | undefined): number {
-  if (!texto) return 0;
-  return texto.trim().split(/\s+/).filter(Boolean).length;
-}
-
-/** Una entrada por idioma, todas enlazadas entre sí. */
+/**
+ * Una entrada por idioma indexable, todas enlazadas entre sí.
+ *
+ * `idiomas` se recorta cuando la página no entra al índice en los tres. Con
+ * uno solo no se declaran alternativas: un grupo de idiomas de un miembro no
+ * dice nada.
+ */
 function entradas(
   pagina: Pagina,
   prioridad: number,
   frecuencia: Frecuencia,
   fecha: Date,
+  idiomas: readonly Idioma[] = IDIOMAS,
 ): MetadataRoute.Sitemap {
+  if (idiomas.length === 0) return [];
+
   const rutas = todasLasRutas(pagina);
   const languages = Object.fromEntries(
-    IDIOMAS.map((idioma) => [idioma, urlAbsoluta(rutas[idioma])]),
+    idiomas.map((idioma) => [idioma, urlAbsoluta(rutas[idioma])]),
   );
 
-  return IDIOMAS.map((idioma) => ({
+  return idiomas.map((idioma) => ({
     url: urlAbsoluta(rutas[idioma]),
     lastModified: fecha,
     changeFrequency: frecuencia,
     priority: prioridad,
-    alternates: { languages },
+    ...(idiomas.length > 1 ? { alternates: { languages } } : {}),
   }));
 }
 
@@ -91,17 +99,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [{ tipo: "experiencias" }, 0.7, "weekly"],
     [{ tipo: "guias" }, 0.7, "weekly"],
     [{ tipo: "blog" }, 0.6, "weekly"],
-    [{ tipo: "comparar" }, 0.5, "monthly"],
     [{ tipo: "comoFunciona" }, 0.4, "monthly"],
     [{ tipo: "publicar" }, 0.4, "monthly"],
   ];
-
-  // Solo las que superan el umbral: las demás emiten noindex.
-  const sinLicenciaIndexables = destinos.filter(
-    (d) =>
-      (sinTitulacion.get(d.slug) ?? 0) >= MINIMO_BARCOS &&
-      palabras(d.sinLicencia) >= MINIMO_PALABRAS,
-  );
 
   return [
     ...fijas.flatMap(([pagina, prioridad, frecuencia]) =>
@@ -118,12 +118,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
 
     // Máxima intención de compra del sitio, por delante de tipo y experiencia.
-    ...sinLicenciaIndexables.flatMap((d) =>
-      entradas({ tipo: "sinLicenciaDestino", destino: d.slug }, 0.85, "daily", ahora),
+    // Solo en los idiomas donde hay flota y texto propio; en los demás la
+    // página existe pero emite `noindex`.
+    ...destinos.flatMap((d) =>
+      entradas(
+        { tipo: "sinLicenciaDestino", destino: d.slug },
+        0.85,
+        "daily",
+        ahora,
+        idiomasIndexables({
+          prosa: d.sinLicencia,
+          idiomaProsa: d.idiomaProsa,
+          barcos: sinTitulacion.get(d.slug) ?? 0,
+        }),
+      ),
     ),
 
     ...lugares.flatMap((l) =>
-      entradas({ tipo: "lugar", slug: l.slug }, 0.8, "weekly", ahora),
+      entradas(
+        { tipo: "lugar", slug: l.slug },
+        0.8,
+        "weekly",
+        ahora,
+        idiomasIndexables({ prosa: l.contenido, idiomaProsa: l.idiomaProsa }),
+      ),
     ),
 
     ...tipos.flatMap((t) =>

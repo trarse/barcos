@@ -81,13 +81,14 @@ haciendo su trabajo.
 ## 4. Antes de dar el sitio por publicado
 
 - [ ] `npm run verificar` en verde. Incluye tests, tipos, lint, build y la
-      auditoría SEO de las 632 páginas.
+      auditoría SEO de las 644 páginas.
 - [ ] **Abrir `https://estribor.es/robots.txt` en el navegador.** Tiene que
       permitir el rastreo y apuntar al sitemap del dominio real. Desplegar con
       un `noindex` o un `Disallow: /` de pruebas es el fallo más común y más
       caro del sector, y no da ninguna señal.
 - [ ] Abrir `https://estribor.es/sitemap.xml` y comprobar que las URL son del
-      dominio real.
+      dominio real. Solo debe declarar páginas indexables: `npm run seo` ya lo
+      comprueba contra el HTML construido, en las dos direcciones.
 - [ ] Probar las tres versiones de una misma página:
       `/es/sin-licencia/calpe`, `/en/boat-hire-without-licence/calpe`,
       `/de/boot-mieten-ohne-fuehrerschein/calpe`.

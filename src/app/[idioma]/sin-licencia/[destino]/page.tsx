@@ -19,28 +19,21 @@ import { Faq } from "@/components/faq";
 import { JsonLd } from "@/components/json-ld";
 import { Migas, migasBase } from "@/components/migas";
 import { TarjetaBarco } from "@/components/tarjeta-barco";
-import { buscarBarcos, listarDestinos, obtenerDestino } from "@/lib/consultas";
+import {
+  buscarBarcos,
+  contarSinTitulacion,
+  listarDestinos,
+  obtenerDestino,
+} from "@/lib/consultas";
 import { FILTROS_VACIOS } from "@/lib/filtros";
 import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
+import { esIndexable } from "@/lib/indexacion";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
-
-/**
- * Umbrales de la regla de indexación. Una landing programática sin flota
- * suficiente ni texto propio es una página del montón, y miles de páginas del
- * montón son la forma más rápida de hundir un sitio de marketplace entero.
- */
-const MINIMO_BARCOS = 6;
-const MINIMO_PALABRAS = 250;
-
-function palabras(texto: string | null | undefined): number {
-  if (!texto) return 0;
-  return texto.trim().split(/\s+/).filter(Boolean).length;
-}
 
 export async function generateStaticParams() {
   const destinos = await listarDestinos();
@@ -59,14 +52,11 @@ export async function generateMetadata(
   if (!destino) return { title: "404" };
 
   const t = textos(idioma);
-  const [sinTitulo, conPatron] = await Promise.all([
-    buscarBarcos({ ...FILTROS_VACIOS, destino: slug, sinLicencia: true }),
-    buscarBarcos({ ...FILTROS_VACIOS, destino: slug, conPatron: true }),
-  ]);
-
-  const total = sinTitulo.total + conPatron.total;
-  const prosaAqui = destino.idiomaProsa === idioma ? destino.sinLicencia : null;
-  const indexable = total >= MINIMO_BARCOS && palabras(prosaAqui) >= MINIMO_PALABRAS;
+  const indexable = esIndexable(idioma, {
+    prosa: destino.sinLicencia,
+    idiomaProsa: destino.idiomaProsa,
+    barcos: (await contarSinTitulacion()).get(slug) ?? 0,
+  });
 
   return {
     title: t.sinLicenciaMunicipio.titulo(destino.nombre),
@@ -90,12 +80,17 @@ export default async function SinLicenciaEnDestino(
 
   const t = textos(idioma);
 
-  const [sinTitulo, conPatron] = await Promise.all([
+  const [sinTitulo, conPatron, sinTitulacion] = await Promise.all([
     buscarBarcos({ ...FILTROS_VACIOS, destino: slug, sinLicencia: true, orden: "precio-asc" }),
     buscarBarcos({ ...FILTROS_VACIOS, destino: slug, conPatron: true, orden: "precio-asc" }),
+    contarSinTitulacion(),
   ]);
 
-  const total = sinTitulo.total + conPatron.total;
+  // Un barco que no exige titulación y además ofrece patrón sale en los dos
+  // bloques. Sumar los dos totales lo contaría dos veces: diría que hay más
+  // flota de la que hay y, peor, dejaría pasar el umbral de seis barcos con
+  // cuatro. El recuento bueno es el de la unión, el mismo que usa el sitemap.
+  const total = sinTitulacion.get(slug) ?? 0;
   const todos = [...sinTitulo.barcos, ...conPatron.barcos];
   const masBarato = todos.length > 0 ? Math.min(...todos.map((b) => b.precioDia)) : 0;
 
