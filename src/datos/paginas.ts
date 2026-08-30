@@ -193,7 +193,7 @@ const ES: PaginasFijas = {
       {
         titulo: "Comisión del 12 %",
         texto:
-          "Las plataformas grandes se quedan entre el 15 y el 20 %. Aquí son 12 puntos, sin cuota de alta ni permanencia.",
+          "La plataforma más usada del sector pide un 22 %. Aquí son 12 puntos, sin cuota de alta y sin permanencia: diez puntos de diferencia en cada alquiler.",
       },
       {
         titulo: "Sin exclusividad",
@@ -208,7 +208,7 @@ const ES: PaginasFijas = {
       {
         titulo: "Cobro garantizado",
         texto:
-          "El importe se transfiere 24 horas después de la salida. Si el cliente no aparece, cobras igual según la política de cancelación.",
+          "El importe se transfiere 48 horas después de la salida, con el desglose a la vista en tu panel. Si el cliente no aparece, cobras igual según la política de cancelación.",
       },
     ],
     faq: [
@@ -220,7 +220,7 @@ const ES: PaginasFijas = {
       {
         pregunta: "¿Cuánto puedo ganar?",
         respuesta:
-          "Depende del barco y del puerto. Una lancha de 7 metros en la costa de Alicante que se alquile 60 días al año a 300 euros de tarifa base deja unos 15.800 euros netos después de comisión. Un velero de 12 metros en Baleares con 90 días de ocupación supera los 30.000.",
+          "Depende del barco, del puerto y sobre todo de la ocupación. Una lancha de 6 a 8 metros bien gestionada en la Costa Blanca hace entre cuarenta y sesenta días al año: con cuarenta y cinco a una media de 320 euros son unos 14.400 brutos. De ahí hay que descontar comisión, el aumento del seguro, el mantenimiento extra y la limpieza, y quedan entre 6.000 y 8.000 netos antes de impuestos. No es un sueldo: es el amarre pagado y buena parte del mantenimiento cubierto.",
       },
       {
         pregunta: "¿Quién responde si hay un daño?",
@@ -371,7 +371,7 @@ const EN: PaginasFijas = {
       {
         titulo: "12 % commission",
         texto:
-          "The big platforms take between 15 and 20 %. Here it is 12 points, with no listing fee and no lock-in.",
+          "The most used platform in the sector asks for 22 %. Here it is 12 points, with no listing fee and no lock-in: ten points of difference on every booking.",
       },
       {
         titulo: "No exclusivity",
@@ -386,7 +386,7 @@ const EN: PaginasFijas = {
       {
         titulo: "Guaranteed payment",
         texto:
-          "The money is transferred 24 hours after departure. If the customer does not turn up, you are paid anyway under the cancellation policy.",
+          "The money is transferred 48 hours after departure, itemised in your panel. If the customer does not turn up, you are paid anyway under the cancellation policy.",
       },
     ],
     faq: [
@@ -398,7 +398,7 @@ const EN: PaginasFijas = {
       {
         pregunta: "How much can I earn?",
         respuesta:
-          "It depends on the boat and the marina. A 7-metre motorboat on the Alicante coast hired 60 days a year at a 300-euro base rate leaves around 15,800 euros net after commission. A 12-metre sailboat in the Balearics with 90 days of occupancy passes 30,000.",
+          "It depends on the boat, the marina and above all on occupancy. A well-run 6 to 8 metre motorboat on the Costa Blanca does forty to sixty days a year: forty-five at an average of 320 euros is around 14,400 gross. Take off commission, the higher insurance, the extra maintenance and the cleaning, and 6,000 to 8,000 net is left before tax. Not a salary: the mooring paid for and much of the maintenance covered.",
       },
       {
         pregunta: "Who is liable if there is damage?",
@@ -549,7 +549,7 @@ const DE: PaginasFijas = {
       {
         titulo: "12 % Provision",
         texto:
-          "Die großen Plattformen nehmen zwischen 15 und 20 %. Hier sind es 12 Punkte, ohne Einstellgebühr und ohne Bindung.",
+          "Die meistgenutzte Plattform der Branche verlangt 22 %. Hier sind es 12 Punkte, ohne Einstellgebühr und ohne Bindung: zehn Punkte Unterschied bei jeder Buchung.",
       },
       {
         titulo: "Keine Exklusivität",
@@ -564,7 +564,7 @@ const DE: PaginasFijas = {
       {
         titulo: "Garantierte Auszahlung",
         texto:
-          "Der Betrag wird 24 Stunden nach der Abfahrt überwiesen. Erscheint der Kunde nicht, werden Sie nach den Stornobedingungen trotzdem bezahlt.",
+          "Der Betrag wird 48 Stunden nach der Abfahrt überwiesen, aufgeschlüsselt in Ihrem Panel. Erscheint der Kunde nicht, werden Sie nach den Stornobedingungen trotzdem bezahlt.",
       },
     ],
     faq: [
@@ -576,7 +576,7 @@ const DE: PaginasFijas = {
       {
         pregunta: "Wie viel kann ich verdienen?",
         respuesta:
-          "Das hängt von Boot und Hafen ab. Ein 7-Meter-Motorboot an der Küste von Alicante, 60 Tage im Jahr zu 300 Euro Grundpreis vermietet, bringt nach Provision rund 15.800 Euro netto. Ein 12-Meter-Segelboot auf den Balearen mit 90 Belegungstagen liegt über 30.000.",
+          "Das hängt vom Boot, vom Hafen und vor allem von der Auslastung ab. Ein gut betreutes Motorboot von 6 bis 8 Metern an der Costa Blanca kommt auf vierzig bis sechzig Tage im Jahr: fünfundvierzig zu durchschnittlich 320 Euro sind rund 14.400 brutto. Abzüglich Provision, höherer Versicherung, zusätzlicher Wartung und Reinigung bleiben 6.000 bis 8.000 netto vor Steuern. Kein Gehalt, aber der Liegeplatz ist bezahlt und ein guter Teil der Wartung gedeckt.",
       },
       {
         pregunta: "Wer haftet bei einem Schaden?",
