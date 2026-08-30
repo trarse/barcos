@@ -35,6 +35,94 @@ export interface Guia extends Programable {
 export const GUIAS: Guia[] = [
   {
     idioma: "es",
+    slug: "licencia-de-navegacion-que-te-ensenan",
+    titulo: "La licencia de navegación: qué te enseñan de verdad",
+    entradilla:
+      "Es el título más corto que existe y el que más cambia el día de barco. Esto es lo que se ve en el curso, por qué cada cosa está ahí y qué se sigue sin poder hacer después.",
+    revisada: "2026-08-30",
+    minutos: 8,
+    publico: "cliente",
+    cuerpo: `La licencia de navegación —el «titulín», como la llama todo el mundo— es la puerta de entrada al sistema de titulaciones. Es corta, no tiene el peso de examen del PER y mucha gente la despacha como un trámite.
+
+Es un error entenderla así. No es un trámite: es el mínimo que hace falta para que un día de barco no dependa de la suerte.
+
+## Qué se ve en el curso
+
+El temario es corto porque está pensado para una cosa muy concreta: que puedas salir con un barco pequeño, cerca de la costa, de día, y volver sin haber puesto a nadie en riesgo. Todo lo que hay dentro está por ese motivo.
+
+**Nomenclatura y partes del barco.** Proa, popa, babor, estribor, amuras, aletas. Parece lo tonto del curso y es lo que hace que después entiendas una instrucción por radio o lo que te dice alguien desde otro barco. Cuando alguien te grita «por tu aleta de estribor», o sabes qué significa o no sirve de nada que te lo griten.
+
+**El equipo de seguridad y su uso.** No dónde está: cómo se usa. Chalecos y cómo se ajustan de verdad, aro salvavidas, extintores, bengalas, achique. Es la parte que todo el mundo escucha con menos atención y la única que importa el día que importa.
+
+**Balizamiento.** Qué significan las marcas laterales y las cardinales, qué te está diciendo una boya verde y qué una roja, y por dónde se pasa. Es el idioma escrito del mar, y sin él navegas leyendo solo la mitad del mensaje.
+
+**Reglas de rumbo y gobierno.** Quién se aparta de quién, cómo se cruza, qué se hace en un canal angosto. Aquí entra algo que casi nadie tiene interiorizado y que da más sustos que ninguna otra cosa: un buque grande maniobrando no puede apartarse de ti.
+
+**Maniobra.** Salir del amarre, atracar, y sobre todo el hombre al agua: parar, no perderlo de vista nunca y volver. Se practica porque leerlo no sirve de nada.
+
+**Fondeo.** Cómo se echa el ancla, cuánta cadena hace falta y cómo se comprueba que ha agarrado. También dónde no se fondea y por qué, que en esta costa tiene consecuencias legales además de prácticas.
+
+**Meteorología básica.** Leer un parte, entender qué significa una previsión de viento y saber que en el Mediterráneo la tarde no se parece a la mañana.
+
+**Comunicaciones y emergencias.** El canal de emergencia, cómo se pide ayuda, qué datos hay que dar y en qué orden. Se dice una vez y se olvida, y por eso conviene apuntárselo y llevarlo a bordo.
+
+## Y luego están las prácticas
+
+La parte teórica se olvida a los quince días. Lo que se queda es el rato en el barco: notar cómo responde el timón a velocidad lenta, ver que el viento te mueve la proa mientras maniobras, y comprobar que atracar bien es cuestión de ir despacio y de mirar antes, no de habilidad.
+
+Si el sitio donde te formas te despacha las prácticas en veinte minutos, cambia de sitio.
+
+## Lo que la licencia NO te da
+
+Y esto es lo que más gente confunde:
+
+- **No te habilita para cualquier barco.** Hay límites de eslora y de potencia, y por encima de ellos hace falta otro título.
+- **No te habilita para alejarte cuanto quieras.** Hay un límite de distancia a un puerto o lugar de abrigo.
+- **No te habilita para navegar de noche.**
+- **No te da experiencia.** Te da el permiso; lo otro se hace saliendo.
+
+**Los límites concretos los fija la normativa y se revisan cada cierto tiempo**, así que no los damos aquí como cifra cerrada: consúltalos en la fuente oficial o pregúntalos en la escuela antes de matricularte. Lo que sí es estable es la idea: es un título para navegación cercana, diurna y en embarcaciones pequeñas.
+
+## ¿Merece la pena?
+
+Depende de una sola cosa: cuántas veces piensas salir.
+
+Si vas a alquilar una vez al año, no. Alquila con patrón, disfruta del día y déjate de papeles: sale más barato y aprendes más mirando cómo lo hace él.
+
+Si vas a salir tres o cuatro veces cada verano, sí, y con creces. La licencia se saca en poco tiempo, el coste se recupera en dos alquileres al no pagar patrón, y sobre todo cambia la relación con el día: dejas de ser pasajero.
+
+Y hay un momento bueno para hacerlo. **En invierno.** Las escuelas tienen hueco, las prácticas se hacen sin el agobio de agosto y llegas a Semana Santa con el título en la mano en vez de en lista de espera.`,
+    preguntas: [
+      {
+        pregunta: "¿Qué se aprende en el curso de licencia de navegación?",
+        respuesta:
+          "Nomenclatura del barco, uso del equipo de seguridad, balizamiento, reglas de rumbo y gobierno, maniobra —incluida la de hombre al agua—, fondeo, meteorología básica y comunicaciones de emergencia. Más las prácticas a bordo, que es lo único que de verdad se queda.",
+      },
+      {
+        pregunta: "¿Qué no puedo hacer con la licencia de navegación?",
+        respuesta:
+          "Llevar barcos por encima de sus límites de eslora y potencia, alejarte más de la distancia permitida a un puerto o lugar de abrigo, y navegar de noche. Los límites concretos los fija la normativa y se revisan: consúltalos en la fuente oficial antes de matricularte.",
+      },
+      {
+        pregunta: "¿Merece la pena sacársela?",
+        respuesta:
+          "Si alquilas una vez al año, no: sale mejor ir con patrón. Si sales tres o cuatro veces cada verano, sí. El coste se recupera en dos alquileres al no pagar patrón, y cambia la relación con el día: dejas de ser pasajero.",
+      },
+      {
+        pregunta: "¿Cuándo es mejor hacer el curso?",
+        respuesta:
+          "En invierno. Las escuelas tienen hueco, las prácticas se hacen sin el agobio de agosto y llegas a Semana Santa con el título en la mano en vez de en lista de espera.",
+      },
+    ],
+    relacionados: [
+      { texto: "Qué titulación necesito", pagina: { tipo: "guia", slug: "que-titulacion-necesito-para-llevar-un-barco" } },
+      { texto: "Barcos sin licencia en Santa Pola", pagina: { tipo: "sinLicenciaDestino", destino: "santa-pola" } },
+      { texto: "Barcos sin licencia en Dénia", pagina: { tipo: "sinLicenciaDestino", destino: "denia" } },
+      { texto: "Cruzarse con un crucero", pagina: { tipo: "articulo", slug: "cruzarse-con-un-crucero-canal-de-puerto" } },
+    ],
+  },
+  {
+    idioma: "es",
     slug: "que-titulacion-necesito-para-llevar-un-barco",
     titulo: "Qué titulación necesito para llevar un barco",
     entradilla:
@@ -100,6 +188,7 @@ Vete con patrón. No por incapacidad: por aprovechar el día. La primera salida 
       { texto: "Barcos sin licencia en Benidorm", pagina: { tipo: "sinLicenciaDestino", destino: "benidorm" } },
       { texto: "Barcos sin licencia en Santa Pola", pagina: { tipo: "sinLicenciaDestino", destino: "santa-pola" } },
       { texto: "Barcos sin licencia en Calpe", pagina: { tipo: "sinLicenciaDestino", destino: "calpe" } },
+      { texto: "Qué te enseñan en el curso de licencia", pagina: { tipo: "guia", slug: "licencia-de-navegacion-que-te-ensenan" } },
       { texto: "Ir a Tabarca en barco", pagina: { tipo: "lugar", slug: "tabarca" } },
     ],
   },

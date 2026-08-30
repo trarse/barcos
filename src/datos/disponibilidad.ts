@@ -13,6 +13,7 @@
 import type { Idioma } from "@/lib/idiomas";
 
 export const IDIOMAS_GUIA: Record<string, Idioma[]> = {
+  "licencia-de-navegacion-que-te-ensenan": ["es"],
   "que-titulacion-necesito-para-llevar-un-barco": ["es"],
   "contrato-de-alquiler-de-embarcacion": ["es"],
   "cuanto-puede-ganar-tu-barco": ["es"],
