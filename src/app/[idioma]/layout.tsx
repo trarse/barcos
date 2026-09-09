@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Cabecera } from "@/components/cabecera";
 import { BarraComparar } from "@/components/comparador/barra-comparar";
+import { Consentimiento } from "@/components/consentimiento";
 import { JsonLd } from "@/components/json-ld";
 import { Pie } from "@/components/pie";
 import { esIdioma, ETIQUETAS, IDIOMAS } from "@/lib/idiomas";
@@ -108,6 +109,7 @@ export default async function LayoutRaiz(props: LayoutProps<"/[idioma]">) {
         <main className="flex-1">{props.children}</main>
         <Pie idioma={idioma} />
         <BarraComparar idioma={idioma} />
+        <Consentimiento idioma={idioma} />
       </body>
     </html>
   );

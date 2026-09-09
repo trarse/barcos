@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // El cliente de Prisma se regenera en cada `prisma generate`: no es
     // código nuestro y no tiene sentido analizarlo.
     "src/generated/**",
+    // Artefactos del despliegue de Netlify: código empaquetado, no nuestro.
+    ".netlify/**",
   ]),
 ]);
 

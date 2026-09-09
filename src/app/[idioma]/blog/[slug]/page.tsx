@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { CuerpoArticulo } from "@/components/cuerpo-articulo";
 import { JsonLd } from "@/components/json-ld";
 import { Migas } from "@/components/migas";
-import { ARTICULOS, idiomasDelArticulo, obtenerArticulo } from "@/datos/blog";
+import { ARTICULOS, etiquetaCategoria, idiomasDelArticulo, obtenerArticulo } from "@/datos/blog";
 import { fechaLarga } from "@/lib/formato";
 import { esIdioma, ETIQUETAS } from "@/lib/idiomas";
 import { ruta } from "@/lib/rutas";
@@ -95,7 +95,7 @@ export default async function Articulo(props: PageProps<"/[idioma]/blog/[slug]">
             />
 
             <div className="mt-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider">
-              <span className="text-acento">{articulo.categoria}</span>
+              <span className="text-acento">{etiquetaCategoria(articulo.categoria, idioma)}</span>
               <span className="text-texto-tenue">
                 {t.comun.minutosLectura(articulo.minutos)}
               </span>

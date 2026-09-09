@@ -306,6 +306,18 @@ export const es = {
     fianza: "Fianza",
     notaFianza:
       "Se bloquea en la tarjeta al recoger el barco y se libera al devolverlo. No se cobra ni forma parte del total.",
+    fechas: "Fechas",
+    entrada: "Entrada",
+    salida: "Salida",
+    nombre: "Tu nombre",
+    email: "Tu email",
+    telefono: "Teléfono (opcional)",
+    personas: "Personas",
+    enviando: "Enviando…",
+    exito: (referencia: string) =>
+      `Solicitud enviada. Tu referencia es ${referencia}. Te contactamos para confirmar.`,
+    error: "No se pudo enviar. Revisa los datos e inténtalo de nuevo.",
+    eligeFechas: "Elige las fechas para ver el precio exacto.",
     conceptos: {
       alquiler: "Alquiler",
       descuento: (porcentaje: number) => `Descuento ${porcentaje} %`,

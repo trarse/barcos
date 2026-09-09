@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { paginaLegal } from "@/datos/legales";
 import { listarDestinos, listarExperiencias, listarLugares } from "@/lib/consultas";
 
 import type { Idioma } from "@/lib/idiomas";
@@ -67,6 +68,9 @@ export async function Pie({ idioma }: { idioma: Idioma }) {
         { texto: t.pie.guias, pagina: { tipo: "guias" } },
         { texto: t.pie.ocasiones, pagina: { tipo: "ocasiones" } },
         { texto: t.pie.blog, pagina: { tipo: "blog" } },
+        { texto: paginaLegal(idioma, "avisoLegal").titulo, pagina: { tipo: "avisoLegal" } },
+        { texto: paginaLegal(idioma, "privacidad").titulo, pagina: { tipo: "privacidad" } },
+        { texto: paginaLegal(idioma, "cookies").titulo, pagina: { tipo: "cookies" } },
       ],
     },
   ];

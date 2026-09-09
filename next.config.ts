@@ -1,7 +1,21 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-import { reescriturasLocalizadas } from "./src/lib/idiomas";
+import { IDIOMAS, reescriturasLocalizadas, segmento } from "./src/lib/idiomas";
+
+// Destinos que se podaron a propósito (CLAUDE.md): Baleares, Barcelona,
+// Málaga, Costa Brava y Valencia. Si algo se indexó antes de la poda, un 301
+// lo lleva al buscador del idioma en lugar de a un 404.
+const DESTINOS_PODADOS = [
+  "mallorca",
+  "ibiza",
+  "menorca",
+  "formentera",
+  "barcelona",
+  "malaga",
+  "costa-brava",
+  "valencia",
+] as const;
 
 const nextConfig: NextConfig = {
   // Hay un package-lock.json suelto en el perfil del usuario y Turbopack lo
@@ -22,6 +36,16 @@ const nextConfig: NextConfig = {
       afterFiles: reescriturasLocalizadas(),
       fallback: [],
     };
+  },
+
+  async redirects() {
+    return [...IDIOMAS].flatMap((idioma) =>
+      DESTINOS_PODADOS.map((slug) => ({
+        source: `/${idioma}/${segmento("alquiler", idioma)}/${slug}`,
+        destination: `/${idioma}/${segmento("alquiler", idioma)}`,
+        permanent: true,
+      })),
+    );
   },
 };
 

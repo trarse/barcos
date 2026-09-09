@@ -15,7 +15,7 @@ import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
-import { descripcionCorta } from "@/lib/prosa";
+import { contenidoEnIdioma, descripcionCorta, preguntaEnIdioma } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -63,8 +63,7 @@ export default async function LandingExperiencia(
   if (!experiencia) notFound();
 
   const t = textos(idioma);
-  const prosaTraducida =
-    esIdioma(experiencia.idiomaProsa) && experiencia.idiomaProsa === idioma;
+  const prosa = contenidoEnIdioma(experiencia, idioma);
   const barcos = await barcosDeExperiencia(actividad);
   const masBarato = barcos.length > 0 ? Math.min(...barcos.map((b) => b.precioDia)) : 0;
   const nombre =
@@ -133,8 +132,8 @@ export default async function LandingExperiencia(
               {t.pie.comoFunciona}
             </h2>
             <div className="mt-5">
-              {prosaTraducida ? (
-                <Contenido texto={experiencia.contenido} />
+              {prosa ? (
+                <Contenido texto={prosa} />
               ) : (
                 <p className="text-sm leading-relaxed text-texto-suave">
                   {t.destino.guiaOtroIdioma}
@@ -142,14 +141,13 @@ export default async function LandingExperiencia(
               )}
             </div>
 
-            {prosaTraducida && experiencia.preguntas.length > 0 && (
+            {prosa && experiencia.preguntas.length > 0 && (
               <div className="mt-12">
                 <Faq
                   idioma={idioma}
-                  preguntas={experiencia.preguntas.map((p) => ({
-                    pregunta: p.pregunta,
-                    respuesta: p.respuesta,
-                  }))}
+                  preguntas={experiencia.preguntas
+                    .map((p) => preguntaEnIdioma(p, idioma))
+                    .filter((q): q is { pregunta: string; respuesta: string } => q !== null)}
                 />
               </div>
             )}

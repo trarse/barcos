@@ -1,4 +1,4 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "@/generated/prisma/client";
 
@@ -6,8 +6,7 @@ import { PrismaClient } from "@/generated/prisma/client";
  * Cliente de Prisma.
  *
  * Desde la versión 7 la conexión no se declara en el esquema sino a través de
- * un driver adapter. Cambiar de SQLite a PostgreSQL en producción es sustituir
- * este adaptador por `@prisma/adapter-pg` y el provider del datasource.
+ * un driver adapter. Corre sobre PostgreSQL con `@prisma/adapter-pg`.
  *
  * Se cachea en `globalThis` porque en desarrollo Next recarga los módulos en
  * cada cambio y, sin esto, cada recarga abriría una conexión nueva.
@@ -19,7 +18,7 @@ function crearCliente() {
     throw new Error("Falta DATABASE_URL. Copia .env.example a .env.");
   }
 
-  return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) });
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 }
 
 const cache = globalThis as unknown as {

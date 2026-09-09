@@ -7,61 +7,93 @@ import type { Idioma } from "@/lib/idiomas";
 import {
   calcularDesglose,
   DIAS_DESCUENTO,
+  diasEntre,
   HORAS_NAVEGACION_DIA,
   type Tarifa,
   type Temporada,
+  temporadaDe,
 } from "@/lib/precio";
 import { textos } from "@/lib/textos";
 
 /**
- * Panel de reserva con el desglose en vivo.
+ * Panel de reserva con el desglose en vivo y el formulario real de petición.
  *
- * Usa exactamente la misma función que el servidor, así que el precio de la
- * tarjeta de resultados y el de aquí no pueden desviarse. Y como el cálculo es
- * puro, mover un control no cuesta ni una petición.
- *
- * El deslizador de horas de navegación no lo tiene nadie del sector: es lo que
- * convierte el combustible de sorpresa final en una decisión informada.
+ * El precio se calcula dos veces con la MISMA función: aquí (para pintarlo) y
+ * en el servidor (para guardarlo). El cliente no puede manipular el total
+ * porque el servidor lo recalcula siempre desde la tarifa del barco.
  *
  * Se recibe `idioma` y no el objeto de textos porque este catálogo contiene
  * funciones, y una función no cruza la frontera servidor-cliente.
  */
 export function Reserva({
+  barcoId,
   tarifa,
   temporada,
+  mesesAlta,
+  capacidad,
   minimoDias,
   reservaInstantanea,
   requiereTitulacion,
   idioma,
 }: {
+  barcoId: string;
   tarifa: Tarifa;
   temporada: Temporada;
+  mesesAlta: string;
+  capacidad: number;
   minimoDias: number;
   reservaInstantanea: boolean;
   requiereTitulacion: boolean;
   idioma: Idioma;
 }) {
   const t = textos(idioma);
-  const [dias, setDias] = useState(minimoDias);
+
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [horas, setHoras] = useState(HORAS_NAVEGACION_DIA);
   const [conPatron, setConPatron] = useState(false);
+  const [numPersonas, setNumPersonas] = useState(1);
+  const [clienteNombre, setClienteNombre] = useState("");
+  const [clienteEmail, setClienteEmail] = useState("");
+  const [clienteTelefono, setClienteTelefono] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [resultado, setResultado] = useState<{
+    tipo: "ok" | "error";
+    mensaje: string;
+  } | null>(null);
+
+  const hoy = aISOFecha(new Date());
+
+  const dias = useMemo(() => {
+    if (fechaInicio && fechaFin) {
+      return diasEntre(new Date(`${fechaInicio}T00:00:00Z`), new Date(`${fechaFin}T00:00:00Z`));
+    }
+    return minimoDias;
+  }, [fechaInicio, fechaFin, minimoDias]);
+
+  const temporadaEfectiva = useMemo(() => {
+    if (fechaInicio) {
+      return temporadaDe(new Date(`${fechaInicio}T00:00:00Z`), mesesAlta);
+    }
+    return temporada;
+  }, [fechaInicio, mesesAlta, temporada]);
 
   const desglose = useMemo(
     () =>
       calcularDesglose(tarifa, {
         dias,
-        temporada,
+        temporada: temporadaEfectiva,
         conPatron,
         horasNavegacionDia: horas,
       }),
-    [tarifa, dias, temporada, conPatron, horas],
+    [tarifa, dias, temporadaEfectiva, conPatron, horas],
   );
 
   const etiquetaTemporada = {
     alta: t.reserva.temporadaAlta,
     media: t.reserva.temporadaMedia,
     baja: t.reserva.temporadaBaja,
-  }[temporada];
+  }[temporadaEfectiva];
 
   /** Traduce una línea a partir de su clave, nunca de su etiqueta. */
   function traducirLinea(linea: (typeof desglose.lineas)[number]) {
@@ -99,6 +131,45 @@ export function Reserva({
     }
   }
 
+  async function enviar() {
+    if (!fechaInicio || !fechaFin || !clienteNombre.trim() || !clienteEmail.trim()) {
+      setResultado({ tipo: "error", mensaje: t.reserva.error });
+      return;
+    }
+    setEnviando(true);
+    setResultado(null);
+    try {
+      const res = await fetch("/api/reservas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          barcoId,
+          fechaInicio,
+          fechaFin,
+          numPersonas,
+          conPatron,
+          clienteNombre: clienteNombre.trim(),
+          clienteEmail: clienteEmail.trim(),
+          clienteTelefono: clienteTelefono.trim() || undefined,
+          idioma,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        setResultado({
+          tipo: "ok",
+          mensaje: t.reserva.exito(data.reserva.referencia),
+        });
+      } else {
+        setResultado({ tipo: "error", mensaje: t.reserva.error });
+      }
+    } catch {
+      setResultado({ tipo: "error", mensaje: t.reserva.error });
+    } finally {
+      setEnviando(false);
+    }
+  }
+
   return (
     <div className="rounded-carta border border-borde bg-superficie p-5">
       <div className="flex items-baseline justify-between gap-3">
@@ -114,42 +185,40 @@ export function Reserva({
       </div>
       <p className="mt-1 text-sm font-medium text-exito">{t.reserva.sinExtras}</p>
 
-      {/* ------------------------------------------------------- controles */}
-      <div className="mt-5 space-y-4">
-        <Control
-          etiqueta={t.reserva.diasAlquiler}
-          valor={plural(dias, t.comun.dia, t.comun.dias)}
-        >
-          <div className="flex items-center gap-2">
-            <BotonPaso
-              signo="−"
-              onClick={() => setDias((d) => Math.max(minimoDias, d - 1))}
-              inhabilitado={dias <= minimoDias}
-              etiqueta={t.reserva.unDiaMenos}
-            />
-            <input
-              type="range"
-              min={minimoDias}
-              max={21}
-              value={dias}
-              onChange={(e) => setDias(Number(e.target.value))}
-              className="flex-1 accent-[var(--acento)]"
-              aria-label={t.reserva.diasAlquiler}
-            />
-            <BotonPaso
-              signo="+"
-              onClick={() => setDias((d) => Math.min(21, d + 1))}
-              inhabilitado={dias >= 21}
-              etiqueta={t.reserva.unDiaMas}
-            />
-          </div>
-          {minimoDias > 1 && (
-            <p className="mt-1.5 text-xs text-texto-tenue">
-              {t.reserva.minimoDias(plural(minimoDias, t.comun.dia, t.comun.dias))}
-            </p>
-          )}
-        </Control>
+      {/* -------------------------------------------------------- fechas */}
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="text-sm font-medium text-texto">{t.reserva.entrada}</span>
+          <input
+            type="date"
+            min={hoy}
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            className="mt-1.5 w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium text-texto">{t.reserva.salida}</span>
+          <input
+            type="date"
+            min={fechaInicio || hoy}
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+            className="mt-1.5 w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+          />
+        </label>
+      </div>
+      <p className="mt-1.5 text-xs text-texto-tenue">
+        {fechaInicio && fechaFin
+          ? plural(dias, t.comun.dia, t.comun.dias)
+          : t.reserva.eligeFechas}
+        {minimoDias > 1 && (
+          <> · {t.reserva.minimoDias(plural(minimoDias, t.comun.dia, t.comun.dias))}</>
+        )}
+      </p>
 
+      {/* ------------------------------------------------------ controles */}
+      <div className="mt-4 space-y-4">
         <Control etiqueta={t.reserva.horasNavegacion} valor={`${horas} h`}>
           <input
             type="range"
@@ -163,6 +232,22 @@ export function Reserva({
           <p className="mt-1.5 text-xs leading-relaxed text-texto-tenue">
             {t.reserva.notaHoras}
           </p>
+        </Control>
+
+        <Control etiqueta={t.reserva.personas} valor={`${numPersonas}`}>
+          <input
+            type="number"
+            min={1}
+            max={Math.min(30, Math.max(1, capacidad))}
+            value={numPersonas}
+            onChange={(e) =>
+              setNumPersonas(
+                Math.max(1, Math.min(Math.min(30, capacidad), Number(e.target.value) || 1)),
+              )
+            }
+            className="mt-1.5 w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+            aria-label={t.reserva.personas}
+          />
         </Control>
 
         {tarifa.patronDia !== null && (
@@ -238,13 +323,57 @@ export function Reserva({
         </span>
       </div>
 
+      {/* ---------------------------------------------------------- datos */}
+      <div className="mt-5 space-y-3">
+        <input
+          type="text"
+          value={clienteNombre}
+          onChange={(e) => setClienteNombre(e.target.value)}
+          placeholder={t.reserva.nombre}
+          className="w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+          aria-label={t.reserva.nombre}
+        />
+        <input
+          type="email"
+          value={clienteEmail}
+          onChange={(e) => setClienteEmail(e.target.value)}
+          placeholder={t.reserva.email}
+          className="w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+          aria-label={t.reserva.email}
+        />
+        <input
+          type="tel"
+          value={clienteTelefono}
+          onChange={(e) => setClienteTelefono(e.target.value)}
+          placeholder={t.reserva.telefono}
+          className="w-full rounded-md border border-borde bg-superficie px-3 py-2 text-sm text-texto"
+          aria-label={t.reserva.telefono}
+        />
+      </div>
+
+      {resultado && (
+        <p
+          className={`mt-3 rounded-md px-3 py-2 text-sm ${
+            resultado.tipo === "ok"
+              ? "bg-emerald-50 text-emerald-800"
+              : "bg-rose-50 text-rose-700"
+          }`}
+        >
+          {resultado.mensaje}
+        </p>
+      )}
+
       <button
         type="button"
-        className="mt-5 w-full rounded-md bg-marca px-5 py-3.5 font-semibold text-fondo transition-opacity hover:opacity-90"
+        onClick={() => void enviar()}
+        disabled={enviando}
+        className="mt-5 w-full rounded-md bg-marca px-5 py-3.5 font-semibold text-fondo transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {reservaInstantanea
-          ? t.reserva.reservarAhora
-          : t.reserva.solicitarDisponibilidad}
+        {enviando
+          ? t.reserva.enviando
+          : reservaInstantanea
+            ? t.reserva.reservarAhora
+            : t.reserva.solicitarDisponibilidad}
       </button>
 
       <p className="mt-3 text-center text-xs leading-relaxed text-texto-tenue">
@@ -264,6 +393,13 @@ export function Reserva({
   );
 }
 
+function aISOFecha(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dia}`;
+}
+
 function Control({
   etiqueta,
   valor,
@@ -281,29 +417,5 @@ function Control({
       </div>
       <div className="mt-2">{children}</div>
     </div>
-  );
-}
-
-function BotonPaso({
-  signo,
-  onClick,
-  inhabilitado,
-  etiqueta,
-}: {
-  signo: string;
-  onClick: () => void;
-  inhabilitado: boolean;
-  etiqueta: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={inhabilitado}
-      aria-label={etiqueta}
-      className="h-8 w-8 shrink-0 rounded-md border border-borde text-texto transition-colors hover:bg-superficie-alt disabled:opacity-35"
-    >
-      {signo}
-    </button>
   );
 }

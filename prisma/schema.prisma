@@ -16,7 +16,7 @@ generator client {
 // Desde Prisma 7 la URL no vive aquí: la CLI la lee de prisma.config.ts y el
 // cliente se conecta a través del driver adapter (src/lib/db.ts).
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 /// Zona de navegación: una isla, una costa o una ciudad portuaria.
@@ -37,6 +37,8 @@ model Destino {
   descripcionDe String?
   /// Texto largo de la landing, en Markdown ligero. Es lo que posiciona.
   contenido     String
+  contenidoEn   String?
+  contenidoDe   String?
   /// Idioma en el que estan escritos `contenido` y las `preguntas`. No se
   /// traduce nada automaticamente: si no coincide con el idioma de la
   /// pagina, esos bloques no se pintan ni se marcan en JSON-LD.
@@ -45,6 +47,8 @@ model Destino {
   /// vacio, la pagina existe pero no se indexa: sin texto propio seria una
   /// pagina mas del monton, que es justo lo que hunde a un marketplace.
   sinLicencia   String?
+  sinLicenciaEn String?
+  sinLicenciaDe String?
   latitud       Float
   longitud      Float
   imagen        String
@@ -113,6 +117,10 @@ model Experiencia {
   descripcionEn String?
   descripcionDe String?
   contenido     String
+  contenidoEn   String?
+  contenidoDe   String?
+  titularEn     String?
+  titularDe     String?
   /// Idioma en el que estan escritos `contenido` y las `preguntas`.
   idiomaProsa   String  @default("es")
   imagen        String
@@ -192,6 +200,7 @@ model Barco {
   equipamiento Equipamiento[]
   experiencias Experiencia[]
   opiniones    Opinion[]
+  reservas     Reserva[]
 
   @@index([tipoId])
   @@index([puertoId])
@@ -244,6 +253,8 @@ model Lugar {
   descripcionDe String?
   /// Texto largo de la pagina. Sin el, la pagina existe pero no se indexa.
   contenido     String
+  contenidoEn   String?
+  contenidoDe   String?
   /// Idioma en el que estan escritos `contenido` y sus preguntas.
   idiomaProsa   String  @default("es")
   latitud       Float
@@ -282,6 +293,10 @@ model Pregunta {
   id        String @id @default(cuid())
   pregunta  String
   respuesta String
+  preguntaEn   String?
+  respuestaEn  String?
+  preguntaDe   String?
+  respuestaDe  String?
   orden     Int    @default(0)
   /// A que landing pertenece esta pregunta: "destino" o "sinLicencia".
   bloque    String @default("destino")
@@ -297,4 +312,52 @@ model Pregunta {
   @@index([destinoId])
   @@index([experienciaId])
   @@index([lugarId])
+}
+
+/// Suscripción de captación. Es la señal del go/no-go que no da Search Console:
+/// correos de clientes y de armadores, con su puerto y su página de origen.
+model Suscripcion {
+  id           String   @id @default(cuid())
+  correo       String
+  /// "puerto" | "normativa" | "armador"
+  variante     String
+  /// Puerto o municipio, para la variante "puerto".
+  destino      String?
+  idioma       String   @default("es")
+  paginaOrigen String?
+  fecha        DateTime @default(now())
+  /// Doble opt-in pendiente de un proveedor de email transaccional.
+  confirmado   Boolean  @default(false)
+
+  @@index([variante, fecha])
+  @@index([correo])
+}
+
+/// Reserva de un barco por un cliente. El precio se guarda en CÉNTIMOS,
+/// calculado con el motor de precios de Estribor.
+model Reserva {
+  id               String   @id @default(cuid())
+  /// Referencia legible para el armador y el cliente: "RES-XXXXXX".
+  referencia       String   @unique
+  barcoId          String
+  barco            Barco    @relation(fields: [barcoId], references: [id], onDelete: Cascade)
+  fechaInicio      DateTime
+  fechaFin         DateTime
+  numDias          Int
+  numPersonas      Int      @default(1)
+  clienteNombre    String
+  clienteEmail     String
+  clienteTelefono  String?
+  /// Total en céntimos de euro.
+  precioTotalCents Int
+  /// "pendiente" | "confirmada" | "cancelada" | "rechazada" | "completada"
+  estado           String   @default("pendiente")
+  notas            String?
+  idioma           String   @default("es")
+  paginaOrigen     String?
+  creadoEn         DateTime @default(now())
+  actualizadoEn    DateTime @updatedAt
+
+  @@index([barcoId, fechaInicio])
+  @@index([estado, creadoEn])
 }

@@ -341,8 +341,11 @@ export default async function FichaBarco(props: PageProps<"/[idioma]/barco/[slug
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <Reserva
+            barcoId={barco.id}
             tarifa={tarifa}
             temporada={temporada}
+            mesesAlta={destino.mesesAlta}
+            capacidad={barco.capacidad}
             minimoDias={barco.minimoDias}
             reservaInstantanea={barco.reservaInstantanea}
             requiereTitulacion={barco.requiereTitulacion}

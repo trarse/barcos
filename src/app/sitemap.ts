@@ -101,6 +101,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [{ tipo: "blog" }, 0.6, "weekly"],
     [{ tipo: "comoFunciona" }, 0.4, "monthly"],
     [{ tipo: "publicar" }, 0.4, "monthly"],
+    [{ tipo: "avisoLegal" }, 0.2, "monthly"],
+    [{ tipo: "privacidad" }, 0.2, "monthly"],
+    [{ tipo: "cookies" }, 0.2, "monthly"],
   ];
 
   return [
@@ -127,8 +130,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "daily",
         ahora,
         idiomasIndexables({
-          prosa: d.sinLicencia,
-          idiomaProsa: d.idiomaProsa,
+          prosa: { es: d.sinLicencia, en: d.sinLicenciaEn, de: d.sinLicenciaDe },
           barcos: sinTitulacion.get(d.slug) ?? 0,
         }),
       ),
@@ -140,7 +142,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         0.8,
         "weekly",
         ahora,
-        idiomasIndexables({ prosa: l.contenido, idiomaProsa: l.idiomaProsa }),
+        idiomasIndexables({ prosa: { es: l.contenido, en: l.contenidoEn, de: l.contenidoDe } }),
       ),
     ),
 

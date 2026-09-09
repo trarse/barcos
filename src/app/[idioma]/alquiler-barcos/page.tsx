@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Migas, migasBase } from "@/components/migas";
 import { Paginacion } from "@/components/paginacion";
 import { PanelFiltros } from "@/components/panel-filtros";
+import { EventoSinResultados } from "@/components/evento-sin-resultados";
 import { TarjetaBarco } from "@/components/tarjeta-barco";
 import {
   buscarBarcos,
@@ -109,6 +110,7 @@ export default async function Busqueda(
         <div>
           {barcos.length === 0 ? (
             <div className="rounded-carta border border-borde bg-superficie p-10 text-center">
+              <EventoSinResultados puerto={filtros.destino ?? "global"} />
               <h2 className="font-display text-xl font-semibold text-texto">
                 {t.busqueda.sinResultados}
               </h2>

@@ -1,0 +1,209 @@
+ »   Warning: --build is now the default and can safely be omitted.
+​
+Netlify Build                                                 
+────────────────────────────────────────────────────────────────
+​
+> Version
+  @netlify/build 36.4.8
+​
+> Flags
+  accountId: 69027db6e5370000b6ec5da4
+  deployId: 6aa1bc014fa7d072fe251f90
+​
+> Current directory
+  C:\Users\kety follen\Desktop\deepseek\barcos
+​
+> Config file
+  C:\Users\kety follen\Desktop\deepseek\barcos\netlify.toml
+​
+> Context
+  production
+​
+> Using Next.js Runtime - v5.15.13
+​
+build.command from netlify.toml                               
+────────────────────────────────────────────────────────────────
+​
+$ npm run build
+
+> barcos@0.1.0 build
+> next build
+
+▲ Next.js 16.3.3 (Turbopack)
+- Environments: .env
+✓ Running next.config.ts took 51ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.4s
+  Running TypeScript ...
+  Finished TypeScript in 7.3s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/688) ...
+  Generating static pages using 15 workers (172/688) 
+  Generating static pages using 15 workers (344/688) 
+  Generating static pages using 15 workers (516/688) 
+✓ Generating static pages using 15 workers (688/688) in 30.5s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /_not-found
+├   /[idioma]
+│ ├ ● /es
+│ ├ ● /en
+│ └ ● /de
+├ ƒ /[idioma]/alquiler-barcos
+├   /[idioma]/alquiler-barcos/[destino]
+│ ├ ● /es/alquiler-barcos/denia
+│ ├ ● /es/alquiler-barcos/javea
+│ ├ ● /es/alquiler-barcos/santa-pola
+│ └ ● [+30 more paths]
+├   /[idioma]/alquiler-barcos/[destino]/[tipo]
+│ ├ ● /es/alquiler-barcos/denia/neumatica
+│ ├ ● /es/alquiler-barcos/santa-pola/neumatica
+│ ├ ● /es/alquiler-barcos/javea/neumatica
+│ └ ● [+195 more paths]
+├   /[idioma]/aviso-legal
+│ ├ ● /es/aviso-legal
+│ ├ ● /en/aviso-legal
+│ └ ● /de/aviso-legal
+├   /[idioma]/barco/[slug]
+│ ├ ● /es/barco/azimut-55-flybridge-benidorm
+│ ├ ● /es/barco/azimut-55-flybridge-el-campello
+│ ├ ● /es/barco/azimut-55-flybridge-les-bassetes
+│ └ ● [+285 more paths]
+├   /[idioma]/blog
+│ ├ ● /es/blog
+│ ├ ● /en/blog
+│ └ ● /de/blog
+├   /[idioma]/blog/[slug]
+│ ├ ● /es/blog/que-hacer-si-aparecen-delfines
+│ ├ ● /es/blog/cruzarse-con-un-crucero-canal-de-puerto
+│ ├ ● /es/blog/posidonia-tabarca-por-que-el-agua-es-asi
+│ └ ● [+9 more paths]
+├   /[idioma]/como-funciona
+│ ├ ● /es/como-funciona
+│ ├ ● /en/como-funciona
+│ └ ● /de/como-funciona
+├ ƒ /[idioma]/comparar
+├   /[idioma]/cookies
+│ ├ ● /es/cookies
+│ ├ ● /en/cookies
+│ └ ● /de/cookies
+├   /[idioma]/destinos
+│ ├ ● /es/destinos
+│ ├ ● /en/destinos
+│ └ ● /de/destinos
+├   /[idioma]/destinos/[lugar]
+│ ├ ● /es/destinos/tabarca
+│ ├ ● /es/destinos/penon-de-ifach
+│ ├ ● /es/destinos/isla-de-benidorm
+│ └ ● [+18 more paths]
+├   /[idioma]/experiencias
+│ ├ ● /es/experiencias
+│ ├ ● /en/experiencias
+│ └ ● /de/experiencias
+├   /[idioma]/experiencias/[actividad]
+│ ├ ● /es/experiencias/atardecer
+│ ├ ● /es/experiencias/pesca
+│ ├ ● /es/experiencias/calas-y-snorkel
+│ └ ● [+9 more paths]
+├   /[idioma]/guias
+│ ├ ● /es/guias
+│ ├ ● /en/guias
+│ └ ● /de/guias
+├   /[idioma]/guias/[slug]
+│ ├ ● /es/guias/licencia-de-navegacion-que-te-ensenan
+│ ├ ● /es/guias/que-titulacion-necesito-para-llevar-un-barco
+│ ├ ● /es/guias/contrato-de-alquiler-de-embarcacion
+│ └ ● [+6 more paths]
+├   /[idioma]/ocasiones
+│ ├ ● /es/ocasiones
+│ ├ ● /en/ocasiones
+│ └ ● /de/ocasiones
+├   /[idioma]/ocasiones/[slug]
+│ ├ ● /es/ocasiones/despedidas
+│ ├ ● /es/ocasiones/cumpleanos
+│ ├ ● /es/ocasiones/eventos-de-empresa
+│ └ ● [+9 more paths]
+├   /[idioma]/privacidad
+│ ├ ● /es/privacidad
+│ ├ ● /en/privacidad
+│ └ ● /de/privacidad
+├   /[idioma]/registrar-barco
+│ ├ ● /es/registrar-barco
+│ ├ ● /en/registrar-barco
+│ └ ● /de/registrar-barco
+├   /[idioma]/sin-licencia
+│ ├ ● /es/sin-licencia
+│ ├ ● /en/sin-licencia
+│ └ ● /de/sin-licencia
+├   /[idioma]/sin-licencia/[destino]
+│ ├ ● /es/sin-licencia/denia
+│ ├ ● /es/sin-licencia/javea
+│ ├ ● /es/sin-licencia/santa-pola
+│ └ ● [+30 more paths]
+├   /[idioma]/tipos/[tipo]
+│ ├ ● /es/tipos/velero
+│ ├ ● /es/tipos/catamaran
+│ ├ ● /es/tipos/lancha
+│ └ ● [+18 more paths]
+├ ○ /admin
+├ ƒ /api/reservas
+├ ƒ /api/suscripcion
+├ ○ /robots.txt
+└ ○ /sitemap.xml
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+​
+(build.command completed in 53.1s)
+​
+Functions bundling                                            
+────────────────────────────────────────────────────────────────
+​
+Packaging Functions from .netlify\functions-internal directory:
+ - ___netlify-server-handler\___netlify-server-handler.mjs
+​
+​
+(Functions bundling completed in 20.1s)
+
+Deploying to Netlify
+────────────────────────────────────────────────────────────────
+
+[32mDeploy path: [39m       C:\Users\kety follen\Desktop\deepseek\barcos\.next
+[32mConfiguration path: [39mC:\Users\kety follen\Desktop\deepseek\barcos\netlify.toml
+
+[33m⠋[39m Uploading blobs to deploy store...
+
+[32m√[39m Finished uploading blobs to deploy store
+[33m⠋[39m Hashing files...
+[33m⠋[39m Looking for a functions cache...
+[32m√[39m Ignored invalid or expired functions cache
+[32m√[39m Finished hashing 25 files and 1 functions
+[33m⠋[39m CDN diffing files...
+[32m√[39m CDN requesting 5 files and 1 functions and 0 edge functions
+[33m⠋[39m Uploading 6 files
+[32m√[39m Finished uploading 6 assets
+[33m⠋[39m Waiting for deploy to go live...
+[32m√[39m Deploy is live!
+​
+Netlify Build Complete                                        
+────────────────────────────────────────────────────────────────
+​
+(Netlify Build completed in 5m 56.2s)
+
+🚀 Deploy complete
+────────────────────────────────────────────────────────────────
+
+Draft URL: <https://6aa1bc014fa7d072fe251f90--estribor-preview.netlify.app>
+
+Build logs: <https://app.netlify.com/projects/estribor-preview/deploys/6aa1bc014fa7d072fe251f90>
+Function logs: <https://app.netlify.com/projects/estribor-preview/logs/functions?scope=deploy:6aa1bc014fa7d072fe251f90>
+Edge function logs: <https://app.netlify.com/projects/estribor-preview/logs/edge-functions?scope=deployid:6aa1bc014fa7d072fe251f90>
+
+If everything looks good on your draft URL, deploy it to your main project URL with the --prod flag:
+netlify deploy --prod
+

@@ -1,0 +1,19 @@
+# Despliegue de Estribor en Netlify.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # De dónde salen canonical, hreflang, sitemap y JSON-LD. Para el preview
+  # apuntamos ya al dominio final; el propio Netlify añade X-Robots-Tag:
+  # noindex a los despliegues de preview, así que no se indexa.
+  NEXT_PUBLIC_URL = "https://estribor.es"
+  NODE_VERSION = "20"
+
+# El middleware (proxy.ts) redirigía "/" al idioma del visitante. Como el
+# plugin de Netlify aún no empaqueta bien el middleware de Next 16 (Turbopack),
+# lo replicamos aquí a nivel de CDN para el preview.
+[[redirects]]
+  from = "/"
+  to = "/es"
+  status = 302

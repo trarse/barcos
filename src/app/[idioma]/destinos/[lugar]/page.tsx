@@ -27,7 +27,7 @@ import { listarLugares, obtenerLugar } from "@/lib/consultas";
 import { entero } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
 import { esIndexable } from "@/lib/indexacion";
-import { descripcionCorta, titularCorto } from "@/lib/prosa";
+import { contenidoEnIdioma, descripcionCorta, preguntaEnIdioma, titularCorto } from "@/lib/prosa";
 import { alternativas, ruta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
 
@@ -49,8 +49,7 @@ export async function generateMetadata(
 
   // Sin flota que contar: aquí la regla de indexación es solo la del texto.
   const indexable = esIndexable(idioma, {
-    prosa: lugar.contenido,
-    idiomaProsa: lugar.idiomaProsa,
+    prosa: { es: lugar.contenido, en: lugar.contenidoEn, de: lugar.contenidoDe },
   });
 
   return {
@@ -80,7 +79,7 @@ export default async function PaginaLugar(
   const lugares = await listarLugares();
   const otros = lugares.filter((l) => l.slug !== slug);
 
-  const prosaTraducida = esIdioma(lugar.idiomaProsa) && lugar.idiomaProsa === idioma;
+  const prosa = contenidoEnIdioma(lugar, idioma);
 
   return (
     <>
@@ -160,8 +159,8 @@ export default async function PaginaLugar(
       <section className="border-t border-borde bg-superficie">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <div className="max-w-3xl">
-            {prosaTraducida ? (
-              <Contenido texto={lugar.contenido} />
+            {prosa ? (
+              <Contenido texto={prosa} />
             ) : (
               <p className="text-sm leading-relaxed text-texto-suave">
                 {t.destino.guiaOtroIdioma}{" "}
@@ -174,14 +173,13 @@ export default async function PaginaLugar(
               </p>
             )}
 
-            {prosaTraducida && lugar.preguntas.length > 0 && (
+            {prosa && lugar.preguntas.length > 0 && (
               <div className="mt-12">
                 <Faq
                   idioma={idioma}
-                  preguntas={lugar.preguntas.map((p) => ({
-                    pregunta: p.pregunta,
-                    respuesta: p.respuesta,
-                  }))}
+                  preguntas={lugar.preguntas
+                    .map((p) => preguntaEnIdioma(p, idioma))
+                    .filter((q): q is { pregunta: string; respuesta: string } => q !== null)}
                 />
               </div>
             )}

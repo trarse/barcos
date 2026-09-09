@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Migas } from "@/components/migas";
-import { articulosPorFecha } from "@/datos/blog";
+import { articulosPorFecha, etiquetaCategoria } from "@/datos/blog";
 import { fechaLarga } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
@@ -81,7 +81,7 @@ export default async function Blog(props: PageProps<"/[idioma]/blog">) {
                 className="group relative flex flex-col rounded-carta border border-borde bg-superficie p-6 transition-colors hover:border-acento"
               >
                 <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider">
-                  <span className="text-acento">{articulo.categoria}</span>
+                  <span className="text-acento">{etiquetaCategoria(articulo.categoria, idioma)}</span>
                   <span className="text-texto-tenue">
                     {t.comun.minutosLectura(articulo.minutos)}
                   </span>

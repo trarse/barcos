@@ -72,6 +72,13 @@ La línea está en si el texto **sustituye al criterio de quien va al timón**.
 - Que una zona está protegida o regulada, **remitiendo siempre a confirmarlo**
   con el club o la autoridad competente. Nunca cuál es la norma concreta.
 - Que un fondeadero es popular o está concurrido en agosto.
+- El régimen general de viento de la tarde y cómo ordena el día (salir temprano,
+  volver con el viento a favor), **sin decir qué lado de una cala concreta
+  resguarda**. Eso es clima y planificación, no abrigo.
+
+Matiz: **describir el temario de un curso** (qué se aprende en él, incluido que
+se enseña a fondear) no es una guía de cómo fondear; la prohibición alcanza al
+texto que enseña a hacerlo, no al que describe que un curso lo enseña.
 
 La duda se resuelve en contra de publicar. Y lo que ya esté escrito se revisa
 **antes de traducirlo**: un fallo de este tipo traducido son tres páginas

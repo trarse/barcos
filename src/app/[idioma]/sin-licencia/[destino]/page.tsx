@@ -29,6 +29,7 @@ import { FILTROS_VACIOS } from "@/lib/filtros";
 import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
 import { esIndexable } from "@/lib/indexacion";
+import { preguntaEnIdioma, sinLicenciaEnIdioma } from "@/lib/prosa";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
 import { textos } from "@/lib/textos";
@@ -53,8 +54,7 @@ export async function generateMetadata(
 
   const t = textos(idioma);
   const indexable = esIndexable(idioma, {
-    prosa: destino.sinLicencia,
-    idiomaProsa: destino.idiomaProsa,
+    prosa: { es: destino.sinLicencia, en: destino.sinLicenciaEn, de: destino.sinLicenciaDe },
     barcos: (await contarSinTitulacion()).get(slug) ?? 0,
   });
 
@@ -97,10 +97,12 @@ export default async function SinLicenciaEnDestino(
   // La prosa y las preguntas están escritas a mano en un idioma concreto.
   // Igual que en la landing de destino: o coinciden con el idioma de la
   // página, o no se pintan ni se marcan en JSON-LD.
-  const prosaTraducida = esIdioma(destino.idiomaProsa) && destino.idiomaProsa === idioma;
-  const prosa = prosaTraducida ? destino.sinLicencia : null;
-  const preguntas = prosaTraducida
-    ? destino.preguntas.filter((p) => p.bloque === "sinLicencia")
+  const prosa = sinLicenciaEnIdioma(destino, idioma);
+  const preguntas = prosa
+    ? destino.preguntas
+        .filter((p) => p.bloque === "sinLicencia")
+        .map((p) => preguntaEnIdioma(p, idioma))
+        .filter((q): q is { pregunta: string; respuesta: string } => q !== null)
     : [];
 
   const titulo = t.sinLicenciaMunicipio.titulo(destino.nombre);
@@ -222,10 +224,7 @@ export default async function SinLicenciaEnDestino(
               <div className="mt-12">
                 <Faq
                   idioma={idioma}
-                  preguntas={preguntas.map((p) => ({
-                    pregunta: p.pregunta,
-                    respuesta: p.respuesta,
-                  }))}
+                  preguntas={preguntas}
                 />
               </div>
             )}

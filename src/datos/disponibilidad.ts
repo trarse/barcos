@@ -13,22 +13,22 @@
 import type { Idioma } from "@/lib/idiomas";
 
 export const IDIOMAS_GUIA: Record<string, Idioma[]> = {
-  "licencia-de-navegacion-que-te-ensenan": ["es"],
-  "que-titulacion-necesito-para-llevar-un-barco": ["es"],
-  "contrato-de-alquiler-de-embarcacion": ["es"],
-  "cuanto-puede-ganar-tu-barco": ["es"],
+  "licencia-de-navegacion-que-te-ensenan": ["es", "en", "de"],
+  "que-titulacion-necesito-para-llevar-un-barco": ["es", "en", "de"],
+  "contrato-de-alquiler-de-embarcacion": ["es", "en", "de"],
+  "cuanto-puede-ganar-tu-barco": ["es", "en", "de"],
 };
 
 export const IDIOMAS_ARTICULO: Record<string, Idioma[]> = {
-  "que-hacer-si-aparecen-delfines": ["es"],
-  "cruzarse-con-un-crucero-canal-de-puerto": ["es"],
-  "posidonia-tabarca-por-que-el-agua-es-asi": ["es"],
-  "cuanto-cuesta-alquilar-un-barco-en-espana": ["es"],
+  "que-hacer-si-aparecen-delfines": ["es", "en", "de"],
+  "cruzarse-con-un-crucero-canal-de-puerto": ["es", "en", "de"],
+  "posidonia-tabarca-por-que-el-agua-es-asi": ["es", "en", "de"],
+  "cuanto-cuesta-alquilar-un-barco-en-espana": ["es", "en", "de"],
 };
 
 export const IDIOMAS_OCASION: Record<string, Idioma[]> = {
-  despedidas: ["es"],
-  cumpleanos: ["es"],
-  "eventos-de-empresa": ["es"],
-  "pedidas-y-bodas": ["es"],
+  despedidas: ["es", "en", "de"],
+  cumpleanos: ["es", "en", "de"],
+  "eventos-de-empresa": ["es", "en", "de"],
+  "pedidas-y-bodas": ["es", "en", "de"],
 };

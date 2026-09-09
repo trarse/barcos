@@ -301,6 +301,18 @@ export const de: Textos = {
     fianza: "Kaution",
     notaFianza:
       "Wird bei Übernahme auf der Karte geblockt und bei Rückgabe freigegeben. Sie wird nicht abgebucht und gehört nicht zum Gesamtpreis.",
+    fechas: "Termine",
+    entrada: "Anreise",
+    salida: "Abreise",
+    nombre: "Ihr Name",
+    email: "Ihre E-Mail",
+    telefono: "Telefon (optional)",
+    personas: "Personen",
+    enviando: "Wird gesendet…",
+    exito: (referencia) =>
+      `Anfrage gesendet. Ihre Referenz ist ${referencia}. Wir melden uns zur Bestätigung.`,
+    error: "Senden fehlgeschlagen. Prüfen Sie die Angaben und versuchen Sie es erneut.",
+    eligeFechas: "Wählen Sie die Termine, um den genauen Preis zu sehen.",
     conceptos: {
       alquiler: "Miete",
       descuento: (porcentaje) => `${porcentaje} % Rabatt`,

@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Faq } from "@/components/faq";
+import { FormularioCaptacion } from "@/components/formulario-captacion";
 import { Migas } from "@/components/migas";
 import { paginasFijas } from "@/datos/paginas";
 import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
 import { alternativas } from "@/lib/rutas";
-import { SITIO } from "@/lib/sitio";
 import { textos } from "@/lib/textos";
 
 export function generateStaticParams() {
@@ -131,14 +130,11 @@ export default async function RegistrarBarco(
                 {p.notaComision}
               </p>
 
-              <Link
-                href={`mailto:${SITIO.correo}?subject=${encodeURIComponent(p.asunto)}`}
-                className="mt-6 block rounded-md bg-marca px-5 py-3.5 text-center font-semibold text-fondo transition-opacity hover:opacity-90"
-              >
-                {p.empezar}
-              </Link>
-
-              <p className="mt-3 text-center text-xs text-texto-tenue">{p.respuesta}</p>
+              <FormularioCaptacion
+                idioma={idioma}
+                variante="armador"
+                pagina="/registrar-barco"
+              />
             </div>
           </aside>
         </div>

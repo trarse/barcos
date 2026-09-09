@@ -6,18 +6,13 @@
  * enlazar, pero no se ofrece al buscador. El `follow` es para que el rastreo
  * siga hasta las fichas de los barcos.
  *
- * Vivía duplicada en tres ficheros —la plantilla «sin licencia», la de lugar
- * y el sitemap— y las tres copias se desincronizaron: el sitemap la aplicaba
- * en castellano y luego declaraba las tres versiones de idioma, así que
- * ofrecía al buscador 36 URL que ellas mismas decían `noindex`. Mandarle dos
- * órdenes opuestas sobre la misma URL no cuesta esa página: cuesta la
- * confianza en el sitemap entero.
- *
- * Los umbrales no se bajan. Si un texto se queda a 245 palabras, se alarga el
- * texto.
+ * Desde que la prosa vive en columnas por idioma, la regla cuenta palabras
+ * POR IDIOMA: cada versión de la landing tiene su propio texto y su propia
+ * decisión de indexarse. Los umbrales no se bajan. Si un texto se queda a
+ * 245 palabras, se alarga el texto.
  */
 
-import { esIdioma, type Idioma } from "./idiomas";
+import { IDIOMAS, type Idioma } from "./idiomas";
 
 export const MINIMO_BARCOS = 6;
 export const MINIMO_PALABRAS = 250;
@@ -29,31 +24,27 @@ export function palabras(texto: string | null | undefined): number {
 }
 
 /**
- * En qué idiomas entra al índice una landing con texto escrito a mano.
+ * En qué idiomas entra al índice una landing con prosa por idioma.
  *
- * La respuesta es una lista y no un sí o un no porque la prosa está escrita
- * en un idioma concreto y no se traduce sola. En los demás idiomas la página
- * existe —el buscador, los filtros y las fichas sí están traducidos— pero se
- * queda sin texto propio, así que no llega al umbral.
+ * La respuesta es una lista porque cada idioma tiene su propio texto. Un
+ * idioma sin columna de prosa (o con menos de 250 palabras) se queda fuera:
+ * la página existe, pero emite `noindex`.
  *
  * `barcos` se omite en las páginas que no listan flota, como los destinos con
  * nombre propio: ahí la regla es solo la del texto.
  */
 export function idiomasIndexables(entrada: {
-  prosa: string | null | undefined;
-  idiomaProsa: string;
+  prosa: Partial<Record<Idioma, string | null | undefined>>;
   barcos?: number;
 }): Idioma[] {
   if (entrada.barcos !== undefined && entrada.barcos < MINIMO_BARCOS) return [];
-  if (!esIdioma(entrada.idiomaProsa)) return [];
-  if (palabras(entrada.prosa) < MINIMO_PALABRAS) return [];
-  return [entrada.idiomaProsa];
+  return IDIOMAS.filter((idioma) => palabras(entrada.prosa[idioma]) >= MINIMO_PALABRAS);
 }
 
 /** La misma regla vista desde una página concreta. */
 export function esIndexable(
   idioma: Idioma,
-  entrada: { prosa: string | null | undefined; idiomaProsa: string; barcos?: number },
+  entrada: { prosa: Partial<Record<Idioma, string | null | undefined>>; barcos?: number },
 ): boolean {
   return idiomasIndexables(entrada).includes(idioma);
 }

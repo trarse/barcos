@@ -8,7 +8,7 @@
 
 import "dotenv/config";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { MODELOS, OPINIONES, FACTOR_DESTINO } from "./datos/barcos";
@@ -17,7 +17,7 @@ import { DESTINOS } from "./datos/destinos";
 import { LUGARES } from "./datos/lugares";
 
 const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! }),
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
 });
 
 /** Nombres de propietario, repartidos de forma estable entre los barcos. */
@@ -100,6 +100,10 @@ async function main() {
         descripcionEn: x.descripcionEn,
         descripcionDe: x.descripcionDe,
         contenido: x.contenido,
+        contenidoEn: x.contenidoEn ?? null,
+        contenidoDe: x.contenidoDe ?? null,
+        titularEn: x.titularEn ?? null,
+        titularDe: x.titularDe ?? null,
         horas: x.horas,
         orden: x.orden,
         imagen: `carta:${x.slug}`,
@@ -130,7 +134,11 @@ async function main() {
         descripcionEn: d.descripcionEn,
         descripcionDe: d.descripcionDe,
         contenido: d.contenido,
+        contenidoEn: d.contenidoEn ?? null,
+        contenidoDe: d.contenidoDe ?? null,
         sinLicencia: d.sinLicencia ?? null,
+        sinLicenciaEn: d.sinLicenciaEn ?? null,
+        sinLicenciaDe: d.sinLicenciaDe ?? null,
         latitud: d.latitud,
         longitud: d.longitud,
         mesesAlta: d.mesesAlta,
@@ -287,6 +295,8 @@ async function main() {
         descripcionEn: l.descripcionEn,
         descripcionDe: l.descripcionDe,
         contenido: l.contenido,
+        contenidoEn: l.contenidoEn ?? null,
+        contenidoDe: l.contenidoDe ?? null,
         latitud: l.latitud,
         longitud: l.longitud,
         clase: l.clase,

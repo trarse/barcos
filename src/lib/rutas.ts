@@ -42,7 +42,10 @@ export type Pagina =
   | { tipo: "articulo"; slug: string }
   | { tipo: "comoFunciona" }
   | { tipo: "publicar" }
-  | { tipo: "comparar" };
+  | { tipo: "comparar" }
+  | { tipo: "avisoLegal" }
+  | { tipo: "privacidad" }
+  | { tipo: "cookies" };
 
 /** URL pública de una página en un idioma. Nunca termina en barra. */
 export function ruta(pagina: Pagina, idioma: Idioma): string {
@@ -92,6 +95,12 @@ export function ruta(pagina: Pagina, idioma: Idioma): string {
       return `${raiz}/${segmento("publicar", idioma)}`;
     case "comparar":
       return `${raiz}/${segmento("comparar", idioma)}`;
+    case "avisoLegal":
+      return `${raiz}/${segmento("avisoLegal", idioma)}`;
+    case "privacidad":
+      return `${raiz}/${segmento("privacidad", idioma)}`;
+    case "cookies":
+      return `${raiz}/${segmento("cookies", idioma)}`;
   }
 }
 
@@ -131,6 +140,9 @@ export function analizarRuta(
     if (primero === segmento("comoFunciona", idioma)) return con({ tipo: "comoFunciona" });
     if (primero === segmento("publicar", idioma)) return con({ tipo: "publicar" });
     if (primero === segmento("comparar", idioma)) return con({ tipo: "comparar" });
+    if (primero === segmento("avisoLegal", idioma)) return con({ tipo: "avisoLegal" });
+    if (primero === segmento("privacidad", idioma)) return con({ tipo: "privacidad" });
+    if (primero === segmento("cookies", idioma)) return con({ tipo: "cookies" });
 
     const tipoBarco = tipoDesdeSegmento(primero, idioma);
     if (tipoBarco) return con({ tipo: "tipoBarco", tipoBarco });

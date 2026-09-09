@@ -300,6 +300,18 @@ export const en: Textos = {
     fianza: "Security deposit",
     notaFianza:
       "Held on your card when you collect the boat and released when you bring it back. It is never charged and is not part of the total.",
+    fechas: "Dates",
+    entrada: "Check-in",
+    salida: "Check-out",
+    nombre: "Your name",
+    email: "Your email",
+    telefono: "Phone (optional)",
+    personas: "Guests",
+    enviando: "Sending…",
+    exito: (referencia) =>
+      `Request sent. Your reference is ${referencia}. We'll get in touch to confirm.`,
+    error: "Could not send. Check your details and try again.",
+    eligeFechas: "Pick the dates to see the exact price.",
     conceptos: {
       alquiler: "Hire",
       descuento: (porcentaje) => `${porcentaje} % discount`,

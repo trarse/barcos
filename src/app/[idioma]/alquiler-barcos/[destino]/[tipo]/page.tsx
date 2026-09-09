@@ -18,6 +18,7 @@ import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMAS, tipoInterno, tipoSimple } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
 import { listaJsonLd } from "@/lib/seo";
+import { contenidoEnIdioma } from "@/lib/prosa";
 import { textos } from "@/lib/textos";
 
 export const revalidate = 3600;
@@ -181,8 +182,8 @@ export default async function LandingDestinoTipo(
             {t.destino.tipoEn(plural, destino.nombre)}
           </h2>
           <div className="mt-5">
-            {esIdioma(destino.idiomaProsa) && destino.idiomaProsa === idioma ? (
-              <Contenido texto={destino.contenido} />
+            {contenidoEnIdioma(destino, idioma) ? (
+              <Contenido texto={contenidoEnIdioma(destino, idioma)!} />
             ) : (
               <p className="text-sm leading-relaxed text-texto-suave">
                 {t.destino.guiaOtroIdioma}
