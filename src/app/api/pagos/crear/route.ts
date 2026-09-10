@@ -11,8 +11,12 @@ const Esquema = z.object({ reservaId: z.string().min(1) });
  * Crea un enlace de pago (Checkout) para cobrar una reserva desde el panel.
  */
 export async function POST(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);

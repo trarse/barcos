@@ -133,11 +133,19 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
+  // El armador solo ve sus barcos; el admin, todos.
+  const where =
+    usuario.rol === "armador" && usuario.propietarioId
+      ? { propietarioId: usuario.propietarioId }
+      : {};
+
   const barcos = await db.barco.findMany({
+    where,
     include: {
       tipo: { select: { nombre: true } },
       puerto: { include: { destino: { select: { nombre: true } } } },
@@ -165,8 +173,12 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);
@@ -181,8 +193,12 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);

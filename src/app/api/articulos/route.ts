@@ -59,8 +59,12 @@ function datosDe(a: z.infer<typeof Esquema>): Prisma.ArticuloUncheckedCreateInpu
 }
 
 export async function GET(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const articulos = await db.articulo.findMany({
@@ -87,8 +91,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);
@@ -107,8 +115,12 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);
@@ -131,8 +143,12 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
+  }
+  if (usuario.rol !== "admin") {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);

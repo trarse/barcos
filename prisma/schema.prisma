@@ -142,6 +142,9 @@ model Propietario {
   respondeEnMin  Int      @default(60)
   superAnfitrion Boolean  @default(false)
   avatar         String?
+  /// Login del armador, si tiene acceso al área propia.
+  usuarioId      String?  @unique
+  usuario        Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
   barcos Barco[]
 }
@@ -407,10 +410,11 @@ model Usuario {
   nombre       String
   /// "sal:hash" generado con scrypt.
   passwordHash String
-  /// "admin" de momento; más adelante "armador".
+  /// "admin" o "armador".
   rol          String   @default("admin")
   creadoEn     DateTime @default(now())
   sesiones     Sesion[]
+  propietario  Propietario?
 }
 
 /// Sesión de un usuario: el token viaja en una cookie httpOnly y aquí se

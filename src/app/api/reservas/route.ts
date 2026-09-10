@@ -192,11 +192,19 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
+  // El armador solo ve las reservas de sus barcos; el admin, todas.
+  const where =
+    usuario.rol === "armador" && usuario.propietarioId
+      ? { barco: { propietarioId: usuario.propietarioId } }
+      : {};
+
   const reservas = await db.reserva.findMany({
+    where,
     include: {
       barco: {
         select: { nombre: true, slug: true, puerto: { select: { nombre: true } } },
@@ -210,7 +218,8 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  if (!(await usuarioAutenticado(req))) {
+  const usuario = await usuarioAutenticado(req);
+  if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
@@ -220,6 +229,19 @@ export async function PATCH(req: Request) {
 
   if (!id || !ESTADOS.includes(estado)) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
+  }
+
+  const existente = await db.reserva.findUnique({
+    where: { id },
+    include: { barco: { select: { propietarioId: true } } },
+  });
+  if (!existente) {
+    return NextResponse.json({ ok: false, error: "reserva" }, { status: 404 });
+  }
+
+  // Un armador solo puede cambiar el estado de las reservas de sus barcos.
+  if (usuario.rol !== "admin" && usuario.propietarioId !== existente.barco.propietarioId) {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const reserva = await db.reserva.update({
