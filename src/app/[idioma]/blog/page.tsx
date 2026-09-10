@@ -3,11 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Migas } from "@/components/migas";
-import { articulosPorFecha, etiquetaCategoria } from "@/datos/blog";
+import { etiquetaCategoria } from "@/datos/blog";
+import { articulosPorFecha } from "@/lib/blog";
 import { fechaLarga } from "@/lib/formato";
 import { esIdioma, IDIOMA_POR_DEFECTO, IDIOMAS } from "@/lib/idiomas";
 import { alternativas, ruta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
+
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return IDIOMAS.map((idioma) => ({ idioma }));
@@ -32,7 +35,7 @@ export default async function Blog(props: PageProps<"/[idioma]/blog">) {
   if (!esIdioma(idioma)) notFound();
 
   const t = textos(idioma);
-  const articulos = articulosPorFecha(idioma);
+  const articulos = await articulosPorFecha(idioma);
 
   return (
     <>

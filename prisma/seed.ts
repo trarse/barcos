@@ -10,7 +10,8 @@ import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient, Prisma } from "../src/generated/prisma/client";
+import { ARTICULOS } from "../src/datos/blog";
 import { MODELOS, OPINIONES, FACTOR_DESTINO } from "./datos/barcos";
 import { EQUIPAMIENTO, EXPERIENCIAS, TIPOS } from "./datos/catalogo";
 import { DESTINOS } from "./datos/destinos";
@@ -317,8 +318,31 @@ async function main() {
     }
   }
 
+  // ------------------------------------------------------------- blog
+  console.log("Sembrando artículos del blog…");
+  await prisma.articulo.deleteMany();
+  for (const a of ARTICULOS) {
+    await prisma.articulo.create({
+      data: {
+        idioma: a.idioma,
+        slug: a.slug,
+        titulo: a.titulo,
+        entradilla: a.entradilla,
+        fecha: new Date(`${a.fecha}T00:00:00Z`),
+        minutos: a.minutos,
+        categoria: a.categoria,
+        cuerpo: a.cuerpo,
+        relacionados: a.relacionados as unknown as Prisma.InputJsonValue,
+        publicado: true,
+        publicaDesde: a.publicaDesde
+          ? new Date(`${a.publicaDesde}T00:00:00Z`)
+          : null,
+      },
+    });
+  }
+
   console.log(
-    `Listo: ${DESTINOS.length} destinos, ${puertos.size} puertos, ${total} barcos y ${LUGARES.length} lugares.`,
+    `Listo: ${DESTINOS.length} destinos, ${puertos.size} puertos, ${total} barcos, ${LUGARES.length} lugares y ${ARTICULOS.length} artículos.`,
   );
 }
 

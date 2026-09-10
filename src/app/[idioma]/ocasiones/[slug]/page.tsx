@@ -81,7 +81,7 @@ export default async function PaginaOcasion(
 
   const t = textos(idioma);
   const otras = ocasionesDe(idioma).filter((o) => o.slug !== slug);
-  const relacionados = enlacesVivos(ocasion.relacionados, idioma);
+  const relacionados = await enlacesVivos(ocasion.relacionados, idioma);
 
   const { barcos, total } = await buscarBarcos({
     ...FILTROS_VACIOS,

@@ -5,23 +5,26 @@ import { notFound } from "next/navigation";
 import { CuerpoArticulo } from "@/components/cuerpo-articulo";
 import { JsonLd } from "@/components/json-ld";
 import { Migas } from "@/components/migas";
-import { ARTICULOS, etiquetaCategoria, idiomasDelArticulo, obtenerArticulo } from "@/datos/blog";
+import { etiquetaCategoria } from "@/datos/blog";
+import { articulosPorFecha, idiomasDelArticulo, obtenerArticulo, slugsDeArticulos } from "@/lib/blog";
 import { fechaLarga } from "@/lib/formato";
 import { esIdioma, ETIQUETAS } from "@/lib/idiomas";
 import { ruta } from "@/lib/rutas";
 import { textos } from "@/lib/textos";
 import { SITIO, urlAbsoluta } from "@/lib/sitio";
 
-export function generateStaticParams() {
-  return ARTICULOS.map((a) => ({ idioma: a.idioma, slug: a.slug }));
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return (await slugsDeArticulos()).map((a) => ({ idioma: a.idioma, slug: a.slug }));
 }
 
 /**
  * El `hreflang` de un artículo solo declara los idiomas en los que existe de
  * verdad. Declarar una traducción que no está es peor que no declarar nada.
  */
-function alternativasArticulo(slug: string, idioma: string) {
-  const disponibles = idiomasDelArticulo(slug);
+async function alternativasArticulo(slug: string, idioma: string) {
+  const disponibles = await idiomasDelArticulo(slug);
   const languages: Record<string, string> = {};
   for (const otro of disponibles) {
     languages[ETIQUETAS[otro].hreflang] = ruta({ tipo: "articulo", slug }, otro);
@@ -38,13 +41,13 @@ export async function generateMetadata(
   const { idioma, slug } = await props.params;
   if (!esIdioma(idioma)) return {};
 
-  const articulo = obtenerArticulo(slug, idioma);
+  const articulo = await obtenerArticulo(slug, idioma);
   if (!articulo) return { title: "404" };
 
   return {
     title: articulo.titulo,
     description: articulo.entradilla,
-    alternates: alternativasArticulo(slug, idioma),
+    alternates: await alternativasArticulo(slug, idioma),
     openGraph: {
       type: "article",
       title: articulo.titulo,
@@ -59,11 +62,11 @@ export default async function Articulo(props: PageProps<"/[idioma]/blog/[slug]">
   const { idioma, slug } = await props.params;
   if (!esIdioma(idioma)) notFound();
 
-  const articulo = obtenerArticulo(slug, idioma);
+  const articulo = await obtenerArticulo(slug, idioma);
   if (!articulo) notFound();
 
   const t = textos(idioma);
-  const otros = ARTICULOS.filter((a) => a.idioma === idioma && a.slug !== slug).slice(0, 2);
+  const otros = (await articulosPorFecha(idioma)).filter((a) => a.slug !== slug).slice(0, 2);
 
   return (
     <>

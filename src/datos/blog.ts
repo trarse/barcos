@@ -9,7 +9,6 @@
 
 import type { Idioma } from "@/lib/idiomas";
 import type { Programable } from "@/lib/publicacion";
-import { estaPublicado, soloPublicados } from "@/lib/publicacion";
 import type { Pagina } from "@/lib/rutas";
 
 export interface Articulo extends Programable {
@@ -38,11 +37,8 @@ const CATEGORIA_ETIQUETA: Record<Articulo["categoria"], Record<Idioma, string>> 
 
 /** Etiqueta visible de la categoría, localizada. La unión guarda el valor en
  * castellano como clave estable; esto la traduce para la página. */
-export function etiquetaCategoria(
-  categoria: Articulo["categoria"],
-  idioma: Idioma,
-): string {
-  return CATEGORIA_ETIQUETA[categoria][idioma];
+export function etiquetaCategoria(categoria: string, idioma: Idioma): string {
+  return CATEGORIA_ETIQUETA[categoria as Articulo["categoria"]]?.[idioma] ?? categoria;
 }
 
 export const ARTICULOS: Articulo[] = [
@@ -672,26 +668,3 @@ Was die Rechnung am stärksten senkt, ist nicht Feilschen, sondern gut wählen.
     ],
   },
 ];
-
-export function obtenerArticulo(slug: string, idioma: Idioma): Articulo | undefined {
-  const articulo = ARTICULOS.find((a) => a.slug === slug && a.idioma === idioma);
-  return articulo && estaPublicado(articulo) ? articulo : undefined;
-}
-
-/**
- * Artículos de un idioma, del más reciente al más antiguo.
- *
- * No hay respaldo al castellano a propósito: servir un texto en español
- * dentro de una página marcada como inglesa es peor que no tener el artículo,
- * tanto para quien lo lee como para quien lo indexa.
- */
-export function articulosPorFecha(idioma: Idioma): Articulo[] {
-  return soloPublicados(ARTICULOS.filter((a) => a.idioma === idioma)).sort((a, b) =>
-    b.fecha.localeCompare(a.fecha),
-  );
-}
-
-/** En qué idiomas existe un artículo. Alimenta el `hreflang`. */
-export function idiomasDelArticulo(slug: string): Idioma[] {
-  return soloPublicados(ARTICULOS.filter((a) => a.slug === slug)).map((a) => a.idioma);
-}

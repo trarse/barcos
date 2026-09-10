@@ -361,3 +361,36 @@ model Reserva {
   @@index([barcoId, fechaInicio])
   @@index([estado, creadoEn])
 }
+
+/// Artículo del blog. Contenido editorial gestionado desde el panel /admin.
+/// El SEO depende de estos campos: título, entradilla (meta description), slug
+/// y la programación de publicación.
+model Articulo {
+  id            String    @id @default(cuid())
+  /// "es" | "en" | "de"
+  idioma        String
+  slug          String
+  /// <title> de la página.
+  titulo        String
+  /// Meta description y entradilla visible en las listas.
+  entradilla    String
+  /// Fecha visible y datePublished del JSON-LD.
+  fecha         DateTime
+  minutos       Int       @default(5)
+  /// "Precios" | "Normativa" | "Rutas" | "Medio ambiente"
+  categoria     String
+  /// Cuerpo en Markdown ligero.
+  cuerpo        String
+  /// Enlaces internos al final, como JSON: [{ "texto": "...", "pagina": {...} }]
+  relacionados  Json?
+  /// Despublicar sin borrar.
+  publicado     Boolean   @default(true)
+  /// Programación: no es público hasta esta fecha. Null = sin programar.
+  publicaDesde  DateTime?
+  creadoEn      DateTime  @default(now())
+  actualizadoEn DateTime  @updatedAt
+
+  @@unique([idioma, slug])
+  @@index([idioma, fecha])
+  @@index([publicado, publicaDesde])
+}

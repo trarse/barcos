@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 
-import { ARTICULOS } from "@/datos/blog";
 import { GUIAS } from "@/datos/guias";
 import { OCASIONES } from "@/datos/ocasiones";
 import { soloPublicados } from "@/lib/publicacion";
@@ -13,6 +12,7 @@ import {
   paresDestinoTipo,
   slugsDeBarcos,
 } from "@/lib/consultas";
+import { articulosPublicados } from "@/lib/blog";
 import { IDIOMAS, type Idioma } from "@/lib/idiomas";
 import { idiomasIndexables } from "@/lib/indexacion";
 import { ruta, todasLasRutas, type Pagina } from "@/lib/rutas";
@@ -77,7 +77,7 @@ function entradas(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [destinos, tipos, pares, barcos, experiencias, lugares, sinTitulacion] =
+  const [destinos, tipos, pares, barcos, experiencias, lugares, sinTitulacion, articulos] =
     await Promise.all([
       listarDestinos(),
       listarTipos(),
@@ -86,6 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       listarExperiencias(),
       listarLugares(),
       contarSinTitulacion(),
+      articulosPublicados(),
     ]);
 
   const ahora = new Date();
@@ -183,7 +184,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     })),
 
-    ...soloPublicados(ARTICULOS).map((a) => ({
+    ...articulos.map((a) => ({
       url: urlAbsoluta(ruta({ tipo: "articulo", slug: a.slug }, a.idioma)),
       lastModified: new Date(a.fecha),
       changeFrequency: "monthly" as const,

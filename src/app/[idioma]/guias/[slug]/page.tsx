@@ -74,7 +74,7 @@ export default async function PaginaGuia(props: PageProps<"/[idioma]/guias/[slug
   const t = textos(idioma);
   const otras = guiasDe(idioma).filter((g) => g.slug !== slug);
   // No se enlaza a lo que todavía no se ha publicado.
-  const relacionados = enlacesVivos(guia.relacionados, idioma);
+  const relacionados = await enlacesVivos(guia.relacionados, idioma);
 
   return (
     <>

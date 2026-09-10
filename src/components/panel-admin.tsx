@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { PanelBlog } from "@/components/panel-blog";
+
 /**
  * Panel de administración de reservas.
  *
@@ -71,6 +73,7 @@ export function PanelAdmin() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("pendiente");
+  const [vista, setVista] = useState<"reservas" | "blog">("reservas");
 
   const cargar = useCallback(async (token: string) => {
     try {
@@ -154,14 +157,49 @@ export function PanelAdmin() {
     );
   }
 
+  if (vista === "blog") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setVista("reservas")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            ← Reservas
+          </button>
+          <button
+            onClick={() => {
+              sessionStorage.removeItem("estribor_admin");
+              setAutenticado(false);
+            }}
+            className="text-sm text-texto-suave underline"
+          >
+            Salir
+          </button>
+        </div>
+        <div className="mt-8">
+          <PanelBlog clave={clave} />
+        </div>
+      </main>
+    );
+  }
+
   const visibles = reservas.filter((r) => r.estado === filtro);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-texto">
-          Reservas
-        </h1>
+        <div className="flex gap-2">
+          <span className="rounded-full bg-acento px-4 py-1.5 text-sm font-medium text-white">
+            Reservas
+          </span>
+          <button
+            onClick={() => setVista("blog")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            Blog
+          </button>
+        </div>
         <button
           onClick={() => {
             sessionStorage.removeItem("estribor_admin");
