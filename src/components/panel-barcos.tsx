@@ -20,7 +20,7 @@ type Barco = {
  * Revisión de barcos: los que llegan del formulario de alta entran como
  * pendientes (publicado=false) y aquí se aprueban o rechazan.
  */
-export function PanelBarcos({ clave }: { clave: string }) {
+export function PanelBarcos() {
   const [barcos, setBarcos] = useState<Barco[]>([]);
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -28,9 +28,7 @@ export function PanelBarcos({ clave }: { clave: string }) {
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
-      const res = await fetch("/api/barcos", {
-        headers: { Authorization: `Bearer ${clave}` },
-      });
+      const res = await fetch("/api/barcos");
       if (!res.ok) throw new Error("auth");
       const data = await res.json();
       setBarcos(data.barcos ?? []);
@@ -39,7 +37,7 @@ export function PanelBarcos({ clave }: { clave: string }) {
     } finally {
       setCargando(false);
     }
-  }, [clave]);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -49,10 +47,7 @@ export function PanelBarcos({ clave }: { clave: string }) {
   async function publicar(id: string, publicado: boolean) {
     const res = await fetch("/api/barcos", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${clave}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, publicado }),
     });
     if (res.ok) void cargar();
@@ -62,10 +57,7 @@ export function PanelBarcos({ clave }: { clave: string }) {
     if (!confirm("¿Borrar este barco?")) return;
     const res = await fetch("/api/barcos", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${clave}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
     if (res.ok) void cargar();

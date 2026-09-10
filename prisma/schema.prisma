@@ -394,3 +394,31 @@ model Articulo {
   @@index([idioma, fecha])
   @@index([publicado, publicaDesde])
 }
+
+/// Usuario del panel con autenticación por contraseña.
+model Usuario {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  nombre       String
+  /// "sal:hash" generado con scrypt.
+  passwordHash String
+  /// "admin" de momento; más adelante "armador".
+  rol          String   @default("admin")
+  creadoEn     DateTime @default(now())
+  sesiones     Sesion[]
+}
+
+/// Sesión de un usuario: el token viaja en una cookie httpOnly y aquí se
+/// guarda solo su hash SHA-256, para que una fuga de la tabla no permita
+/// suplantar la identidad.
+model Sesion {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  creadoEn  DateTime @default(now())
+  expiraEn  DateTime
+
+  @@index([usuarioId])
+  @@index([expiraEn])
+}

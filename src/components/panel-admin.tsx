@@ -7,11 +7,11 @@ import { PanelBlog } from "@/components/panel-blog";
 import { paisDeTelefono } from "@/lib/telefonos";
 
 /**
- * Panel de administración de reservas.
+ * Panel de administración de reservas, barcos y blog.
  *
- * La "sesión" es la clave guardada en sessionStorage y enviada como cabecera
- * Bearer a /api/reservas. Es lo bastante sencillo para la fase de validación;
- * antes de abrir a armadores habrá que sustituirlo por autenticación real.
+ * La autenticación es real: email + contraseña contra /api/auth/login, que
+ * deja una cookie httpOnly de sesión. Las peticiones al API no mandan ninguna
+ * cabecera: la sesión viaja sola en la cookie.
  */
 
 type Reserva = {
@@ -66,58 +66,128 @@ function fecha(iso: string): string {
 }
 
 export function PanelAdmin() {
-  const [clave, setClave] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return sessionStorage.getItem("estribor_admin") ?? "";
-  });
   const [autenticado, setAutenticado] = useState(false);
+  const [usuario, setUsuario] = useState<{ email: string; nombre: string } | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
+  const [cargandoReservas, setCargandoReservas] = useState(false);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("pendiente");
   const [vista, setVista] = useState<"reservas" | "blog" | "barcos">("reservas");
 
-  const cargar = useCallback(async (token: string) => {
+  // Campos del formulario de acceso.
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Cambio de contraseña.
+  const [mostrarCambioClave, setMostrarCambioClave] = useState(false);
+  const [claveActual, setClaveActual] = useState("");
+  const [claveNueva, setClaveNueva] = useState("");
+  const [msgClave, setMsgClave] = useState("");
+
+  const cargarReservas = useCallback(async () => {
+    setCargandoReservas(true);
     try {
-      const res = await fetch("/api/reservas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch("/api/reservas");
       if (!res.ok) throw new Error("auth");
       const data = await res.json();
       setReservas(data.reservas ?? []);
-      setAutenticado(true);
-      setError("");
-      sessionStorage.setItem("estribor_admin", token);
     } catch {
-      setError("Clave incorrecta o no se pudo cargar.");
-      setAutenticado(false);
+      // La sesión ya la valida /api/auth/yo.
+    } finally {
+      setCargandoReservas(false);
     }
   }, []);
 
   useEffect(() => {
-    if (clave) {
-      // Carga inicial en el montaje: fetch asíncrono; el setState ocurre
-      // después del await, no de forma síncrona en el efecto.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      void cargar(clave);
+    // Montaje: comprobar la sesión y, si existe, cargar las reservas.
+    void (async () => {
+      try {
+        const res = await fetch("/api/auth/yo");
+        if (res.ok) {
+          const data = await res.json();
+          setUsuario(data.usuario);
+          setAutenticado(true);
+          void cargarReservas();
+        }
+      } catch {
+        // Sin sesión: se queda en la pantalla de acceso.
+      } finally {
+        setCargando(false);
+      }
+    })();
+  }, [cargarReservas]);
+
+  async function entrar(e: React.FormEvent) {
+    e.preventDefault();
+    setCargando(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        setUsuario(data.usuario);
+        setAutenticado(true);
+        setPassword("");
+        void cargarReservas();
+      } else if (data?.error === "limit") {
+        setError("Demasiados intentos. Espera unos minutos.");
+      } else {
+        setError("Email o contraseña incorrectos.");
+      }
+    } catch {
+      setError("No se pudo conectar.");
+    } finally {
+      setCargando(false);
     }
-  }, [clave, cargar]);
+  }
+
+  async function salir() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    setAutenticado(false);
+    setUsuario(null);
+    setVista("reservas");
+  }
 
   async function cambiarEstado(id: string, estado: string) {
-    const token = sessionStorage.getItem("estribor_admin");
-    if (!token) return;
     const res = await fetch("/api/reservas", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, estado }),
     });
     if (res.ok) {
       setReservas((prev) =>
         prev.map((r) => (r.id === id ? { ...r, estado } : r)),
       );
+    }
+  }
+
+  async function cambiarClave(e: React.FormEvent) {
+    e.preventDefault();
+    setMsgClave("");
+    try {
+      const res = await fetch("/api/auth/cambiar-clave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actual: claveActual, nueva: claveNueva }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        setClaveActual("");
+        setClaveNueva("");
+        setMostrarCambioClave(false);
+        setMsgClave("Contraseña actualizada.");
+      } else if (data?.error === "credenciales") {
+        setMsgClave("La contraseña actual no es correcta.");
+      } else {
+        setMsgClave("La nueva debe tener al menos 8 caracteres.");
+      }
+    } catch {
+      setMsgClave("No se pudo actualizar.");
     }
   }
 
@@ -128,22 +198,24 @@ export function PanelAdmin() {
           Panel · Estribor
         </h1>
         <p className="mt-2 text-sm text-texto-suave">
-          Introduce la clave de administración.
+          Entra con tu email y contraseña.
         </p>
-        <form
-          className="mt-6 space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setCargando(true);
-            void cargar(clave).finally(() => setCargando(false));
-          }}
-        >
+        <form className="mt-6 space-y-3" onSubmit={entrar}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            autoFocus
+            autoComplete="username"
+            className="w-full rounded-carta border border-borde bg-superficie px-4 py-2 text-texto"
+          />
           <input
             type="password"
-            value={clave}
-            onChange={(e) => setClave(e.target.value)}
-            placeholder="Clave"
-            autoFocus
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Contraseña"
+            autoComplete="current-password"
             className="w-full rounded-carta border border-borde bg-superficie px-4 py-2 text-texto"
           />
           {error && <p className="text-sm text-rose-600">{error}</p>}
@@ -169,18 +241,12 @@ export function PanelAdmin() {
           >
             ← Reservas
           </button>
-          <button
-            onClick={() => {
-              sessionStorage.removeItem("estribor_admin");
-              setAutenticado(false);
-            }}
-            className="text-sm text-texto-suave underline"
-          >
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
             Salir
           </button>
         </div>
         <div className="mt-8">
-          <PanelBlog clave={clave} />
+          <PanelBlog />
         </div>
       </main>
     );
@@ -196,18 +262,12 @@ export function PanelAdmin() {
           >
             ← Reservas
           </button>
-          <button
-            onClick={() => {
-              sessionStorage.removeItem("estribor_admin");
-              setAutenticado(false);
-            }}
-            className="text-sm text-texto-suave underline"
-          >
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
             Salir
           </button>
         </div>
         <div className="mt-8">
-          <PanelBarcos clave={clave} />
+          <PanelBarcos />
         </div>
       </main>
     );
@@ -217,7 +277,7 @@ export function PanelAdmin() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2">
           <span className="rounded-full bg-acento px-4 py-1.5 text-sm font-medium text-white">
             Reservas
@@ -235,16 +295,56 @@ export function PanelAdmin() {
             Barcos
           </button>
         </div>
-        <button
-          onClick={() => {
-            sessionStorage.removeItem("estribor_admin");
-            setAutenticado(false);
-          }}
-          className="text-sm text-texto-suave underline"
-        >
-          Salir
-        </button>
+        <div className="flex items-center gap-3">
+          {usuario && (
+            <span className="text-sm text-texto-suave">
+              {usuario.nombre} · {usuario.email}
+            </span>
+          )}
+          <button
+            onClick={() => setMostrarCambioClave((v) => !v)}
+            className="text-sm text-texto-suave underline"
+          >
+            Cambiar clave
+          </button>
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
+            Salir
+          </button>
+        </div>
       </div>
+
+      {mostrarCambioClave && (
+        <form
+          onSubmit={cambiarClave}
+          className="mt-4 grid gap-3 rounded-carta border border-borde bg-superficie p-4 sm:grid-cols-2"
+        >
+          <input
+            type="password"
+            value={claveActual}
+            onChange={(e) => setClaveActual(e.target.value)}
+            placeholder="Contraseña actual"
+            autoComplete="current-password"
+            className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto"
+          />
+          <input
+            type="password"
+            value={claveNueva}
+            onChange={(e) => setClaveNueva(e.target.value)}
+            placeholder="Nueva contraseña (mín. 8)"
+            autoComplete="new-password"
+            className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto"
+          />
+          {msgClave && (
+            <p className="text-sm text-texto-suave sm:col-span-2">{msgClave}</p>
+          )}
+          <button
+            type="submit"
+            className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo sm:col-span-2"
+          >
+            Actualizar contraseña
+          </button>
+        </form>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-2">
         {ESTADOS.map((estado) => {
@@ -265,7 +365,7 @@ export function PanelAdmin() {
         })}
       </div>
 
-      {cargando ? (
+      {cargandoReservas ? (
         <p className="mt-6 text-sm text-texto-suave">Cargando…</p>
       ) : visibles.length === 0 ? (
         <p className="mt-6 text-sm text-texto-suave">

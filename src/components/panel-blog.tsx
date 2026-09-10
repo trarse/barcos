@@ -121,7 +121,7 @@ function formularioVacio(): Formulario {
   };
 }
 
-export function PanelBlog({ clave }: { clave: string }) {
+export function PanelBlog() {
   const [articulos, setArticulos] = useState<Articulo[]>([]);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
@@ -132,9 +132,7 @@ export function PanelBlog({ clave }: { clave: string }) {
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
-      const res = await fetch("/api/articulos", {
-        headers: { Authorization: `Bearer ${clave}` },
-      });
+      const res = await fetch("/api/articulos");
       if (!res.ok) throw new Error("auth");
       const data = await res.json();
       setArticulos(data.articulos ?? []);
@@ -143,7 +141,7 @@ export function PanelBlog({ clave }: { clave: string }) {
     } finally {
       setCargando(false);
     }
-  }, [clave]);
+  }, []);
 
   useEffect(() => {
     // Carga inicial en el montaje (fetch asíncrono).
@@ -199,10 +197,7 @@ export function PanelBlog({ clave }: { clave: string }) {
     const metodo = editandoId ? "PATCH" : "POST";
     const res = await fetch("/api/articulos", {
       method: metodo,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${clave}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editandoId ? { id: editandoId, ...cuerpo } : cuerpo),
     });
     if (res.ok) {
@@ -217,10 +212,7 @@ export function PanelBlog({ clave }: { clave: string }) {
   async function alternarPublicado(a: Articulo) {
     const res = await fetch("/api/articulos", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${clave}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: a.id,
         idioma: a.idioma,
@@ -243,10 +235,7 @@ export function PanelBlog({ clave }: { clave: string }) {
     if (!confirm(`¿Borrar "${a.titulo}" (${a.idioma})?`)) return;
     const res = await fetch("/api/articulos", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${clave}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: a.id }),
     });
     if (res.ok) {

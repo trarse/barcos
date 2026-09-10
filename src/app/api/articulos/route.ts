@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { usuarioAutenticado } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 
@@ -41,12 +42,6 @@ const Esquema = z.object({
     .nullable(),
 });
 
-function esAdmin(req: Request): boolean {
-  const clave = process.env.ADMIN_CLAVE;
-  if (!clave) return false;
-  return req.headers.get("authorization") === `Bearer ${clave}`;
-}
-
 function datosDe(a: z.infer<typeof Esquema>): Prisma.ArticuloUncheckedCreateInput {
   return {
     idioma: a.idioma,
@@ -64,7 +59,7 @@ function datosDe(a: z.infer<typeof Esquema>): Prisma.ArticuloUncheckedCreateInpu
 }
 
 export async function GET(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
@@ -92,7 +87,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
@@ -112,7 +107,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
@@ -136,7 +131,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { usuarioAutenticado } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
 
@@ -46,13 +47,6 @@ function referenciaAleatoria(): string {
     s += caracteres[Math.floor(Math.random() * caracteres.length)];
   }
   return `RES-${s}`;
-}
-
-/** El panel se protege con una clave simple por cabecera Bearer. */
-function esAdmin(req: Request): boolean {
-  const clave = process.env.ADMIN_CLAVE;
-  if (!clave) return false;
-  return req.headers.get("authorization") === `Bearer ${clave}`;
 }
 
 function ipDe(req: Request): string {
@@ -177,7 +171,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
@@ -195,7 +189,7 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  if (!esAdmin(req)) {
+  if (!(await usuarioAutenticado(req))) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
 
