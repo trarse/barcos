@@ -26,6 +26,7 @@ type Reserva = {
   numPersonas: number;
   precioTotalCents: number;
   estado: string;
+  pagado: boolean;
   notas: string | null;
   idioma: string;
   creadoEn: string;
@@ -163,6 +164,20 @@ export function PanelAdmin() {
       setReservas((prev) =>
         prev.map((r) => (r.id === id ? { ...r, estado } : r)),
       );
+    }
+  }
+
+  async function cobrar(id: string) {
+    const res = await fetch("/api/pagos/crear", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reservaId: id }),
+    });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.urlPago) {
+      window.open(data.urlPago, "_blank", "noopener,noreferrer");
+    } else {
+      alert("No se pudo crear el enlace de pago. Comprueba que Stripe está configurado.");
     }
   }
 
@@ -382,11 +397,19 @@ export function PanelAdmin() {
                 <span className="font-mono text-sm font-semibold tracking-wider text-texto-suave">
                   {r.referencia}
                 </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${COLOR[r.estado]}`}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                  {ETIQUETA[r.estado]}
+                <span className="flex items-center gap-2">
+                  {r.pagado && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                      Pagado
+                    </span>
+                  )}
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${COLOR[r.estado]}`}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                    {ETIQUETA[r.estado]}
+                  </span>
                 </span>
               </div>
 
@@ -449,6 +472,14 @@ export function PanelAdmin() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  {!r.pagado && (r.estado === "pendiente" || r.estado === "confirmada") && (
+                    <button
+                      onClick={() => void cobrar(r.id)}
+                      className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+                    >
+                      Cobrar
+                    </button>
+                  )}
                   {r.estado === "pendiente" && (
                     <>
                       <button

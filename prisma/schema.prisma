@@ -355,6 +355,11 @@ model Reserva {
   notas            String?
   idioma           String   @default("es")
   paginaOrigen     String?
+  /// Sesión de pago de Stripe (Checkout), si se inició un cobro.
+  stripeSessionId  String?  @unique
+  /// True cuando Stripe confirma el cobro por webhook.
+  pagado           Boolean  @default(false)
+  pagadoEn         DateTime?
   creadoEn         DateTime @default(now())
   actualizadoEn    DateTime @updatedAt
 

@@ -189,6 +189,10 @@ export function Reserva({
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok) {
+        if (data.urlPago) {
+          window.location.assign(data.urlPago);
+          return;
+        }
         setReservado((prev) => [...prev, { desde: fechaInicio, hasta: fechaFin }]);
         setResultado({
           tipo: "ok",

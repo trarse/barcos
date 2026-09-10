@@ -4,6 +4,7 @@ import { z } from "zod";
 import { usuarioAutenticado } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
+import { crearSesionPago } from "@/lib/stripe";
 
 /**
  * Reservas: creación pública y gestión desde el panel de administración.
@@ -159,6 +160,25 @@ export async function POST(req: Request) {
     },
   });
 
+  // Reserva instantánea: creamos el enlace de pago para redirigir a Stripe.
+  let urlPago: string | undefined;
+  if (barco.reservaInstantanea) {
+    const sesion = await crearSesionPago({
+      reservaId: reserva.id,
+      referencia: reserva.referencia,
+      descripcion: `Alquiler ${barco.nombre}`,
+      totalCents: desglose.total,
+      idioma: r.idioma,
+    });
+    if (sesion?.url) {
+      await db.reserva.update({
+        where: { id: reserva.id },
+        data: { stripeSessionId: sesion.id },
+      });
+      urlPago = sesion.url;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     reserva: {
@@ -167,6 +187,7 @@ export async function POST(req: Request) {
       precioTotalCents: reserva.precioTotalCents,
     },
     desglose,
+    urlPago,
   });
 }
 
