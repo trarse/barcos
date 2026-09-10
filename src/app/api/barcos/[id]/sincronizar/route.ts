@@ -4,7 +4,7 @@ import { usuarioAutenticado } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sincronizarBarco } from "@/lib/sincronizacion";
 
-/** Sincroniza ahora los calendarios externos de un barco (ignora la caché). */
+/** Sincroniza los calendarios externos de un barco (TTL-aware; `forzar` ignora la caché). */
 export async function POST(
   req: Request,
   props: { params: Promise<{ id: string }> },
@@ -23,6 +23,8 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
-  const resultado = await sincronizarBarco(id, { forzar: true });
+  const datos = await req.json().catch(() => null);
+  const forzar = datos?.forzar === true;
+  const resultado = await sincronizarBarco(id, { forzar });
   return NextResponse.json({ ok: true, ...resultado });
 }

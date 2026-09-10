@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Evento = {
   desde: string;
@@ -57,6 +57,25 @@ export function CalendarioFlota({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void cargar();
   }, [cargar]);
+
+  const cargarRef = useRef(cargar);
+  useEffect(() => {
+    cargarRef.current = cargar;
+  }, [cargar]);
+
+  // Refresco en segundo plano de los calendarios externos al abrir el
+  // calendario (TTL-aware), y recarga al terminar.
+  useEffect(() => {
+    let activo = true;
+    fetch("/api/sincronizar", { method: "POST" })
+      .catch(() => {})
+      .finally(() => {
+        if (activo) cargarRef.current();
+      });
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   const dias = useMemo(() => {
     const total = new Date(mes.getFullYear(), mes.getMonth() + 1, 0).getDate();

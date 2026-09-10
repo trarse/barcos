@@ -113,6 +113,26 @@ export function FichaBarco({
     void cargar();
   }, [cargar]);
 
+  // Al abrir la ficha, refresca en segundo plano los calendarios externos
+  // (TTL-aware) y recarga la disponibilidad al terminar.
+  useEffect(() => {
+    let activo = true;
+    void (async () => {
+      try {
+        const rc = await fetch(`/api/barcos/${barcoId}/calendarios`).then((r) => r.json());
+        if (activo && rc?.calendarios?.length > 0) {
+          await fetch(`/api/barcos/${barcoId}/sincronizar`, { method: "POST" }).catch(() => {});
+          if (activo) void cargar();
+        }
+      } catch {
+        // sin conexión
+      }
+    })();
+    return () => {
+      activo = false;
+    };
+  }, [barcoId, cargar]);
+
   async function guardarFotos() {
     setMsgFotos("");
     const limpias = imgs.filter((i) => i.url.trim());
@@ -182,7 +202,11 @@ export function FichaBarco({
   async function sincronizar() {
     setSincronizando(true);
     setMsgCal("");
-    const res = await fetch(`/api/barcos/${barcoId}/sincronizar`, { method: "POST" });
+    const res = await fetch(`/api/barcos/${barcoId}/sincronizar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ forzar: true }),
+    });
     const data = await res.json().catch(() => null);
     setSincronizando(false);
     setMsgCal(res.ok ? `Sincronizado: ${data?.importados ?? 0} eventos importados.` : "Error al sincronizar.");
