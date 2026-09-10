@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
 import { crearSesionPago } from "@/lib/stripe";
 import { sincronizarBarco } from "@/lib/sincronizacion";
+import { paisDeTelefono } from "@/lib/telefonos";
 
 /**
  * Reservas: creación pública y gestión desde el panel de administración.
@@ -164,6 +165,20 @@ export async function POST(req: Request) {
 
   recientes.set(ip, [...(recientes.get(ip) ?? []), Date.now()]);
 
+  // Cliente del CRM: se crea o actualiza con cada reserva.
+  const emailCliente = r.clienteEmail.toLowerCase();
+  const cliente = await db.cliente.upsert({
+    where: { email: emailCliente },
+    update: { nombre: r.clienteNombre, telefono: r.clienteTelefono ?? null, idioma: r.idioma },
+    create: {
+      email: emailCliente,
+      nombre: r.clienteNombre,
+      telefono: r.clienteTelefono ?? null,
+      idioma: r.idioma,
+      pais: paisDeTelefono(r.clienteTelefono ?? "")?.pais ?? null,
+    },
+  });
+
   const reserva = await db.reserva.create({
     data: {
       referencia: referenciaAleatoria(),
@@ -173,8 +188,9 @@ export async function POST(req: Request) {
       numDias: dias,
       numPersonas: r.numPersonas,
       clienteNombre: r.clienteNombre,
-      clienteEmail: r.clienteEmail,
+      clienteEmail: emailCliente,
       clienteTelefono: r.clienteTelefono ?? null,
+      clienteId: cliente.id,
       precioTotalCents: desglose.total,
       estado: "pendiente",
       notas: r.notas ?? null,

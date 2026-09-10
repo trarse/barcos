@@ -387,6 +387,8 @@ model Reserva {
   clienteNombre    String
   clienteEmail     String
   clienteTelefono  String?
+  clienteId        String?
+  cliente          Cliente? @relation(fields: [clienteId], references: [id], onDelete: SetNull)
   /// Total en céntimos de euro.
   precioTotalCents Int
   /// "pendiente" | "confirmada" | "cancelada" | "rechazada" | "completada"
@@ -404,6 +406,57 @@ model Reserva {
 
   @@index([barcoId, fechaInicio])
   @@index([estado, creadoEn])
+  @@index([clienteId])
+}
+
+/// Cliente del CRM: se crea/actualiza automáticamente con cada reserva y
+/// agrega su historial, su valor (LTV) y las notas/etiquetas de gestión.
+model Cliente {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  nombre        String
+  telefono      String?
+  /// País deducido del prefijo telefónico.
+  pais          String?
+  /// Idioma de la última reserva.
+  idioma        String    @default("es")
+  notas         String?
+  etiquetas     String[]  @default([])
+  creadoEn      DateTime  @default(now())
+  actualizadoEn DateTime  @updatedAt
+
+  reservas       Reserva[]
+  comunicaciones Comunicacion[]
+  tareas         Tarea[]
+
+  @@index([creadoEn])
+  @@index([pais])
+}
+
+/// Correo enviado a un cliente (confirmación, cambio de estado, manual...).
+model Comunicacion {
+  id        String   @id @default(cuid())
+  clienteId String
+  tipo      String
+  asunto    String
+  creadoEn  DateTime @default(now())
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+}
+
+/// Tarea de seguimiento sobre un cliente (recordatorio, llamada...).
+model Tarea {
+  id        String   @id @default(cuid())
+  clienteId String
+  texto     String
+  hecho     Boolean  @default(false)
+  creadoEn  DateTime @default(now())
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
 }
 
 /// Artículo del blog. Contenido editorial gestionado desde el panel /admin.
