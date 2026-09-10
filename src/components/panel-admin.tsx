@@ -241,69 +241,102 @@ export function PanelAdmin() {
           {visibles.map((r) => (
             <li
               key={r.id}
-              className="rounded-carta border border-borde bg-superficie p-4"
+              className="rounded-carta border border-borde bg-superficie p-5 transition-colors hover:border-acento"
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-display text-lg font-semibold text-texto">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-mono text-sm font-semibold tracking-wider text-texto-suave">
                   {r.referencia}
                 </span>
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLOR[r.estado]}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${COLOR[r.estado]}`}
                 >
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                   {ETIQUETA[r.estado]}
                 </span>
               </div>
 
-              <p className="mt-1 text-sm text-texto-suave">
-                {r.barco.nombre} · {r.barco.puerto.nombre} · {fecha(r.fechaInicio)}{" "}
-                → {fecha(r.fechaFin)} ({r.numDias} días)
-              </p>
-              <p className="mt-1 text-sm text-texto-suave">
-                {r.clienteNombre} · {r.clienteEmail}
-                {r.clienteTelefono ? ` · ${r.clienteTelefono}` : ""} ·{" "}
-                {r.numPersonas} pax
-              </p>
+              <h3 className="mt-3 font-display text-xl font-semibold text-texto">
+                {r.barco.nombre}
+              </h3>
+              <p className="text-sm text-texto-suave">{r.barco.puerto.nombre}</p>
+
+              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Entrada</dt>
+                  <dd className="mt-0.5 text-texto">{fecha(r.fechaInicio)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Salida</dt>
+                  <dd className="mt-0.5 text-texto">{fecha(r.fechaFin)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Duración</dt>
+                  <dd className="mt-0.5 text-texto">
+                    {r.numDias} {r.numDias === 1 ? "día" : "días"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Personas</dt>
+                  <dd className="mt-0.5 text-texto">{r.numPersonas}</dd>
+                </div>
+              </dl>
+
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md bg-superficie-alt px-3 py-2 text-sm">
+                <span className="font-semibold text-texto">{r.clienteNombre}</span>
+                <span className="text-texto-suave">{r.clienteEmail}</span>
+                {r.clienteTelefono && (
+                  <span className="text-texto-suave">{r.clienteTelefono}</span>
+                )}
+              </div>
+
               {r.notas && (
-                <p className="mt-1 text-xs text-texto-tenue">Nota: {r.notas}</p>
+                <p className="mt-2 text-xs italic text-texto-tenue">{r.notas}</p>
               )}
 
-              <p className="mt-2 font-display text-lg font-semibold text-acento">
-                {euros(r.precioTotalCents)}
-              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-borde pt-4">
+                <div>
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-texto-tenue">
+                    Total
+                  </span>
+                  <span className="cifra font-display text-2xl font-semibold text-acento">
+                    {euros(r.precioTotalCents)}
+                  </span>
+                </div>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {r.estado === "pendiente" && (
-                  <>
+                <div className="flex flex-wrap gap-2">
+                  {r.estado === "pendiente" && (
+                    <>
+                      <button
+                        onClick={() => void cambiarEstado(r.id, "confirmada")}
+                        className="rounded-md bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+                      >
+                        Confirmar
+                      </button>
+                      <button
+                        onClick={() => void cambiarEstado(r.id, "rechazada")}
+                        className="rounded-md bg-rose-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
+                      >
+                        Rechazar
+                      </button>
+                    </>
+                  )}
+                  {(r.estado === "pendiente" || r.estado === "confirmada") && (
                     <button
-                      onClick={() => void cambiarEstado(r.id, "confirmada")}
-                      className="rounded-carta bg-emerald-600 px-3 py-1.5 text-sm text-white"
+                      onClick={() => void cambiarEstado(r.id, "cancelada")}
+                      className="rounded-md border border-borde px-3.5 py-2 text-sm font-medium text-texto-suave transition-colors hover:bg-superficie-alt"
                     >
-                      Confirmar
+                      Cancelar
                     </button>
+                  )}
+                  {r.estado === "confirmada" && (
                     <button
-                      onClick={() => void cambiarEstado(r.id, "rechazada")}
-                      className="rounded-carta bg-rose-600 px-3 py-1.5 text-sm text-white"
+                      onClick={() => void cambiarEstado(r.id, "completada")}
+                      className="rounded-md bg-sky-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
                     >
-                      Rechazar
+                      Completar
                     </button>
-                  </>
-                )}
-                {(r.estado === "pendiente" || r.estado === "confirmada") && (
-                  <button
-                    onClick={() => void cambiarEstado(r.id, "cancelada")}
-                    className="rounded-carta border border-borde px-3 py-1.5 text-sm text-texto-suave"
-                  >
-                    Cancelar
-                  </button>
-                )}
-                {r.estado === "confirmada" && (
-                  <button
-                    onClick={() => void cambiarEstado(r.id, "completada")}
-                    className="rounded-carta bg-sky-600 px-3 py-1.5 text-sm text-white"
-                  >
-                    Completar
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
             </li>
           ))}
