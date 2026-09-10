@@ -78,18 +78,29 @@ export function FichaBarco({
   const [blMotivo, setBlMotivo] = useState("");
   const [msgBloqueo, setMsgBloqueo] = useState("");
 
+  // Calendarios externos (iCal)
+  const [calendarios, setCalendarios] = useState<
+    Array<{ id: string; url: string; nombre: string | null; ultimaSync: string | null; error: string | null }>
+  >([]);
+  const [nuevaUrl, setNuevaUrl] = useState("");
+  const [nuevoNombre, setNuevoNombre] = useState("");
+  const [msgCal, setMsgCal] = useState("");
+  const [sincronizando, setSincronizando] = useState(false);
+
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
-      const [rd, rr] = await Promise.all([
+      const [rd, rr, rc] = await Promise.all([
         fetch(`/api/barcos/${barcoId}`).then((r) => r.json()),
         fetch(`/api/barcos/${barcoId}/disponibilidad`).then((r) => r.json()),
+        fetch(`/api/barcos/${barcoId}/calendarios`).then((r) => r.json()),
       ]);
       if (rd?.ok) {
         setDetalle(rd);
         setImgs(rd.barco.imagenes.map((i: Imagen) => ({ url: i.url, alt: i.alt })));
       }
       if (rr?.ok) setReservado(rr.reservado ?? []);
+      if (rc?.ok) setCalendarios(rc.calendarios ?? []);
     } catch {
       // sin conexión
     } finally {
@@ -140,11 +151,55 @@ export function FichaBarco({
     if (res.ok) void cargar();
   }
 
+  async function agregarCalendario(e: React.FormEvent) {
+    e.preventDefault();
+    setMsgCal("");
+    if (!nuevaUrl.trim()) return;
+    const res = await fetch(`/api/barcos/${barcoId}/calendarios`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: nuevaUrl.trim(), nombre: nuevoNombre.trim() || undefined }),
+    });
+    if (res.ok) {
+      setNuevaUrl("");
+      setNuevoNombre("");
+      setMsgCal("Calendario añadido. Pulsa sincronizar para importarlo.");
+      void cargar();
+    } else {
+      setMsgCal("No se pudo añadir (revisa la URL).");
+    }
+  }
+
+  async function borrarCalendario(id: string) {
+    await fetch(`/api/barcos/${barcoId}/calendarios`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    void cargar();
+  }
+
+  async function sincronizar() {
+    setSincronizando(true);
+    setMsgCal("");
+    const res = await fetch(`/api/barcos/${barcoId}/sincronizar`, { method: "POST" });
+    const data = await res.json().catch(() => null);
+    setSincronizando(false);
+    setMsgCal(res.ok ? `Sincronizado: ${data?.importados ?? 0} eventos importados.` : "Error al sincronizar.");
+    void cargar();
+  }
+
+  async function copiarEnlace(url: string) {
+    await navigator.clipboard.writeText(url);
+    setMsgCal("Enlace copiado.");
+  }
+
   if (cargando || !detalle) {
     return <p className="mt-6 text-sm text-texto-suave">Cargando…</p>;
   }
 
   const b = detalle.barco;
+  const urlExportar = `${window.location.origin}/api/ical/${b.slug}`;
 
   return (
     <div>
@@ -329,6 +384,66 @@ export function FichaBarco({
               </button>
               {msgBloqueo && <span className="col-span-2 text-sm text-texto-suave">{msgBloqueo}</span>}
             </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Calendarios externos */}
+      <section className="mt-8">
+        <h3 className="font-display text-lg font-semibold text-texto">Calendarios externos (iCal)</h3>
+        <p className="mt-1 text-sm text-texto-suave">
+          Pega aquí el enlace iCal de Google Calendar, Airbnb o Nautal para importar sus reservas y evitar dobles ventas.
+        </p>
+
+        <ul className="mt-3 space-y-2">
+          {calendarios.length === 0 && (
+            <li className="text-sm text-texto-suave">Sin calendarios externos.</li>
+          )}
+          {calendarios.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-carta border border-borde bg-superficie p-3 text-sm">
+              <div className="min-w-0 flex-1">
+                <span className="block truncate text-texto">{c.nombre ?? c.url}</span>
+                {c.error && <span className="block text-xs text-rose-600">Error: {c.error}</span>}
+                {c.ultimaSync && <span className="block text-xs text-texto-tenue">Sincronizado {fecha(c.ultimaSync)}</span>}
+              </div>
+              <button onClick={() => void borrarCalendario(c.id)} className="text-xs text-rose-600 underline">quitar</button>
+            </li>
+          ))}
+        </ul>
+
+        <form onSubmit={agregarCalendario} className="mt-3 flex flex-wrap gap-2">
+          <input
+            value={nuevaUrl}
+            onChange={(e) => setNuevaUrl(e.target.value)}
+            placeholder="URL iCal (https://…)"
+            className="min-w-60 flex-1 rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto"
+          />
+          <input
+            value={nuevoNombre}
+            onChange={(e) => setNuevoNombre(e.target.value)}
+            placeholder="Nombre (opcional)"
+            className="w-40 rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto"
+          />
+          <button type="submit" className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo">Añadir</button>
+          <button
+            type="button"
+            onClick={() => void sincronizar()}
+            disabled={sincronizando}
+            className="rounded-md bg-acento px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {sincronizando ? "Sincronizando…" : "Sincronizar ahora"}
+          </button>
+        </form>
+        {msgCal && <p className="mt-2 text-sm text-texto-suave">{msgCal}</p>}
+
+        <div className="mt-4 rounded-carta border border-borde bg-superficie p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Exportar a otras plataformas</p>
+          <p className="mt-1 text-sm text-texto-suave">
+            Pega este enlace en Google Calendar, Airbnb o Nautal para que vean las reservas de Estribor:
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <input readOnly value={urlExportar} className="min-w-0 flex-1 rounded-md border border-borde bg-fondo px-3 py-2 text-xs text-texto" />
+            <button onClick={() => void copiarEnlace(urlExportar)} className="rounded-md border border-borde px-3 py-2 text-sm text-texto">Copiar</button>
           </div>
         </div>
       </section>

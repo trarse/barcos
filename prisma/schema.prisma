@@ -205,6 +205,7 @@ model Barco {
   opiniones    Opinion[]
   reservas     Reserva[]
   bloqueos     Bloqueo[]
+  calendarios  CalendarioExterno[]
 
   @@index([tipoId])
   @@index([puertoId])
@@ -230,11 +231,31 @@ model Bloqueo {
   fechaInicio DateTime
   fechaFin    DateTime
   motivo      String?
+  /// "manual" (armador/admin) o "externo" (importado de un calendario iCal).
+  fuente      String   @default("manual")
+  /// UID del evento externo, para reconocerlo al re-sincronizar.
+  uid         String?
   creadoEn    DateTime @default(now())
 
   barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
 
   @@index([barcoId, fechaInicio])
+  @@index([barcoId, fuente])
+}
+
+/// Calendario externo (iCal) del que se importan las reservas de un barco.
+model CalendarioExterno {
+  id         String    @id @default(cuid())
+  barcoId    String
+  url        String
+  nombre     String?
+  ultimaSync DateTime?
+  error      String?
+  creadoEn   DateTime  @default(now())
+
+  barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
+
+  @@index([barcoId])
 }
 
 model Opinion {

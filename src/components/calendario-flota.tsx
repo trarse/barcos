@@ -8,6 +8,7 @@ type Evento = {
   tipo: string;
   referencia?: string;
   motivo?: string | null;
+  fuente?: string;
 };
 type BarcoCal = { id: string; nombre: string; puerto: string; eventos: Evento[] };
 
@@ -62,11 +63,12 @@ export function CalendarioFlota({
     return Array.from({ length: total }, (_, i) => i + 1);
   }, [mes]);
 
-  function estadoDe(b: BarcoCal, dia: number): "libre" | "reserva" | "bloqueo" {
+  function estadoDe(b: BarcoCal, dia: number): "libre" | "reserva" | "bloqueo" | "externo" {
     const fecha = iso(new Date(mes.getFullYear(), mes.getMonth(), dia));
     for (const e of b.eventos) {
       if (fecha >= e.desde && fecha < e.hasta) {
-        return e.tipo === "bloqueo" ? "bloqueo" : "reserva";
+        if (e.tipo === "bloqueo") return e.fuente === "externo" ? "externo" : "bloqueo";
+        return "reserva";
       }
     }
     return "libre";
@@ -76,9 +78,12 @@ export function CalendarioFlota({
     const fecha = iso(new Date(mes.getFullYear(), mes.getMonth(), dia));
     for (const e of b.eventos) {
       if (fecha >= e.desde && fecha < e.hasta) {
-        return e.tipo === "bloqueo"
-          ? `Bloqueado${e.motivo ? ` · ${e.motivo}` : ""}`
-          : `Reserva ${e.referencia ?? ""}`;
+        if (e.tipo === "bloqueo") {
+          return e.fuente === "externo"
+            ? `Reserva externa${e.motivo ? ` · ${e.motivo}` : ""}`
+            : `Bloqueado${e.motivo ? ` · ${e.motivo}` : ""}`;
+        }
+        return `Reserva ${e.referencia ?? ""}`;
       }
     }
     return "Libre";
@@ -118,6 +123,9 @@ export function CalendarioFlota({
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm bg-slate-400" /> Bloqueado
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-sm bg-purple-400" /> Externo (iCal)
         </span>
       </div>
 
@@ -161,7 +169,9 @@ export function CalendarioFlota({
                         ? "bg-emerald-200"
                         : est === "reserva"
                           ? "bg-amber-400"
-                          : "bg-slate-400";
+                          : est === "externo"
+                            ? "bg-purple-400"
+                            : "bg-slate-400";
                     return (
                       <td key={d} className="p-0.5">
                         <div className={`h-4 w-6 rounded-sm ${color}`} title={tituloDe(b, d)} />

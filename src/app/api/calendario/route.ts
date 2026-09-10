@@ -56,7 +56,7 @@ export async function GET(req: Request) {
         fechaInicio: { lt: fin },
         fechaFin: { gt: inicio },
       },
-      select: { barcoId: true, fechaInicio: true, fechaFin: true, motivo: true },
+      select: { barcoId: true, fechaInicio: true, fechaFin: true, motivo: true, fuente: true },
     }),
   ]);
 
@@ -64,7 +64,7 @@ export async function GET(req: Request) {
 
   const eventosPorBarco = new Map<
     string,
-    Array<{ desde: string; hasta: string; tipo: string; referencia?: string; motivo?: string | null }>
+    Array<{ desde: string; hasta: string; tipo: string; referencia?: string; motivo?: string | null; fuente?: string }>
   >();
   for (const b of barcos) eventosPorBarco.set(b.id, []);
   for (const r of reservas) {
@@ -81,6 +81,7 @@ export async function GET(req: Request) {
       hasta: aFecha(bl.fechaFin),
       tipo: "bloqueo",
       motivo: bl.motivo,
+      fuente: bl.fuente,
     });
   }
 

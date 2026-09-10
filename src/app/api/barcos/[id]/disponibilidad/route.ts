@@ -32,7 +32,7 @@ export async function GET(
     db.bloqueo.findMany({
       where: { barcoId: id, fechaFin: { gt: new Date() } },
       orderBy: { fechaInicio: "asc" },
-      select: { id: true, fechaInicio: true, fechaFin: true, motivo: true },
+      select: { id: true, fechaInicio: true, fechaFin: true, motivo: true, fuente: true },
     }),
   ]);
 
@@ -49,6 +49,7 @@ export async function GET(
       desde: aFecha(b.fechaInicio),
       hasta: aFecha(b.fechaFin),
       motivo: b.motivo,
+      fuente: b.fuente,
     })),
   });
 }
