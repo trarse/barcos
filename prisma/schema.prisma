@@ -145,8 +145,11 @@ model Propietario {
   /// Login del armador, si tiene acceso al área propia.
   usuarioId      String?  @unique
   usuario        Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  /// Plan del armador: "gratis" o "pro" (desbloquea el CRM de clientes).
+  plan           String   @default("gratis")
 
   barcos Barco[]
+  gastos Gasto[]
 }
 
 model Barco {
@@ -206,6 +209,7 @@ model Barco {
   reservas     Reserva[]
   bloqueos     Bloqueo[]
   calendarios  CalendarioExterno[]
+  gastos       Gasto[]
 
   @@index([tipoId])
   @@index([puertoId])
@@ -241,6 +245,24 @@ model Bloqueo {
 
   @@index([barcoId, fechaInicio])
   @@index([barcoId, fuente])
+}
+
+/// Gasto de explotación de un armador, opcionalmente asociado a un barco.
+model Gasto {
+  id            String   @id @default(cuid())
+  propietarioId String
+  barcoId       String?
+  categoria     String
+  concepto      String
+  importeCents  Int
+  fecha         DateTime
+  creadoEn      DateTime @default(now())
+
+  propietario Propietario @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
+  barco       Barco?      @relation(fields: [barcoId], references: [id], onDelete: SetNull)
+
+  @@index([propietarioId, fecha])
+  @@index([barcoId])
 }
 
 /// Calendario externo (iCal) del que se importan las reservas de un barco.

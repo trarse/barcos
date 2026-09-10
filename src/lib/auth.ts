@@ -44,6 +44,7 @@ export type UsuarioSesion = {
   nombre: string;
   rol: string;
   propietarioId: string | null;
+  plan: string | null;
 };
 
 /** Devuelve el usuario de la sesión de la cookie, o null si no hay sesión válida. */
@@ -52,7 +53,7 @@ export async function usuarioAutenticado(req: Request): Promise<UsuarioSesion | 
   if (!token) return null;
   const sesion = await db.sesion.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { usuario: { include: { propietario: { select: { id: true } } } } },
+    include: { usuario: { include: { propietario: { select: { id: true, plan: true } } } } },
   });
   if (!sesion || sesion.expiraEn.getTime() < Date.now()) return null;
   return {
@@ -61,5 +62,6 @@ export async function usuarioAutenticado(req: Request): Promise<UsuarioSesion | 
     nombre: sesion.usuario.nombre,
     rol: sesion.usuario.rol,
     propietarioId: sesion.usuario.propietario?.id ?? null,
+    plan: sesion.usuario.propietario?.plan ?? null,
   };
 }

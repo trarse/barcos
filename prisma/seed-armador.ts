@@ -46,10 +46,10 @@ async function main() {
   const usuario = await prisma.usuario.findUnique({ where: { email } });
   await prisma.propietario.update({
     where: { id: propietario.id },
-    data: { usuarioId: usuario!.id },
+    data: { usuarioId: usuario!.id, plan: "pro" },
   });
 
-  console.log(`Armador ${email} listo, enlazado a "${nombrePropietario}".`);
+  console.log(`Armador ${email} listo (plan pro), enlazado a "${nombrePropietario}".`);
   await prisma.$disconnect();
 }
 

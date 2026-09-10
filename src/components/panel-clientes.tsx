@@ -36,11 +36,16 @@ export function PanelClientes() {
   const [segmento, setSegmento] = useState("todos");
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [ahora, setAhora] = useState(0);
+  const [sinPlan, setSinPlan] = useState(false);
 
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
       const res = await fetch("/api/clientes");
+      if (res.status === 403) {
+        setSinPlan(true);
+        return;
+      }
       const data = await res.json();
       if (data?.ok) {
         setClientes(data.clientes ?? []);
@@ -78,6 +83,18 @@ export function PanelClientes() {
 
   if (detalleId) {
     return <FichaCliente clienteId={detalleId} onCerrar={() => setDetalleId(null)} />;
+  }
+
+  if (sinPlan) {
+    return (
+      <div className="rounded-carta border border-borde bg-superficie p-8 text-center">
+        <h2 className="font-display text-xl font-semibold text-texto">El CRM de clientes es Pro</h2>
+        <p className="mt-2 text-sm text-texto-suave">
+          Con el plan Pro gestionas a tus clientes: historial, valor (LTV), notas, etiquetas y comunicación.
+        </p>
+        <p className="mt-1 text-sm text-texto-suave">Contacta con nosotros para activarlo.</p>
+      </div>
+    );
   }
 
   return (

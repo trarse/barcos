@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { usuarioAutenticado } from "@/lib/auth";
+import { puedeGestionarCliente } from "@/lib/clientes";
 import { db } from "@/lib/db";
 import { enviarCorreo } from "@/lib/correo";
 
@@ -19,11 +20,10 @@ export async function POST(
   if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  if (usuario.rol !== "admin") {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
-  }
-
   const { id } = await props.params;
+  if (usuario.rol !== "admin" && !(await puedeGestionarCliente(usuario, id))) {
+    return NextResponse.json({ ok: false, error: "plan" }, { status: 403 });
+  }
   const cliente = await db.cliente.findUnique({ where: { id }, select: { email: true } });
   if (!cliente) {
     return NextResponse.json({ ok: false, error: "cliente" }, { status: 404 });

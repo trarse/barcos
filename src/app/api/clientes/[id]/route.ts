@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { Prisma } from "@/generated/prisma/client";
 import { usuarioAutenticado } from "@/lib/auth";
+import { puedeGestionarCliente } from "@/lib/clientes";
 import { db } from "@/lib/db";
 
 const Edicion = z.object({
@@ -11,7 +13,7 @@ const Edicion = z.object({
   etiquetas: z.array(z.string().trim().min(1).max(40)).optional(),
 });
 
-/** Ficha 360° de un cliente: datos, historial, comunicaciones y tareas. */
+/** Ficha 360° de un cliente. El armador pro solo ve a sus clientes (sus reservas). */
 export async function GET(
   req: Request,
   props: { params: Promise<{ id: string }> },
@@ -20,15 +22,22 @@ export async function GET(
   if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  if (usuario.rol !== "admin") {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
+  const { id } = await props.params;
+
+  const esAdmin = usuario.rol === "admin";
+  if (!esAdmin && !(await puedeGestionarCliente(usuario, id))) {
+    return NextResponse.json({ ok: false, error: "plan" }, { status: 403 });
   }
 
-  const { id } = await props.params;
+  const reservasWhere: Prisma.ReservaWhereInput = esAdmin
+    ? {}
+    : { barco: { propietarioId: usuario.propietarioId! } };
+
   const cliente = await db.cliente.findUnique({
     where: { id },
     include: {
       reservas: {
+        where: reservasWhere,
         orderBy: { fechaInicio: "desc" },
         include: { barco: { select: { nombre: true } } },
       },
@@ -84,7 +93,6 @@ export async function GET(
   });
 }
 
-/** Actualiza notas, etiquetas, nombre o teléfono de un cliente. */
 export async function PATCH(
   req: Request,
   props: { params: Promise<{ id: string }> },
@@ -93,11 +101,11 @@ export async function PATCH(
   if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  if (usuario.rol !== "admin") {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
+  const { id } = await props.params;
+  if (usuario.rol !== "admin" && !(await puedeGestionarCliente(usuario, id))) {
+    return NextResponse.json({ ok: false, error: "plan" }, { status: 403 });
   }
 
-  const { id } = await props.params;
   const datos = await req.json().catch(() => null);
   const parseado = Edicion.safeParse(datos);
   if (!parseado.success) {
