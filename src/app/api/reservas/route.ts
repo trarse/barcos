@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { usuarioAutenticado } from "@/lib/auth";
+import { avisarAdminNuevaReserva, enviarCambioEstado, enviarConfirmacionReserva } from "@/lib/correo";
 import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
 import { crearSesionPago } from "@/lib/stripe";
@@ -160,6 +161,25 @@ export async function POST(req: Request) {
     },
   });
 
+  // Correo transaccional: aviso al cliente y al administrador. No bloquea.
+  void enviarConfirmacionReserva({
+    clienteEmail: r.clienteEmail,
+    clienteNombre: r.clienteNombre,
+    referencia: reserva.referencia,
+    barco: barco.nombre,
+    inicio: entrada,
+    fin: salida,
+    totalCents: desglose.total,
+  });
+  void avisarAdminNuevaReserva({
+    referencia: reserva.referencia,
+    barco: barco.nombre,
+    clienteNombre: r.clienteNombre,
+    inicio: entrada,
+    fin: salida,
+    totalCents: desglose.total,
+  });
+
   // Reserva instantánea: creamos el enlace de pago para redirigir a Stripe.
   let urlPago: string | undefined;
   if (barco.reservaInstantanea) {
@@ -233,7 +253,7 @@ export async function PATCH(req: Request) {
 
   const existente = await db.reserva.findUnique({
     where: { id },
-    include: { barco: { select: { propietarioId: true } } },
+    include: { barco: { select: { propietarioId: true, nombre: true } } },
   });
   if (!existente) {
     return NextResponse.json({ ok: false, error: "reserva" }, { status: 404 });
@@ -247,6 +267,14 @@ export async function PATCH(req: Request) {
   const reserva = await db.reserva.update({
     where: { id },
     data: { estado },
+  });
+
+  void enviarCambioEstado({
+    clienteEmail: existente.clienteEmail,
+    clienteNombre: existente.clienteNombre,
+    referencia: existente.referencia,
+    barco: existente.barco.nombre,
+    estado,
   });
 
   return NextResponse.json({ ok: true, estado: reserva.estado });

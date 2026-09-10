@@ -472,6 +472,14 @@ export function PanelAdmin() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <a
+                    href={`/contrato/${r.referencia}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md border border-borde px-3.5 py-2 text-sm font-medium text-texto-suave transition-colors hover:bg-superficie-alt"
+                  >
+                    Contrato
+                  </a>
                   {!r.pagado && (r.estado === "pendiente" || r.estado === "confirmada") && (
                     <button
                       onClick={() => void cobrar(r.id)}
