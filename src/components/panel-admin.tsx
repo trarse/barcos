@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { PanelBlog } from "@/components/panel-blog";
+import { paisDeTelefono } from "@/lib/telefonos";
 
 /**
  * Panel de administración de reservas.
@@ -285,7 +286,17 @@ export function PanelAdmin() {
                 <span className="font-semibold text-texto">{r.clienteNombre}</span>
                 <span className="text-texto-suave">{r.clienteEmail}</span>
                 {r.clienteTelefono && (
-                  <span className="text-texto-suave">{r.clienteTelefono}</span>
+                  <span className="text-texto-suave">
+                    {r.clienteTelefono}
+                    {(() => {
+                      const pais = paisDeTelefono(r.clienteTelefono);
+                      return pais ? (
+                        <span className="ml-1.5 text-texto-tenue">
+                          {pais.bandera} {pais.pais}
+                        </span>
+                      ) : null;
+                    })()}
+                  </span>
                 )}
               </div>
 
