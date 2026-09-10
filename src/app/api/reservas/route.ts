@@ -124,6 +124,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "ocupado" }, { status: 409 });
   }
 
+  // Bloqueos manuales (mantenimiento, cierres): tampoco se puede reservar.
+  const bloqueado = await db.bloqueo.findFirst({
+    where: {
+      barcoId: barco.id,
+      fechaInicio: { lt: salida },
+      fechaFin: { gt: entrada },
+    },
+    select: { id: true },
+  });
+  if (bloqueado) {
+    return NextResponse.json({ ok: false, error: "ocupado" }, { status: 409 });
+  }
+
   const temporada = temporadaDe(entrada, barco.puerto.destino.mesesAlta);
   const tarifa: Tarifa = {
     precioBaseDia: barco.precioBaseDia,

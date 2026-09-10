@@ -19,15 +19,22 @@ export async function GET(
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
 
-  const reservas = await db.reserva.findMany({
-    where: {
-      barcoId: id,
-      estado: { in: ["pendiente", "confirmada"] },
-      fechaFin: { gt: new Date() },
-    },
-    orderBy: { fechaInicio: "asc" },
-    select: { fechaInicio: true, fechaFin: true },
-  });
+  const [reservas, bloques] = await Promise.all([
+    db.reserva.findMany({
+      where: {
+        barcoId: id,
+        estado: { in: ["pendiente", "confirmada"] },
+        fechaFin: { gt: new Date() },
+      },
+      orderBy: { fechaInicio: "asc" },
+      select: { fechaInicio: true, fechaFin: true },
+    }),
+    db.bloqueo.findMany({
+      where: { barcoId: id, fechaFin: { gt: new Date() } },
+      orderBy: { fechaInicio: "asc" },
+      select: { id: true, fechaInicio: true, fechaFin: true, motivo: true },
+    }),
+  ]);
 
   const aFecha = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -36,6 +43,12 @@ export async function GET(
     reservado: reservas.map((r) => ({
       desde: aFecha(r.fechaInicio),
       hasta: aFecha(r.fechaFin),
+    })),
+    bloques: bloques.map((b) => ({
+      id: b.id,
+      desde: aFecha(b.fechaInicio),
+      hasta: aFecha(b.fechaFin),
+      motivo: b.motivo,
     })),
   });
 }

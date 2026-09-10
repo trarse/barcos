@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { usuarioAutenticado } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { Prisma } from "@/generated/prisma/client";
 
 /**
  * Alta de barcos por parte de los armadores.
@@ -168,9 +169,42 @@ export async function GET(req: Request) {
       tipo: b.tipo.nombre,
       puerto: `${b.puerto.nombre} · ${b.puerto.destino.nombre}`,
       propietario: b.propietario.nombre,
+      precioBaseDia: b.precioBaseDia,
+      esloraCm: b.esloraCm,
+      capacidad: b.capacidad,
+      reservaInstantanea: b.reservaInstantanea,
+      tipoId: b.tipoId,
+      puertoId: b.puertoId,
     })),
   });
 }
+
+const Edicion = z.object({
+  id: z.string().min(1),
+  publicado: z.boolean().optional(),
+  nombre: z.string().trim().min(2).max(120).optional(),
+  fabricante: z.string().trim().max(80).optional(),
+  modelo: z.string().trim().max(80).optional(),
+  anio: z.coerce.number().int().min(1900).max(2100).optional(),
+  descripcion: z.string().trim().max(2000).optional(),
+  esloraM: z.coerce.number().min(1).max(100).optional(),
+  capacidad: z.coerce.number().int().min(1).max(50).optional(),
+  camarotes: z.coerce.number().int().min(0).max(20).optional(),
+  aseos: z.coerce.number().int().min(0).max(20).optional(),
+  potenciaCv: z.coerce.number().int().min(0).max(5000).optional(),
+  consumo: z.coerce.number().min(0).max(500).optional(),
+  tipoId: z.string().min(1).optional(),
+  puertoId: z.string().min(1).optional(),
+  precioBaseDia: z.coerce.number().min(0).optional(),
+  limpieza: z.coerce.number().min(0).optional(),
+  tasaPortuariaDia: z.coerce.number().min(0).optional(),
+  patronDia: z.union([z.string().trim(), z.null()]).optional(),
+  fianza: z.coerce.number().min(0).optional(),
+  requiereTitulacion: z.boolean().optional(),
+  minimoDias: z.coerce.number().int().min(1).max(30).optional(),
+  descuentoSemana: z.coerce.number().int().min(0).max(100).optional(),
+  reservaInstantanea: z.boolean().optional(),
+});
 
 export async function PATCH(req: Request) {
   const usuario = await usuarioAutenticado(req);
@@ -182,13 +216,40 @@ export async function PATCH(req: Request) {
   }
 
   const datos = await req.json().catch(() => null);
-  const id = typeof datos?.id === "string" ? datos.id : "";
-  const publicado = Boolean(datos?.publicado);
-  if (!id) {
+  const parseado = Edicion.safeParse(datos);
+  if (!parseado.success) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
+  const a = parseado.data;
 
-  await db.barco.update({ where: { id }, data: { publicado } });
+  const data: Prisma.BarcoUncheckedUpdateInput = {};
+  if (a.publicado !== undefined) data.publicado = a.publicado;
+  if (a.nombre !== undefined) data.nombre = a.nombre;
+  if (a.fabricante !== undefined) data.fabricante = a.fabricante;
+  if (a.modelo !== undefined) data.modelo = a.modelo;
+  if (a.anio !== undefined) data.anio = a.anio;
+  if (a.descripcion !== undefined) data.descripcion = a.descripcion;
+  if (a.esloraM !== undefined) data.esloraCm = Math.round(a.esloraM * 100);
+  if (a.capacidad !== undefined) data.capacidad = a.capacidad;
+  if (a.camarotes !== undefined) data.camarotes = a.camarotes;
+  if (a.aseos !== undefined) data.aseos = a.aseos;
+  if (a.potenciaCv !== undefined) data.potenciaCv = a.potenciaCv;
+  if (a.consumo !== undefined) data.consumoLitrosHora = a.consumo;
+  if (a.tipoId !== undefined) data.tipoId = a.tipoId;
+  if (a.puertoId !== undefined) data.puertoId = a.puertoId;
+  if (a.precioBaseDia !== undefined) data.precioBaseDia = Math.round(a.precioBaseDia * 100);
+  if (a.limpieza !== undefined) data.limpieza = Math.round(a.limpieza * 100);
+  if (a.tasaPortuariaDia !== undefined) data.tasaPortuariaDia = Math.round(a.tasaPortuariaDia * 100);
+  if (a.patronDia !== undefined) {
+    data.patronDia = a.patronDia === null || a.patronDia === "" ? null : Math.round(Number(a.patronDia) * 100);
+  }
+  if (a.fianza !== undefined) data.fianza = Math.round(a.fianza * 100);
+  if (a.requiereTitulacion !== undefined) data.requiereTitulacion = a.requiereTitulacion;
+  if (a.minimoDias !== undefined) data.minimoDias = a.minimoDias;
+  if (a.descuentoSemana !== undefined) data.descuentoSemana = a.descuentoSemana;
+  if (a.reservaInstantanea !== undefined) data.reservaInstantanea = a.reservaInstantanea;
+
+  await db.barco.update({ where: { id: a.id }, data });
   return NextResponse.json({ ok: true });
 }
 

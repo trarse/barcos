@@ -204,6 +204,7 @@ model Barco {
   experiencias Experiencia[]
   opiniones    Opinion[]
   reservas     Reserva[]
+  bloqueos     Bloqueo[]
 
   @@index([tipoId])
   @@index([puertoId])
@@ -220,6 +221,20 @@ model Imagen {
   barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
 
   @@index([barcoId, orden])
+}
+
+/// Días en los que un barco no se puede alquilar (mantenimiento, cierre...).
+model Bloqueo {
+  id          String   @id @default(cuid())
+  barcoId     String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  motivo      String?
+  creadoEn    DateTime @default(now())
+
+  barco Barco @relation(fields: [barcoId], references: [id], onDelete: Cascade)
+
+  @@index([barcoId, fechaInicio])
 }
 
 model Opinion {
