@@ -6,6 +6,7 @@ import { avisarAdminNuevaReserva, enviarCambioEstado, enviarConfirmacionReserva 
 import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
 import { crearSesionPago } from "@/lib/stripe";
+import { sincronizarBarco } from "@/lib/sincronizacion";
 
 /**
  * Reservas: creación pública y gestión desde el panel de administración.
@@ -89,6 +90,14 @@ export async function POST(req: Request) {
   });
   if (!barco) {
     return NextResponse.json({ ok: false, error: "barco" }, { status: 404 });
+  }
+
+  // Refresca los calendarios externos antes de comprobar disponibilidad: así
+  // una reserva de Airbnb/Google recién entrante también bloquea estas fechas.
+  try {
+    await sincronizarBarco(barco.id);
+  } catch {
+    // Si la sincronización falla, seguimos con los datos que ya tenemos.
   }
 
   const entrada = new Date(`${r.fechaInicio}T00:00:00Z`);
