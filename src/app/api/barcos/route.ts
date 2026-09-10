@@ -37,7 +37,7 @@ const Esquema = z.object({
   contactoNombre: z.string().trim().min(2).max(120),
   contactoEmail: z.string().trim().email().max(200),
   contactoTelefono: z.string().trim().max(40).optional(),
-  web: z.string().max(0).optional(),
+  web: z.string().optional(),
 });
 
 function aSlug(texto: string): string {
