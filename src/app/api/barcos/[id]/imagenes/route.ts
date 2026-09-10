@@ -22,14 +22,14 @@ export async function PUT(
   if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  if (usuario.rol !== "admin") {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
-  }
 
   const { id } = await props.params;
-  const barco = await db.barco.findUnique({ where: { id }, select: { id: true } });
+  const barco = await db.barco.findUnique({ where: { id }, select: { propietarioId: true } });
   if (!barco) {
     return NextResponse.json({ ok: false, error: "barco" }, { status: 404 });
+  }
+  if (usuario.rol !== "admin" && usuario.propietarioId !== barco.propietarioId) {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
   }
 
   const datos = await req.json().catch(() => null);

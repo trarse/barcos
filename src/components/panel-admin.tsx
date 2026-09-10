@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { CalendarioFlota } from "@/components/calendario-flota";
 import { PanelBarcos } from "@/components/panel-barcos";
 import { PanelBlog } from "@/components/panel-blog";
 import { paisDeTelefono } from "@/lib/telefonos";
@@ -74,7 +75,7 @@ export function PanelAdmin() {
   const [cargandoReservas, setCargandoReservas] = useState(false);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("pendiente");
-  const [vista, setVista] = useState<"reservas" | "blog" | "barcos">("reservas");
+  const [vista, setVista] = useState<"reservas" | "blog" | "barcos" | "calendario">("reservas");
 
   // Campos del formulario de acceso.
   const [email, setEmail] = useState("");
@@ -288,6 +289,27 @@ export function PanelAdmin() {
     );
   }
 
+  if (vista === "calendario") {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setVista("reservas")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            ← Reservas
+          </button>
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
+            Salir
+          </button>
+        </div>
+        <div className="mt-8">
+          <CalendarioFlota />
+        </div>
+      </main>
+    );
+  }
+
   const visibles = reservas.filter((r) => r.estado === filtro);
 
   return (
@@ -308,6 +330,12 @@ export function PanelAdmin() {
             className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
           >
             Barcos
+          </button>
+          <button
+            onClick={() => setVista("calendario")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            Calendario
           </button>
         </div>
         <div className="flex items-center gap-3">

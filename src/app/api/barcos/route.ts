@@ -211,9 +211,6 @@ export async function PATCH(req: Request) {
   if (!usuario) {
     return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
   }
-  if (usuario.rol !== "admin") {
-    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
-  }
 
   const datos = await req.json().catch(() => null);
   const parseado = Edicion.safeParse(datos);
@@ -222,8 +219,17 @@ export async function PATCH(req: Request) {
   }
   const a = parseado.data;
 
+  const barco = await db.barco.findUnique({ where: { id: a.id }, select: { propietarioId: true } });
+  if (!barco) {
+    return NextResponse.json({ ok: false, error: "barco" }, { status: 404 });
+  }
+  // El armador gestiona su barco; publicar/despublicar lo decide el admin.
+  if (usuario.rol !== "admin" && usuario.propietarioId !== barco.propietarioId) {
+    return NextResponse.json({ ok: false, error: "auth" }, { status: 403 });
+  }
+
   const data: Prisma.BarcoUncheckedUpdateInput = {};
-  if (a.publicado !== undefined) data.publicado = a.publicado;
+  if (usuario.rol === "admin" && a.publicado !== undefined) data.publicado = a.publicado;
   if (a.nombre !== undefined) data.nombre = a.nombre;
   if (a.fabricante !== undefined) data.fabricante = a.fabricante;
   if (a.modelo !== undefined) data.modelo = a.modelo;

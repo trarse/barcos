@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { CalendarioFlota } from "@/components/calendario-flota";
+import { FichaBarco } from "@/components/ficha-barco";
+import { FormularioEditarBarco, type BarcoDetalle } from "@/components/formulario-editar-barco";
+
 /**
  * Área del armador: cada propietario entra con su email y contraseña y ve
  * solo sus barcos y las reservas de esos barcos. Puede confirmar, rechazar,
@@ -14,6 +18,9 @@ type Barco = {
   publicado: boolean;
   puerto: string;
 };
+
+type Tipo = { id: string; slug: string; nombre: string };
+type Puerto = { id: string; nombre: string; destino: string };
 
 type Reserva = {
   id: string;
@@ -74,14 +81,22 @@ export function PanelArmador() {
   const [barcos, setBarcos] = useState<Barco[]>([]);
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [filtro, setFiltro] = useState("todas");
+  const [tipos, setTipos] = useState<Tipo[]>([]);
+  const [puertos, setPuertos] = useState<Puerto[]>([]);
+  const [vista, setVista] = useState<"reservas" | "calendario">("reservas");
+  const [gestionId, setGestionId] = useState<string | null>(null);
+  const [editando, setEditando] = useState<BarcoDetalle | null>(null);
 
   const cargarDatos = useCallback(async () => {
-    const [rb, rr] = await Promise.all([
+    const [rb, rr, rm] = await Promise.all([
       fetch("/api/barcos").then((r) => r.json()),
       fetch("/api/reservas").then((r) => r.json()),
+      fetch("/api/meta").then((r) => r.json()),
     ]);
     setBarcos(rb?.barcos ?? []);
     setReservas(rr?.reservas ?? []);
+    setTipos(rm?.tipos ?? []);
+    setPuertos(rm?.puertos ?? []);
   }, []);
 
   useEffect(() => {
@@ -190,6 +205,64 @@ export function PanelArmador() {
     );
   }
 
+  if (gestionId) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <FichaBarco
+          barcoId={gestionId}
+          onCerrar={() => setGestionId(null)}
+          onEditar={(b) => {
+            setEditando(b);
+            setGestionId(null);
+          }}
+        />
+      </main>
+    );
+  }
+
+  if (editando) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <FormularioEditarBarco
+          barco={editando}
+          tipos={tipos}
+          puertos={puertos}
+          onCancelar={() => setEditando(null)}
+          onGuardado={() => {
+            setEditando(null);
+            void cargarDatos();
+          }}
+        />
+      </main>
+    );
+  }
+
+  if (vista === "calendario") {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold text-texto">Área del armador</h1>
+            {usuario && (
+              <p className="mt-1 text-sm text-texto-suave">{usuario.nombre} · {usuario.email}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setVista("reservas")} className="text-sm text-texto-suave underline">
+              ← Reservas
+            </button>
+            <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
+              Salir
+            </button>
+          </div>
+        </div>
+        <div className="mt-6">
+          <CalendarioFlota onAbrirBarco={(id) => setGestionId(id)} />
+        </div>
+      </main>
+    );
+  }
+
   const pendientes = reservas.filter((r) => r.estado === "pendiente").length;
   const visibles = filtro === "todas" ? reservas : reservas.filter((r) => r.estado === filtro);
 
@@ -206,9 +279,14 @@ export function PanelArmador() {
             </p>
           )}
         </div>
-        <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
-          Salir
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setVista("calendario")} className="text-sm text-texto-suave underline">
+            Calendario
+          </button>
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
+            Salir
+          </button>
+        </div>
       </div>
 
       <section className="mt-8">
@@ -226,13 +304,21 @@ export function PanelArmador() {
                   <span className="font-medium text-texto">{b.nombre}</span>
                   <span className="ml-2 text-sm text-texto-suave">{b.puerto}</span>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    b.publicado ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {b.publicado ? "Publicado" : "Pendiente de revisión"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      b.publicado ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {b.publicado ? "Publicado" : "Pendiente de revisión"}
+                  </span>
+                  <button
+                    onClick={() => setGestionId(b.id)}
+                    className="rounded-md border border-borde px-3 py-1.5 text-sm text-texto"
+                  >
+                    Gestionar
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
