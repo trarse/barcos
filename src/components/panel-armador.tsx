@@ -6,7 +6,9 @@ import { CalendarioFlota } from "@/components/calendario-flota";
 import { FichaBarco } from "@/components/ficha-barco";
 import { FormularioEditarBarco, type BarcoDetalle } from "@/components/formulario-editar-barco";
 import { PanelClientes } from "@/components/panel-clientes";
+import { PanelCobros } from "@/components/panel-cobros";
 import { PanelGastos } from "@/components/panel-gastos";
+import { PanelPlan } from "@/components/panel-plan";
 
 /**
  * Área del armador: cada propietario entra con su email y contraseña y ve
@@ -85,7 +87,7 @@ export function PanelArmador() {
   const [filtro, setFiltro] = useState("todas");
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [puertos, setPuertos] = useState<Puerto[]>([]);
-  const [vista, setVista] = useState<"reservas" | "calendario" | "gastos" | "clientes">("reservas");
+  const [vista, setVista] = useState<"reservas" | "calendario" | "gastos" | "clientes" | "cobros" | "plan">("reservas");
   const [gestionId, setGestionId] = useState<string | null>(null);
   const [editando, setEditando] = useState<BarcoDetalle | null>(null);
 
@@ -301,6 +303,42 @@ export function PanelArmador() {
     );
   }
 
+  if (vista === "cobros") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold text-texto">Área del armador</h1>
+            {usuario && <p className="mt-1 text-sm text-texto-suave">{usuario.nombre} · {usuario.email}</p>}
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setVista("reservas")} className="text-sm text-texto-suave underline">← Reservas</button>
+            <button onClick={() => void salir()} className="text-sm text-texto-suave underline">Salir</button>
+          </div>
+        </div>
+        <div className="mt-6"><PanelCobros /></div>
+      </main>
+    );
+  }
+
+  if (vista === "plan") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold text-texto">Área del armador</h1>
+            {usuario && <p className="mt-1 text-sm text-texto-suave">{usuario.nombre} · {usuario.email}</p>}
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setVista("reservas")} className="text-sm text-texto-suave underline">← Reservas</button>
+            <button onClick={() => void salir()} className="text-sm text-texto-suave underline">Salir</button>
+          </div>
+        </div>
+        <div className="mt-6"><PanelPlan /></div>
+      </main>
+    );
+  }
+
   const pendientes = reservas.filter((r) => r.estado === "pendiente").length;
   const visibles = filtro === "todas" ? reservas : reservas.filter((r) => r.estado === filtro);
 
@@ -326,6 +364,12 @@ export function PanelArmador() {
           </button>
           <button onClick={() => setVista("clientes")} className="text-sm text-texto-suave underline">
             Clientes
+          </button>
+          <button onClick={() => setVista("cobros")} className="text-sm text-texto-suave underline">
+            Cobros
+          </button>
+          <button onClick={() => setVista("plan")} className="text-sm text-texto-suave underline">
+            Plan
           </button>
           <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
             Salir

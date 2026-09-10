@@ -6,6 +6,7 @@ import { avisarAdminNuevaReserva, enviarCambioEstado, enviarConfirmacionReserva 
 import { db } from "@/lib/db";
 import { calcularDesglose, diasEntre, temporadaDe, type Tarifa } from "@/lib/precio";
 import { crearSesionPago } from "@/lib/stripe";
+import { calcularComision } from "@/lib/comisiones";
 import { sincronizarBarco } from "@/lib/sincronizacion";
 import { paisDeTelefono } from "@/lib/telefonos";
 
@@ -179,6 +180,8 @@ export async function POST(req: Request) {
     },
   });
 
+  const { comisionCents, netoArmadorCents } = calcularComision(desglose.total);
+
   const reserva = await db.reserva.create({
     data: {
       referencia: referenciaAleatoria(),
@@ -192,6 +195,8 @@ export async function POST(req: Request) {
       clienteTelefono: r.clienteTelefono ?? null,
       clienteId: cliente.id,
       precioTotalCents: desglose.total,
+      comisionCents,
+      netoArmadorCents,
       estado: "pendiente",
       notas: r.notas ?? null,
       idioma: r.idioma,

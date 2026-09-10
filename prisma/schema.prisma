@@ -147,6 +147,10 @@ model Propietario {
   usuario        Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
   /// Plan del armador: "gratis" o "pro" (desbloquea el CRM de clientes).
   plan           String   @default("gratis")
+  /// Suscripción de pago (Stripe) del plan Pro.
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  suscripcionActiva    Boolean  @default(false)
 
   barcos Barco[]
   gastos Gasto[]
@@ -423,6 +427,13 @@ model Reserva {
   /// True cuando Stripe confirma el cobro por webhook.
   pagado           Boolean  @default(false)
   pagadoEn         DateTime?
+  /// Comisión de la plataforma en céntimos (calculada al reservar).
+  comisionCents    Int      @default(0)
+  /// Parte del armador (total - comisión) en céntimos.
+  netoArmadorCents Int      @default(0)
+  /// True cuando se ha pagado la parte del armador.
+  liquidado        Boolean  @default(false)
+  liquidadoEn      DateTime?
   creadoEn         DateTime @default(now())
   actualizadoEn    DateTime @updatedAt
 

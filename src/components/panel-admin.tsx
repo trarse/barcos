@@ -6,6 +6,8 @@ import { CalendarioFlota } from "@/components/calendario-flota";
 import { PanelBarcos } from "@/components/panel-barcos";
 import { PanelArmadores } from "@/components/panel-armadores";
 import { PanelClientes } from "@/components/panel-clientes";
+import { PanelInformes } from "@/components/panel-informes";
+import { PanelLiquidaciones } from "@/components/panel-liquidaciones";
 import { PanelBlog } from "@/components/panel-blog";
 import { paisDeTelefono } from "@/lib/telefonos";
 
@@ -77,7 +79,7 @@ export function PanelAdmin() {
   const [cargandoReservas, setCargandoReservas] = useState(false);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("pendiente");
-  const [vista, setVista] = useState<"reservas" | "blog" | "barcos" | "calendario" | "clientes" | "armadores">("reservas");
+  const [vista, setVista] = useState<"reservas" | "blog" | "barcos" | "calendario" | "clientes" | "armadores" | "informes" | "liquidaciones">("reservas");
 
   // Campos del formulario de acceso.
   const [email, setEmail] = useState("");
@@ -354,6 +356,30 @@ export function PanelAdmin() {
     );
   }
 
+  if (vista === "informes") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex items-center justify-between">
+          <button onClick={() => setVista("reservas")} className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave">← Reservas</button>
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">Salir</button>
+        </div>
+        <div className="mt-8"><PanelInformes /></div>
+      </main>
+    );
+  }
+
+  if (vista === "liquidaciones") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex items-center justify-between">
+          <button onClick={() => setVista("reservas")} className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave">← Reservas</button>
+          <button onClick={() => void salir()} className="text-sm text-texto-suave underline">Salir</button>
+        </div>
+        <div className="mt-8"><PanelLiquidaciones /></div>
+      </main>
+    );
+  }
+
   const visibles = reservas.filter((r) => r.estado === filtro);
 
   return (
@@ -392,6 +418,18 @@ export function PanelAdmin() {
             className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
           >
             Armadores
+          </button>
+          <button
+            onClick={() => setVista("informes")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            Informes
+          </button>
+          <button
+            onClick={() => setVista("liquidaciones")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            Liquidaciones
           </button>
         </div>
         <div className="flex items-center gap-3">
