@@ -130,6 +130,14 @@ export const obtenerDestino = cache(async (slug: string) =>
   }),
 );
 
+/** Todos los puertos con su municipio, para el alta de barcos. */
+export const listarPuertos = cache(async () =>
+  db.puerto.findMany({
+    orderBy: [{ destino: { nombre: "asc" } }, { nombre: "asc" }],
+    include: { destino: { select: { slug: true, nombre: true } } },
+  }),
+);
+
 /**
  * Destinos con nombre propio: la isla, el peñón, la cueva. Se piden con sus
  * accesos porque el valor de la página está justo ahí — en enlazar el sitio

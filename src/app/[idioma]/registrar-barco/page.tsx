@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Faq } from "@/components/faq";
-import { FormularioCaptacion } from "@/components/formulario-captacion";
+import { FormularioAltaBarco } from "@/components/formulario-alta-barco";
 import { Migas } from "@/components/migas";
 import { paginasFijas } from "@/datos/paginas";
+import { listarPuertos, listarTipos } from "@/lib/consultas";
 import { entero, euro } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
 import { alternativas } from "@/lib/rutas";
@@ -36,6 +37,7 @@ export default async function RegistrarBarco(
 
   const t = textos(idioma);
   const p = paginasFijas(idioma).publicar;
+  const [tipos, puertos] = await Promise.all([listarTipos(), listarPuertos()]);
 
   // Ejemplo con cifras del propio motor de precios, en céntimos.
   const tarifaDia = 30_000;
@@ -130,13 +132,25 @@ export default async function RegistrarBarco(
                 {p.notaComision}
               </p>
 
-              <FormularioCaptacion
-                idioma={idioma}
-                variante="armador"
-                pagina="/registrar-barco"
-              />
+              <p className="mt-4 text-sm leading-relaxed text-texto-suave">
+                Rellena el formulario de abajo para dar de alta tu barco.
+              </p>
             </div>
           </aside>
+        </div>
+      </div>
+
+      <div className="border-t border-borde bg-superficie">
+        <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+          <h2 className="font-display text-2xl font-semibold text-texto sm:text-3xl">
+            Alta de tu barco
+          </h2>
+          <p className="mt-2 text-texto-suave">
+            Rellena los datos y lo revisaremos antes de publicarlo.
+          </p>
+          <div className="mt-6">
+            <FormularioAltaBarco tipos={tipos} puertos={puertos} />
+          </div>
         </div>
       </div>
     </>

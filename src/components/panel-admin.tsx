@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { PanelBarcos } from "@/components/panel-barcos";
 import { PanelBlog } from "@/components/panel-blog";
 import { paisDeTelefono } from "@/lib/telefonos";
 
@@ -74,7 +75,7 @@ export function PanelAdmin() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("pendiente");
-  const [vista, setVista] = useState<"reservas" | "blog">("reservas");
+  const [vista, setVista] = useState<"reservas" | "blog" | "barcos">("reservas");
 
   const cargar = useCallback(async (token: string) => {
     try {
@@ -185,6 +186,33 @@ export function PanelAdmin() {
     );
   }
 
+  if (vista === "barcos") {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setVista("reservas")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            ← Reservas
+          </button>
+          <button
+            onClick={() => {
+              sessionStorage.removeItem("estribor_admin");
+              setAutenticado(false);
+            }}
+            className="text-sm text-texto-suave underline"
+          >
+            Salir
+          </button>
+        </div>
+        <div className="mt-8">
+          <PanelBarcos clave={clave} />
+        </div>
+      </main>
+    );
+  }
+
   const visibles = reservas.filter((r) => r.estado === filtro);
 
   return (
@@ -199,6 +227,12 @@ export function PanelAdmin() {
             className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
           >
             Blog
+          </button>
+          <button
+            onClick={() => setVista("barcos")}
+            className="rounded-full border border-borde px-4 py-1.5 text-sm font-medium text-texto-suave"
+          >
+            Barcos
           </button>
         </div>
         <button
