@@ -313,6 +313,8 @@ export const de: Textos = {
       `Anfrage gesendet. Ihre Referenz ist ${referencia}. Wir melden uns zur Bestätigung.`,
     error: "Senden fehlgeschlagen. Prüfen Sie die Angaben und versuchen Sie es erneut.",
     eligeFechas: "Wählen Sie die Termine, um den genauen Preis zu sehen.",
+    ocupado: "Diese Termine sind bereits gebucht. Wählen Sie andere.",
+    fechasReservadas: "Bereits gebuchte Termine",
     conceptos: {
       alquiler: "Miete",
       descuento: (porcentaje) => `${porcentaje} % Rabatt`,

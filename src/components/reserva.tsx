@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { euro, euroExacto, plural } from "@/lib/formato";
 import type { Idioma } from "@/lib/idiomas";
@@ -61,8 +61,24 @@ export function Reserva({
     tipo: "ok" | "error";
     mensaje: string;
   } | null>(null);
+  const [reservado, setReservado] = useState<{ desde: string; hasta: string }[]>([]);
 
   const hoy = aISOFecha(new Date());
+
+  const cargarDisponibilidad = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/barcos/${barcoId}/disponibilidad`);
+      const data = await res.json();
+      if (data?.ok) setReservado(data.reservado ?? []);
+    } catch {
+      // Sin conexión no pasa nada: el servidor bloquea igualmente el solape.
+    }
+  }, [barcoId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void cargarDisponibilidad();
+  }, [cargarDisponibilidad]);
 
   const dias = useMemo(() => {
     if (fechaInicio && fechaFin) {
@@ -88,6 +104,19 @@ export function Reserva({
       }),
     [tarifa, dias, temporadaEfectiva, conPatron, horas],
   );
+
+  const solape = useMemo(() => {
+    if (!fechaInicio || !fechaFin) return null;
+    const i = new Date(`${fechaInicio}T00:00:00Z`).getTime();
+    const f = new Date(`${fechaFin}T00:00:00Z`).getTime();
+    return (
+      reservado.find(
+        (r) =>
+          new Date(`${r.desde}T00:00:00Z`).getTime() < f &&
+          new Date(`${r.hasta}T00:00:00Z`).getTime() > i,
+      ) ?? null
+    );
+  }, [fechaInicio, fechaFin, reservado]);
 
   const etiquetaTemporada = {
     alta: t.reserva.temporadaAlta,
@@ -136,6 +165,10 @@ export function Reserva({
       setResultado({ tipo: "error", mensaje: t.reserva.error });
       return;
     }
+    if (solape) {
+      setResultado({ tipo: "error", mensaje: t.reserva.ocupado });
+      return;
+    }
     setEnviando(true);
     setResultado(null);
     try {
@@ -156,10 +189,13 @@ export function Reserva({
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok) {
+        setReservado((prev) => [...prev, { desde: fechaInicio, hasta: fechaFin }]);
         setResultado({
           tipo: "ok",
           mensaje: t.reserva.exito(data.reserva.referencia),
         });
+      } else if (data?.error === "ocupado") {
+        setResultado({ tipo: "error", mensaje: t.reserva.ocupado });
       } else {
         setResultado({ tipo: "error", mensaje: t.reserva.error });
       }
@@ -216,6 +252,27 @@ export function Reserva({
           <> · {t.reserva.minimoDias(plural(minimoDias, t.comun.dia, t.comun.dias))}</>
         )}
       </p>
+
+      {solape && (
+        <p className="mt-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+          {t.reserva.ocupado}
+        </p>
+      )}
+
+      {reservado.length > 0 && (
+        <div className="mt-3 rounded-md bg-superficie-alt p-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">
+            {t.reserva.fechasReservadas}
+          </p>
+          <ul className="mt-1.5 space-y-1">
+            {reservado.map((r) => (
+              <li key={`${r.desde}-${r.hasta}`} className="text-xs text-texto-suave">
+                {fechaCorta(r.desde)} – {fechaCorta(r.hasta)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* ------------------------------------------------------ controles */}
       <div className="mt-4 space-y-4">
@@ -366,7 +423,7 @@ export function Reserva({
       <button
         type="button"
         onClick={() => void enviar()}
-        disabled={enviando}
+        disabled={enviando || Boolean(solape)}
         className="mt-5 w-full rounded-md bg-marca px-5 py-3.5 font-semibold text-fondo transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {enviando
@@ -398,6 +455,12 @@ function aISOFecha(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const dia = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${dia}`;
+}
+
+/** "2026-07-15" → "15/07/26" para listar rangos ocupados en poco espacio. */
+function fechaCorta(iso: string): string {
+  const [anio, mes, dia] = iso.split("-");
+  return `${dia}/${mes}/${anio.slice(2)}`;
 }
 
 function Control({

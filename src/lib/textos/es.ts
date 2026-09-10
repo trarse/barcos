@@ -318,6 +318,8 @@ export const es = {
       `Solicitud enviada. Tu referencia es ${referencia}. Te contactamos para confirmar.`,
     error: "No se pudo enviar. Revisa los datos e inténtalo de nuevo.",
     eligeFechas: "Elige las fechas para ver el precio exacto.",
+    ocupado: "Esas fechas ya están reservadas. Elige otras.",
+    fechasReservadas: "Fechas ya reservadas",
     conceptos: {
       alquiler: "Alquiler",
       descuento: (porcentaje: number) => `Descuento ${porcentaje} %`,

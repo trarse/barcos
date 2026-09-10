@@ -25,7 +25,7 @@ const Esquema = z.object({
   idioma: z.enum(["es", "en", "de"]).default("es"),
   paginaOrigen: z.string().trim().max(200).optional(),
   // Honeypot: un humano no lo ve. Si llega relleno, es un bot.
-  web: z.string().max(0).optional(),
+  web: z.string().optional(),
 });
 
 const ESTADOS = [
@@ -111,6 +111,21 @@ export async function POST(req: Request) {
       { ok: false, error: "minimo", minimoDias: barco.minimoDias },
       { status: 400 },
     );
+  }
+
+  // Solapamiento: si ya hay una reserva pendiente o confirmada que se cruza
+  // con estas fechas, el barco no está libre. Evita la doble reserva.
+  const ocupada = await db.reserva.findFirst({
+    where: {
+      barcoId: barco.id,
+      estado: { in: ["pendiente", "confirmada"] },
+      fechaInicio: { lt: salida },
+      fechaFin: { gt: entrada },
+    },
+    select: { id: true },
+  });
+  if (ocupada) {
+    return NextResponse.json({ ok: false, error: "ocupado" }, { status: 409 });
   }
 
   const temporada = temporadaDe(entrada, barco.puerto.destino.mesesAlta);

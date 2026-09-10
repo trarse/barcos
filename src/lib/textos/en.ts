@@ -312,6 +312,8 @@ export const en: Textos = {
       `Request sent. Your reference is ${referencia}. We'll get in touch to confirm.`,
     error: "Could not send. Check your details and try again.",
     eligeFechas: "Pick the dates to see the exact price.",
+    ocupado: "Those dates are already booked. Pick other dates.",
+    fechasReservadas: "Already booked dates",
     conceptos: {
       alquiler: "Hire",
       descuento: (porcentaje) => `${porcentaje} % discount`,
