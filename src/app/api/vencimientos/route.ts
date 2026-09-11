@@ -6,9 +6,10 @@ import { db } from "@/lib/db";
 
 const Esquema = z.object({
   tipo: z.string().trim().min(1).max(40),
-  descripcion: z.string().trim().min(1).max(200),
+  descripcion: z.string().trim().max(200).optional().default(""),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   horas: z.coerce.number().int().min(0).optional().nullable(),
+  horasActuales: z.coerce.number().int().min(0).optional().nullable(),
   barcoId: z.string().optional().nullable(),
 });
 
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
       descripcion: a.descripcion,
       fecha: new Date(`${a.fecha}T00:00:00Z`),
       horas: a.horas ?? null,
+      horasActuales: a.horasActuales ?? null,
     },
   });
 

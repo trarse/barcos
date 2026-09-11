@@ -125,6 +125,7 @@ export async function GET(req: Request) {
       descripcion: v.descripcion,
       fecha: v.fecha.toISOString().slice(0, 10),
       horas: v.horas,
+      horasActuales: v.horasActuales,
       barcoId: v.barcoId,
       barco: v.barco?.nombre ?? null,
     })),

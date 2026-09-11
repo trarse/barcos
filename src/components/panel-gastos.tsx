@@ -27,6 +27,7 @@ type Vencimiento = {
   descripcion: string;
   fecha: string;
   horas: number | null;
+  horasActuales: number | null;
   barcoId: string | null;
   barco: string | null;
 };
@@ -108,6 +109,7 @@ export function PanelGastos() {
   const [fechaV, setFechaV] = useState(hoyISO());
   const [barcoIdV, setBarcoIdV] = useState("");
   const [horasV, setHorasV] = useState("");
+  const [horasActualesV, setHorasActualesV] = useState("");
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -170,6 +172,7 @@ export function PanelGastos() {
   }
 
   async function borrarGasto(id: string) {
+    if (!window.confirm("¿Seguro que quieres borrar este gasto?")) return;
     await fetch("/api/gastos", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -180,10 +183,6 @@ export function PanelGastos() {
 
   async function anadirVencimiento(e: React.FormEvent) {
     e.preventDefault();
-    if (!descV.trim()) {
-      setAviso({ tipo: "error", mensaje: "Escribe una descripción para el vencimiento." });
-      return;
-    }
     setGuardandoVencimiento(true);
     setAviso(null);
     try {
@@ -195,6 +194,7 @@ export function PanelGastos() {
           descripcion: descV.trim(),
           fecha: fechaV,
           horas: horasV ? Number(horasV) : null,
+          horasActuales: horasActualesV ? Number(horasActualesV) : null,
           barcoId: barcoIdV || null,
         }),
       });
@@ -211,6 +211,7 @@ export function PanelGastos() {
   }
 
   async function borrarVencimiento(id: string) {
+    if (!window.confirm("¿Seguro que quieres borrar este vencimiento?")) return;
     await fetch("/api/vencimientos", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -329,8 +330,9 @@ export function PanelGastos() {
               {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
             </select>
             <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
-            <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Horas de motor (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas de motor" />
-            <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
+            <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
+            <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
+            <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
             <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
               <option value="">Toda la flota</option>
               {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -351,7 +353,7 @@ export function PanelGastos() {
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-medium text-texto">
                         {ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}
-                        {v.horas != null && <span className="font-normal text-texto-suave"> · a las {v.horas} h</span>}
+                        {v.horas != null && <span className="font-normal text-texto-suave"> · próxima a las {v.horas} h</span>}
                       </span>
                       <span className={`shrink-0 text-xs font-semibold ${colorVencimiento(d)}`}>
                         {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
@@ -359,7 +361,8 @@ export function PanelGastos() {
                       <button onClick={() => void borrarVencimiento(v.id)} className="shrink-0 text-xs text-rose-600 underline">borrar</button>
                     </div>
                     <p className="mt-0.5 text-xs text-texto-suave">
-                      {v.descripcion}{v.barco ? ` · ${v.barco}` : ""} · {fecha(v.fecha)}
+                      {v.descripcion ? `${v.descripcion} · ` : ""}{v.barco ? `${v.barco} · ` : ""}{fecha(v.fecha)}
+                      {v.horasActuales != null && ` · actuales ${v.horasActuales} h`}
                     </p>
                   </li>
                 );
