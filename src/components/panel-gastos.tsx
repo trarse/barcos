@@ -14,11 +14,21 @@ type Gasto = {
   categoria: string;
   concepto: string;
   importeCents: number;
+  iva: number;
+  deducible: boolean;
   factura: string | null;
   notas: string | null;
   fecha: string;
   barcoId: string | null;
   barco: string | null;
+};
+
+type RentabilidadBarco = {
+  barcoId: string;
+  barco: string;
+  ingresosCents: number;
+  gastosCents: number;
+  beneficioCents: number;
 };
 
 type Vencimiento = {
@@ -96,6 +106,7 @@ export function PanelGastos() {
   const [vencimientos, setVencimientos] = useState<Vencimiento[]>([]);
   const [salidas, setSalidas] = useState<Salida[]>([]);
   const [barcos, setBarcos] = useState<Barco[]>([]);
+  const [rentabilidad, setRentabilidad] = useState<RentabilidadBarco[]>([]);
   const [cargando, setCargando] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [guardandoGasto, setGuardandoGasto] = useState(false);
@@ -110,6 +121,8 @@ export function PanelGastos() {
   const [barcoId, setBarcoId] = useState("");
   const [factura, setFactura] = useState("");
   const [notas, setNotas] = useState("");
+  const [iva, setIva] = useState(21);
+  const [deducible, setDeducible] = useState(true);
   const [filtroBarco, setFiltroBarco] = useState("");
 
   // Alta de vencimiento.
@@ -133,6 +146,7 @@ export function PanelGastos() {
       setVencimientos(rg?.vencimientos ?? []);
       setSalidas(rg?.proximasSalidas ?? []);
       setBarcos(rb?.barcos ?? []);
+      setRentabilidad(rg?.rentabilidadPorBarco ?? []);
     } finally {
       setCargando(false);
     }
@@ -163,6 +177,8 @@ export function PanelGastos() {
           barcoId: barcoId || null,
           factura: factura.trim() || null,
           notas: notas.trim() || null,
+          iva,
+          deducible,
         }),
       });
       if (!res.ok) {
@@ -336,6 +352,40 @@ export function PanelGastos() {
         </div>
       </div>
 
+      {/* Rentabilidad por barco */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Rentabilidad por barco</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                <th className="px-4 py-2.5 font-semibold">Barco</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Ingresos</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Gastos</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Beneficio</th>
+                <th className="px-4 py-2.5 text-right font-semibold">Margen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rentabilidad.map((r) => {
+                const margenB = r.ingresosCents > 0 ? (r.beneficioCents / r.ingresosCents) * 100 : 0;
+                return (
+                  <tr key={r.barcoId} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{r.barco}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-emerald-600">{euros(r.ingresosCents)}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-rose-600">{euros(r.gastosCents)}</td>
+                    <td className={`whitespace-nowrap px-3 py-2.5 text-right cifra font-semibold ${r.beneficioCents >= 0 ? "text-texto" : "text-rose-600"}`}>{euros(r.beneficioCents)}</td>
+                    <td className={`whitespace-nowrap px-4 py-2.5 text-right text-xs font-semibold ${margenB >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{margenB.toFixed(0)} %</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Vencimientos y próximas salidas */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-carta border border-borde bg-superficie p-4">
@@ -394,6 +444,15 @@ export function PanelGastos() {
           <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
           <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
           <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
+          <select value={iva} onChange={(e) => setIva(Number(e.target.value))} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="IVA">
+            <option value={21}>IVA 21 %</option>
+            <option value={10}>IVA 10 %</option>
+            <option value={0}>Sin IVA</option>
+          </select>
+          <label className="flex items-center gap-2 rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto">
+            <input type="checkbox" checked={deducible} onChange={(e) => setDeducible(e.target.checked)} className="h-4 w-4 accent-[var(--acento)]" />
+            Deducible
+          </label>
           <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Barco">
             <option value="">Toda la flota</option>
             {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -500,6 +559,8 @@ export function PanelGastos() {
                   <th className="px-3 py-2.5 font-semibold">Categoría</th>
                   <th className="px-3 py-2.5 font-semibold">Barco</th>
                   <th className="px-3 py-2.5 font-semibold">Factura</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">IVA</th>
+                  <th className="px-3 py-2.5 text-center font-semibold">Deducible</th>
                   <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
                   <th className="px-4 py-2.5" />
                 </tr>
@@ -515,6 +576,8 @@ export function PanelGastos() {
                     <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.categoria}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.barco ?? "—"}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.factura ?? "—"}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right text-texto-suave">{g.iva > 0 ? `${g.iva} %` : "—"}</td>
+                    <td className="px-3 py-2.5 text-center">{g.deducible ? <span className="text-emerald-600">Sí</span> : <span className="text-texto-tenue">No</span>}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right cifra font-semibold text-texto">{euros(g.importeCents)}</td>
                     <td className="px-4 py-2.5 text-right">
                       <button
@@ -531,7 +594,7 @@ export function PanelGastos() {
               </tbody>
               <tfoot>
                 <tr className="border-t border-borde-fuerte bg-superficie-alt/50">
-                  <td className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-texto-suave" colSpan={5}>
+                  <td className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-texto-suave" colSpan={7}>
                     Total
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right cifra font-display text-base font-semibold text-texto">

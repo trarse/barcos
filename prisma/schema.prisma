@@ -261,6 +261,8 @@ model Gasto {
   categoria     String
   concepto      String
   importeCents  Int
+  iva           Int      @default(21)
+  deducible     Boolean  @default(true)
   factura       String?
   notas         String?
   fecha         DateTime

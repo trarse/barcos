@@ -12,6 +12,8 @@ const Esquema = z.object({
   barcoId: z.string().optional().nullable(),
   factura: z.string().trim().max(80).optional().nullable(),
   notas: z.string().trim().max(500).optional().nullable(),
+  iva: z.coerce.number().int().min(0).max(100).optional().default(21),
+  deducible: z.boolean().optional().default(true),
 });
 
 /** Clave de mes "YYYY-MM" de una fecha. */
@@ -106,6 +108,27 @@ export async function GET(req: Request) {
     porCategoria.set(g.categoria, (porCategoria.get(g.categoria) ?? 0) + g.importeCents);
   }
 
+  // Rentabilidad por barco: ingresos (reservas) frente a gastos.
+  const barcosDelArmador = await db.barco.findMany({
+    where: esAdmin ? {} : { propietarioId: propietarioId ?? "" },
+    select: { id: true, nombre: true },
+  });
+  const rentabilidadPorBarco = await Promise.all(
+    barcosDelArmador.map(async (b) => {
+      const [ing, gas] = await Promise.all([
+        db.reserva.aggregate({
+          where: { barcoId: b.id, estado: { in: ["confirmada", "completada"] } },
+          _sum: { precioTotalCents: true },
+        }),
+        db.gasto.aggregate({ where: { barcoId: b.id }, _sum: { importeCents: true } }),
+      ]);
+      const ingresos = ing._sum.precioTotalCents ?? 0;
+      const gastosB = gas._sum.importeCents ?? 0;
+      return { barcoId: b.id, barco: b.nombre, ingresosCents: ingresos, gastosCents: gastosB, beneficioCents: ingresos - gastosB };
+    }),
+  );
+  rentabilidadPorBarco.sort((a, b) => b.beneficioCents - a.beneficioCents);
+
   return NextResponse.json({
     ok: true,
     gastos: gastos.map((g) => ({
@@ -113,6 +136,8 @@ export async function GET(req: Request) {
       categoria: g.categoria,
       concepto: g.concepto,
       importeCents: g.importeCents,
+      iva: g.iva,
+      deducible: g.deducible,
       factura: g.factura,
       notas: g.notas,
       fecha: g.fecha.toISOString().slice(0, 10),
@@ -145,6 +170,7 @@ export async function GET(req: Request) {
         .map(([categoria, totalCents]) => ({ categoria, totalCents }))
         .sort((a, b) => b.totalCents - a.totalCents),
     },
+    rentabilidadPorBarco,
   });
 }
 
@@ -171,6 +197,8 @@ export async function POST(req: Request) {
       categoria: a.categoria,
       concepto: a.concepto,
       importeCents: Math.round(a.importe * 100),
+      iva: a.iva,
+      deducible: a.deducible,
       factura: a.factura || null,
       notas: a.notas || null,
       fecha: new Date(`${a.fecha}T00:00:00Z`),
