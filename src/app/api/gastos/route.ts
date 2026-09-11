@@ -40,7 +40,13 @@ export async function GET(req: Request) {
   const esAdmin = usuario.rol === "admin";
   const propietarioId = usuario.propietarioId;
 
-  const where = esAdmin ? {} : { propietarioId: propietarioId ?? "" };
+  const url = new URL(req.url);
+  const barcoId = url.searchParams.get("barcoId") || null;
+
+  const base = esAdmin ? {} : { propietarioId: propietarioId ?? "" };
+  const where = barcoId ? { ...base, barcoId } : base;
+  const baseReserva = esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } };
+  const whereReserva = barcoId ? { ...baseReserva, barcoId } : baseReserva;
   const hoy = new Date();
   const inicioMeses = new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1);
 
@@ -56,7 +62,7 @@ export async function GET(req: Request) {
       db.reserva.aggregate({
         where: {
           estado: { in: ["confirmada", "completada"] },
-          ...(esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } }),
+          ...whereReserva,
         },
         _sum: { precioTotalCents: true },
       }),
@@ -69,7 +75,7 @@ export async function GET(req: Request) {
         where: {
           estado: { in: ["confirmada", "pendiente"] },
           fechaInicio: { gte: new Date() },
-          ...(esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } }),
+          ...whereReserva,
         },
         orderBy: { fechaInicio: "asc" },
         take: 8,
@@ -79,7 +85,7 @@ export async function GET(req: Request) {
         where: {
           estado: { in: ["confirmada", "completada"] },
           fechaInicio: { gte: inicioMeses },
-          ...(esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } }),
+          ...whereReserva,
         },
         select: { fechaInicio: true, precioTotalCents: true },
       }),
@@ -156,13 +162,14 @@ export async function GET(req: Request) {
       where: {
         estado: { in: ["confirmada", "completada", "pendiente"] },
         fechaInicio: { gte: inicioFlujo },
-        ...(esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } }),
+        ...whereReserva,
       },
       select: { fechaInicio: true, precioTotalCents: true },
     }),
     db.vencimiento.findMany({
       where: {
-        ...(esAdmin ? {} : { propietarioId: propietarioId ?? "" }),
+        ...base,
+        ...(barcoId ? { barcoId } : {}),
         fecha: { gte: inicioFlujo },
         importeCents: { not: null },
       },

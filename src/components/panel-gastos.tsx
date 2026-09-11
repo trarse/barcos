@@ -154,8 +154,9 @@ export function PanelGastos() {
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
+      const qs = filtroBarco ? `?barcoId=${encodeURIComponent(filtroBarco)}` : "";
       const [rg, rb] = await Promise.all([
-        fetch("/api/gastos").then((r) => r.json()),
+        fetch(`/api/gastos${qs}`).then((r) => r.json()),
         fetch("/api/barcos").then((r) => r.json()),
       ]);
       setGastos(rg?.gastos ?? []);
@@ -170,7 +171,7 @@ export function PanelGastos() {
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [filtroBarco]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -273,11 +274,9 @@ export function PanelGastos() {
 
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
-  const vencimientosFiltrados = vencimientosOrdenados.filter(
-    (v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))) && (filtroBarco ? v.barcoId === filtroBarco : true),
-  );
+  const vencimientosFiltrados = vencimientosOrdenados.filter((v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))));
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
-  const gastosFiltrados = filtroBarco ? gastos.filter((g) => g.barcoId === filtroBarco) : gastos;
+  const gastosFiltrados = gastos;
   const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
   const barcoSeleccionado = barcos.find((b) => b.id === filtroBarco)?.nombre ?? null;
 
@@ -585,7 +584,7 @@ export function PanelGastos() {
         </div>
         {vencimientosFiltrados.length === 0 ? (
           <p className="px-4 py-4 text-sm text-texto-suave">
-            {vencimientosOrdenados.length === 0 ? "No hay vencimientos registrados." : "No hay vencimientos con estos filtros."}
+            {vencimientos.length === 0 ? (filtroBarco ? "Este barco no tiene vencimientos." : "No hay vencimientos registrados.") : "No hay vencimientos con estos filtros."}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -654,7 +653,7 @@ export function PanelGastos() {
           <p className="px-4 py-4 text-sm text-texto-suave">Cargando…</p>
         ) : gastosFiltrados.length === 0 ? (
           <p className="px-4 py-4 text-sm text-texto-suave">
-            {gastos.length === 0 ? "Aún no has registrado gastos." : "No hay gastos para este barco."}
+            {filtroBarco ? "Este barco no tiene gastos." : "Aún no has registrado gastos."}
           </p>
         ) : (
           <div className="overflow-x-auto">
