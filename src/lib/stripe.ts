@@ -7,6 +7,9 @@ import { urlAbsoluta } from "@/lib/sitio";
  * sesión y devuelve su URL; el cliente redirige y nunca tocamos datos de
  * tarjeta. Si falta STRIPE_SECRET_KEY, los pagos quedan desactivados y el
  * flujo de reserva sigue funcionando como petición.
+ *
+ * El webhook unificado (cobros de reserva + alta/baja de la suscripción Pro)
+ * vive en /api/pagos/stripe y verifica la firma con STRIPE_WEBHOOK_SECRET.
  */
 
 let cliente: Stripe | null | undefined;
