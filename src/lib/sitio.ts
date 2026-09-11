@@ -55,7 +55,7 @@ function urlDelSitio(): string {
     }
   }
 
-  return url || "https://estribor.es";
+  return url || "https://estribor-preview.netlify.app";
 }
 
 export const SITIO = {
