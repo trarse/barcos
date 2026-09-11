@@ -37,6 +37,7 @@ export function PanelGastos() {
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [barcos, setBarcos] = useState<Barco[]>([]);
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
 
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
   const [concepto, setConcepto] = useState("");
@@ -67,7 +68,7 @@ export function PanelGastos() {
   async function anadir(e: React.FormEvent) {
     e.preventDefault();
     if (!concepto.trim() || !importe) return;
-    await fetch("/api/gastos", {
+    const res = await fetch("/api/gastos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -78,6 +79,15 @@ export function PanelGastos() {
         barcoId: barcoId || null,
       }),
     });
+    if (!res.ok) {
+      setError(
+        res.status === 403
+          ? "No tienes permiso para añadir gastos: entra con tu cuenta de armador."
+          : "No se pudo guardar el gasto. Revisa los campos.",
+      );
+      return;
+    }
+    setError("");
     setConcepto("");
     setImporte("");
     void cargar();
@@ -164,6 +174,12 @@ export function PanelGastos() {
         </select>
         <button type="submit" className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo lg:col-span-5">Añadir gasto</button>
       </form>
+
+      {error && (
+        <p role="alert" className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {error}
+        </p>
+      )}
 
       {resumen && resumen.porCategoria.length > 0 && (
         <div className="mt-6">
