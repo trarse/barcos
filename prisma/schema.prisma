@@ -285,6 +285,7 @@ model Vencimiento {
   fecha         DateTime
   horas         Int?
   horasActuales Int?
+  importeCents  Int?
   avisadoEn     DateTime?
   creadoEn      DateTime @default(now())
 

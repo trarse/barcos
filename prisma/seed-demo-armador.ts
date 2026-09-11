@@ -93,6 +93,7 @@ async function main() {
         tipo: "seguro",
         descripcion: "Póliza anual de seguro",
         fecha: enDias(20 + (i % 5) * 22),
+        importeCents: Math.round((1850 + i * 90) * 100),
       },
     });
 
@@ -106,6 +107,7 @@ async function main() {
         fecha: enDias(45 + (i % 4) * 18),
         horas: horasBase + 250,
         horasActuales: horasBase,
+        importeCents: Math.round((460 + i * 30) * 100),
       },
     });
 
@@ -120,6 +122,7 @@ async function main() {
         tipo: extra,
         descripcion: extraDesc,
         fecha: enDias(75 + (i % 6) * 18),
+        importeCents: Math.round((extra === "bengalas" ? 230 : extra === "itb" ? 320 : 180) * 100),
       },
     });
   }

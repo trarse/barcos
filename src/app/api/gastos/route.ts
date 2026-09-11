@@ -16,9 +16,9 @@ const Esquema = z.object({
   deducible: z.boolean().optional().default(true),
 });
 
-/** Clave de mes "YYYY-MM" de una fecha. */
+/** Clave de mes "YYYY-MM" de una fecha, en hora local para evitar desfases UTC. */
 function claveMes(d: Date): string {
-  return d.toISOString().slice(0, 7);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function etiquetaMes(d: Date): string {
@@ -108,6 +108,21 @@ export async function GET(req: Request) {
     porCategoria.set(g.categoria, (porCategoria.get(g.categoria) ?? 0) + g.importeCents);
   }
 
+  // Resumen de IVA y deducibilidad.
+  let totalDeducibleCents = 0;
+  let totalNoDeducibleCents = 0;
+  let totalIvaCents = 0;
+  for (const g of gastos) {
+    const ivaAmount = Math.round((g.importeCents * g.iva) / 100);
+    if (g.deducible) {
+      totalDeducibleCents += g.importeCents;
+      totalIvaCents += ivaAmount;
+    } else {
+      totalNoDeducibleCents += g.importeCents;
+    }
+  }
+  const resumenIva = { totalDeducibleCents, totalNoDeducibleCents, totalIvaCents };
+
   // Rentabilidad por barco: ingresos (reservas) frente a gastos.
   const barcosDelArmador = await db.barco.findMany({
     where: esAdmin ? {} : { propietarioId: propietarioId ?? "" },
@@ -128,6 +143,45 @@ export async function GET(req: Request) {
     }),
   );
   rentabilidadPorBarco.sort((a, b) => b.beneficioCents - a.beneficioCents);
+
+  // Flujo de caja: próximos 6 meses.
+  const inicioFlujo = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const mesesFuturos = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
+    return { mes: claveMes(d), etiqueta: etiquetaMes(d), ingresosCents: 0, gastosCents: 0 };
+  });
+  const mapaFuturo = new Map(mesesFuturos.map((m) => [m.mes, m]));
+  const [reservasFuturas, vencimientosConImporte] = await Promise.all([
+    db.reserva.findMany({
+      where: {
+        estado: { in: ["confirmada", "completada", "pendiente"] },
+        fechaInicio: { gte: inicioFlujo },
+        ...(esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } }),
+      },
+      select: { fechaInicio: true, precioTotalCents: true },
+    }),
+    db.vencimiento.findMany({
+      where: {
+        ...(esAdmin ? {} : { propietarioId: propietarioId ?? "" }),
+        fecha: { gte: inicioFlujo },
+        importeCents: { not: null },
+      },
+      select: { fecha: true, importeCents: true },
+    }),
+  ]);
+  for (const r of reservasFuturas) {
+    const m = mapaFuturo.get(claveMes(r.fechaInicio));
+    if (m) m.ingresosCents += r.precioTotalCents;
+  }
+  for (const v of vencimientosConImporte) {
+    const m = mapaFuturo.get(claveMes(v.fecha));
+    if (m) m.gastosCents += v.importeCents ?? 0;
+  }
+  let acumulado = 0;
+  const flujoCaja = mesesFuturos.map((m) => {
+    acumulado += m.ingresosCents - m.gastosCents;
+    return { mes: m.mes, etiqueta: m.etiqueta, ingresosCents: m.ingresosCents, gastosCents: m.gastosCents, saldoCents: acumulado };
+  });
 
   return NextResponse.json({
     ok: true,
@@ -151,6 +205,7 @@ export async function GET(req: Request) {
       fecha: v.fecha.toISOString().slice(0, 10),
       horas: v.horas,
       horasActuales: v.horasActuales,
+      importeCents: v.importeCents,
       barcoId: v.barcoId,
       barco: v.barco?.nombre ?? null,
     })),
@@ -171,6 +226,8 @@ export async function GET(req: Request) {
         .sort((a, b) => b.totalCents - a.totalCents),
     },
     rentabilidadPorBarco,
+    resumenIva,
+    flujoCaja,
   });
 }
 

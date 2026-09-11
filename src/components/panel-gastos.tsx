@@ -38,6 +38,7 @@ type Vencimiento = {
   fecha: string;
   horas: number | null;
   horasActuales: number | null;
+  importeCents: number | null;
   barcoId: string | null;
   barco: string | null;
 };
@@ -62,6 +63,20 @@ type Resumen = {
   ingresosCents: number;
   beneficioCents: number;
   porCategoria: Array<{ categoria: string; totalCents: number }>;
+};
+
+type FlujoMes = {
+  mes: string;
+  etiqueta: string;
+  ingresosCents: number;
+  gastosCents: number;
+  saldoCents: number;
+};
+
+type ResumenIva = {
+  totalDeducibleCents: number;
+  totalNoDeducibleCents: number;
+  totalIvaCents: number;
 };
 
 type Barco = { id: string; nombre: string };
@@ -107,6 +122,8 @@ export function PanelGastos() {
   const [salidas, setSalidas] = useState<Salida[]>([]);
   const [barcos, setBarcos] = useState<Barco[]>([]);
   const [rentabilidad, setRentabilidad] = useState<RentabilidadBarco[]>([]);
+  const [flujoCaja, setFlujoCaja] = useState<FlujoMes[]>([]);
+  const [resumenIva, setResumenIva] = useState<ResumenIva | null>(null);
   const [cargando, setCargando] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [guardandoGasto, setGuardandoGasto] = useState(false);
@@ -132,6 +149,7 @@ export function PanelGastos() {
   const [barcoIdV, setBarcoIdV] = useState("");
   const [horasV, setHorasV] = useState("");
   const [horasActualesV, setHorasActualesV] = useState("");
+  const [importeV, setImporteV] = useState("");
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -147,6 +165,8 @@ export function PanelGastos() {
       setSalidas(rg?.proximasSalidas ?? []);
       setBarcos(rb?.barcos ?? []);
       setRentabilidad(rg?.rentabilidadPorBarco ?? []);
+      setFlujoCaja(rg?.flujoCaja ?? []);
+      setResumenIva(rg?.resumenIva ?? null);
     } finally {
       setCargando(false);
     }
@@ -220,6 +240,7 @@ export function PanelGastos() {
           fecha: fechaV,
           horas: horasV ? Number(horasV) : null,
           horasActuales: horasActualesV ? Number(horasActualesV) : null,
+          importe: importeV ? Number(importeV) : null,
           barcoId: barcoIdV || null,
         }),
       });
@@ -229,6 +250,7 @@ export function PanelGastos() {
       }
       setAviso({ tipo: "ok", mensaje: "Vencimiento añadido correctamente." });
       setDescV("");
+      setImporteV("");
       void cargar();
     } finally {
       setGuardandoVencimiento(false);
@@ -251,14 +273,26 @@ export function PanelGastos() {
 
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
-  const vencimientosFiltrados = vencimientosOrdenados.filter((v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))));
+  const vencimientosFiltrados = vencimientosOrdenados.filter(
+    (v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))) && (filtroBarco ? v.barcoId === filtroBarco : true),
+  );
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
   const gastosFiltrados = filtroBarco ? gastos.filter((g) => g.barcoId === filtroBarco) : gastos;
   const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
+  const barcoSeleccionado = barcos.find((b) => b.id === filtroBarco)?.nombre ?? null;
 
   return (
     <div className="space-y-5">
-      <h2 className="font-display text-xl font-semibold text-texto">Gastos e ingresos</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-xl font-semibold text-texto">Gastos e ingresos</h2>
+        <div className="flex items-center gap-2">
+          <label htmlFor="filtro-barco-global" className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Barco</label>
+          <select id="filtro-barco-global" value={filtroBarco} onChange={(e) => setFiltroBarco(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Filtrar todo el panel por barco">
+            <option value="">Toda la flota</option>
+            {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+          </select>
+        </div>
+      </div>
 
       {aviso && (
         <div
@@ -269,6 +303,15 @@ export function PanelGastos() {
         >
           <span>{aviso.mensaje}</span>
           <button type="button" onClick={() => setAviso(null)} className="text-xs underline" aria-label="Cerrar aviso">cerrar</button>
+        </div>
+      )}
+
+      {barcoSeleccionado && (
+        <div className="flex items-center justify-between gap-3 rounded-carta border border-acento/30 bg-superficie px-4 py-2.5 text-sm">
+          <p className="text-texto">
+            Mostrando datos de <span className="font-semibold">{barcoSeleccionado}</span>
+          </p>
+          <button type="button" onClick={() => setFiltroBarco("")} className="text-xs font-semibold text-acento underline">Quitar filtro</button>
         </div>
       )}
 
@@ -354,8 +397,9 @@ export function PanelGastos() {
 
       {/* Rentabilidad por barco */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
-        <div className="border-b border-borde px-4 py-3">
+        <div className="flex items-baseline justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Rentabilidad por barco</h3>
+          <p className="text-xs text-texto-suave">Clic en una fila para filtrar el panel</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -372,7 +416,12 @@ export function PanelGastos() {
               {rentabilidad.map((r) => {
                 const margenB = r.ingresosCents > 0 ? (r.beneficioCents / r.ingresosCents) * 100 : 0;
                 return (
-                  <tr key={r.barcoId} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                  <tr
+                    key={r.barcoId}
+                    onClick={() => setFiltroBarco(filtroBarco === r.barcoId ? "" : r.barcoId)}
+                    className={`cursor-pointer border-b border-borde last:border-0 hover:bg-superficie-alt/60 ${filtroBarco === r.barcoId ? "bg-acento/10" : ""}`}
+                    title="Filtrar el panel por este barco"
+                  >
                     <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{r.barco}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-emerald-600">{euros(r.ingresosCents)}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-rose-600">{euros(r.gastosCents)}</td>
@@ -384,6 +433,65 @@ export function PanelGastos() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Flujo de caja: próximos 6 meses */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Previsión de tesorería · próximos 6 meses</h3>
+          <p className="mt-0.5 text-xs text-texto-suave">Ingresos por reservas confirmadas y gastos previstos por vencimientos con importe.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                <th className="px-4 py-2.5 font-semibold">Mes</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Ingresos</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Gastos</th>
+                <th className="px-3 py-2.5 text-right font-semibold">Saldo mes</th>
+                <th className="px-4 py-2.5 text-right font-semibold">Saldo acumulado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flujoCaja.map((f) => {
+                const saldoMes = f.ingresosCents - f.gastosCents;
+                return (
+                  <tr key={f.mes} className="border-b border-borde last:border-0">
+                    <td className="whitespace-nowrap px-4 py-2.5 font-medium capitalize text-texto">{f.etiqueta}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-emerald-600">{euros(f.ingresosCents)}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-rose-600">{euros(f.gastosCents)}</td>
+                    <td className={`whitespace-nowrap px-3 py-2.5 text-right cifra font-semibold ${saldoMes >= 0 ? "text-emerald-600" : "text-rose-600"}`}>{euros(saldoMes)}</td>
+                    <td className={`whitespace-nowrap px-4 py-2.5 text-right cifra font-semibold ${f.saldoCents >= 0 ? "text-texto" : "text-rose-600"}`}>{euros(f.saldoCents)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Resumen fiscal: IVA y deducibilidad */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Resumen fiscal · IVA y deducibilidad</h3>
+        </div>
+        <table className="w-full border-collapse text-sm">
+          <tbody>
+            <tr className="border-b border-borde">
+              <td className="px-4 py-2.5 text-texto-suave">Base imponible deducible</td>
+              <td className="px-4 py-2.5 text-right cifra font-semibold text-texto">{euros(resumenIva?.totalDeducibleCents ?? 0)}</td>
+            </tr>
+            <tr className="border-b border-borde">
+              <td className="px-4 py-2.5 text-texto-suave">Gasto no deducible</td>
+              <td className="px-4 py-2.5 text-right cifra font-semibold text-texto">{euros(resumenIva?.totalNoDeducibleCents ?? 0)}</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-2.5 text-texto-suave">IVA soportado deducible</td>
+              <td className="px-4 py-2.5 text-right cifra font-semibold text-acento">{euros(resumenIva?.totalIvaCents ?? 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="border-t border-borde px-4 py-2.5 text-xs text-texto-suave">El IVA soportado deducible se recupera en la declaración trimestral (modelo 303).</p>
       </div>
 
       {/* Vencimientos y próximas salidas */}
@@ -398,6 +506,7 @@ export function PanelGastos() {
             <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
             <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
             <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
+            <input value={importeV} onChange={(e) => setImporteV(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) opcional" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Importe del vencimiento" />
             <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
               <option value="">Toda la flota</option>
               {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
@@ -487,6 +596,7 @@ export function PanelGastos() {
                   <th className="px-3 py-2.5 font-semibold">Detalle</th>
                   <th className="px-3 py-2.5 font-semibold">Fecha</th>
                   <th className="px-3 py-2.5 font-semibold">Horas</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
                   <th className="px-3 py-2.5 text-right font-semibold">Plazo</th>
                   <th className="px-4 py-2.5" />
                 </tr>
@@ -508,6 +618,7 @@ export function PanelGastos() {
                         {v.horas != null && <span>próxima {v.horas} h</span>}
                         {v.horasActuales == null && v.horas == null && "—"}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-texto-suave">{v.importeCents != null ? euros(v.importeCents) : "—"}</td>
                       <td className={`whitespace-nowrap px-3 py-2.5 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
                         {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
                       </td>
@@ -535,10 +646,6 @@ export function PanelGastos() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
           <div className="flex items-center gap-3">
-            <select value={filtroBarco} onChange={(e) => setFiltroBarco(e.target.value)} className="rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto" aria-label="Filtrar por barco">
-              <option value="">Todos los barcos</option>
-              {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-            </select>
             {gastosFiltrados.length > 0 && <span className="text-xs text-texto-suave">{gastosFiltrados.length} apuntes</span>}
           </div>
         </div>

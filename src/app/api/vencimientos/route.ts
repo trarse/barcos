@@ -10,6 +10,7 @@ const Esquema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   horas: z.coerce.number().int().min(0).optional().nullable(),
   horasActuales: z.coerce.number().int().min(0).optional().nullable(),
+  importe: z.coerce.number().min(0).optional().nullable(),
   barcoId: z.string().optional().nullable(),
 });
 
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
       fecha: new Date(`${a.fecha}T00:00:00Z`),
       horas: a.horas ?? null,
       horasActuales: a.horasActuales ?? null,
+      importeCents: a.importe != null ? Math.round(a.importe * 100) : null,
     },
   });
 
