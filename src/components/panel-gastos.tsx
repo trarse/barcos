@@ -324,10 +324,9 @@ export function PanelGastos() {
 
       {/* Vencimientos y próximas salidas */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-4">
-          <div className="rounded-carta border border-borde bg-superficie p-4">
-            <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
-            <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div className="rounded-carta border border-borde bg-superficie p-4">
+          <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
+          <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
             <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
               {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
             </select>
@@ -343,63 +342,6 @@ export function PanelGastos() {
               {guardandoVencimiento ? "Guardando…" : "Añadir"}
             </button>
           </form>
-          </div>
-
-          <div className="rounded-carta border border-borde bg-superficie p-4">
-            <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
-          {vencimientosOrdenados.length === 0 ? (
-            <p className="mt-3 text-sm text-texto-suave">No hay vencimientos registrados.</p>
-          ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
-                    <th className="px-3 py-2 font-semibold">Tipo</th>
-                    <th className="px-3 py-2 font-semibold">Detalle</th>
-                    <th className="px-3 py-2 font-semibold">Fecha</th>
-                    <th className="px-3 py-2 font-semibold">Horas</th>
-                    <th className="px-3 py-2 text-right font-semibold">Plazo</th>
-                    <th className="px-3 py-2" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {vencimientosOrdenados.map((v) => {
-                    const d = diasHasta(v.fecha);
-                    return (
-                      <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
-                        <td className="whitespace-nowrap px-3 py-2 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
-                        <td className="px-3 py-2">
-                          <span className="text-texto">{v.descripcion || "—"}</span>
-                          {v.barco && <p className="text-xs text-texto-suave">{v.barco}</p>}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-texto-suave">{fecha(v.fecha)}</td>
-                        <td className="whitespace-nowrap px-3 py-2 text-texto-suave">
-                          {v.horasActuales != null && <span>actuales {v.horasActuales} h</span>}
-                          {v.horasActuales != null && v.horas != null && <span> · </span>}
-                          {v.horas != null && <span>próxima {v.horas} h</span>}
-                          {v.horasActuales == null && v.horas == null && "—"}
-                        </td>
-                        <td className={`whitespace-nowrap px-3 py-2 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
-                          {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          <button
-                            onClick={() => void borrarVencimiento(v.id)}
-                            className="text-texto-tenue transition-colors hover:text-rose-600"
-                            aria-label={`Borrar ${ETIQUETA_VENCIMIENTO[v.tipo]}`}
-                            title="Borrar"
-                          >
-                            ✕
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-          </div>
         </div>
 
         <div className="rounded-carta border border-borde bg-superficie p-4">
@@ -447,6 +389,65 @@ export function PanelGastos() {
             {guardandoGasto ? "Guardando…" : "Añadir gasto"}
           </button>
         </form>
+      </div>
+
+      {/* Vencimientos */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
+        </div>
+        {vencimientosOrdenados.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-texto-suave">No hay vencimientos registrados.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                  <th className="px-4 py-2.5 font-semibold">Tipo</th>
+                  <th className="px-3 py-2.5 font-semibold">Detalle</th>
+                  <th className="px-3 py-2.5 font-semibold">Fecha</th>
+                  <th className="px-3 py-2.5 font-semibold">Horas</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Plazo</th>
+                  <th className="px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                {vencimientosOrdenados.map((v) => {
+                  const d = diasHasta(v.fecha);
+                  return (
+                    <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                      <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-texto">{v.descripcion || "—"}</span>
+                        {v.barco && <p className="text-xs text-texto-suave">{v.barco}</p>}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{fecha(v.fecha)}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">
+                        {v.horasActuales != null && <span>actuales {v.horasActuales} h</span>}
+                        {v.horasActuales != null && v.horas != null && <span> · </span>}
+                        {v.horas != null && <span>próxima {v.horas} h</span>}
+                        {v.horasActuales == null && v.horas == null && "—"}
+                      </td>
+                      <td className={`whitespace-nowrap px-3 py-2.5 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
+                        {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <button
+                          onClick={() => void borrarVencimiento(v.id)}
+                          className="text-texto-tenue transition-colors hover:text-rose-600"
+                          aria-label={`Borrar ${ETIQUETA_VENCIMIENTO[v.tipo]}`}
+                          title="Borrar"
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Listado de gastos */}
