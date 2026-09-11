@@ -26,6 +26,7 @@ type Vencimiento = {
   tipo: string;
   descripcion: string;
   fecha: string;
+  horas: number | null;
   barcoId: string | null;
   barco: string | null;
 };
@@ -99,12 +100,14 @@ export function PanelGastos() {
   const [barcoId, setBarcoId] = useState("");
   const [factura, setFactura] = useState("");
   const [notas, setNotas] = useState("");
+  const [filtroBarco, setFiltroBarco] = useState("");
 
   // Alta de vencimiento.
   const [tipoV, setTipoV] = useState(TIPOS_VENCIMIENTO[0].clave);
   const [descV, setDescV] = useState("");
   const [fechaV, setFechaV] = useState(hoyISO());
   const [barcoIdV, setBarcoIdV] = useState("");
+  const [horasV, setHorasV] = useState("");
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -191,6 +194,7 @@ export function PanelGastos() {
           tipo: tipoV,
           descripcion: descV.trim(),
           fecha: fechaV,
+          horas: horasV ? Number(horasV) : null,
           barcoId: barcoIdV || null,
         }),
       });
@@ -218,6 +222,7 @@ export function PanelGastos() {
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
+  const gastosFiltrados = filtroBarco ? gastos.filter((g) => g.barcoId === filtroBarco) : gastos;
 
   return (
     <div className="space-y-5">
@@ -324,6 +329,7 @@ export function PanelGastos() {
               {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
             </select>
             <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
+            <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Horas de motor (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas de motor" />
             <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
             <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
               <option value="">Toda la flota</option>
@@ -341,16 +347,20 @@ export function PanelGastos() {
               {vencimientosOrdenados.map((v) => {
                 const d = diasHasta(v.fecha);
                 return (
-                  <li key={v.id} className="flex items-center justify-between gap-3 rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
-                    <div className="min-w-0 flex-1">
-                      <span className="font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</span>
-                      <span className="ml-2 text-xs text-texto-suave">{v.descripcion}{v.barco ? ` · ${v.barco}` : ""}</span>
-                      <span className="ml-2 text-xs text-texto-tenue">· {fecha(v.fecha)}</span>
+                  <li key={v.id} className="rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-texto">
+                        {ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}
+                        {v.horas != null && <span className="font-normal text-texto-suave"> · a las {v.horas} h</span>}
+                      </span>
+                      <span className={`shrink-0 text-xs font-semibold ${colorVencimiento(d)}`}>
+                        {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
+                      </span>
+                      <button onClick={() => void borrarVencimiento(v.id)} className="shrink-0 text-xs text-rose-600 underline">borrar</button>
                     </div>
-                    <span className={`shrink-0 text-xs font-semibold ${colorVencimiento(d)}`}>
-                      {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
-                    </span>
-                    <button onClick={() => void borrarVencimiento(v.id)} className="shrink-0 text-xs text-rose-600 underline">borrar</button>
+                    <p className="mt-0.5 text-xs text-texto-suave">
+                      {v.descripcion}{v.barco ? ` · ${v.barco}` : ""} · {fecha(v.fecha)}
+                    </p>
                   </li>
                 );
               })}
@@ -407,15 +417,23 @@ export function PanelGastos() {
 
       {/* Listado de gastos */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
-        <div className="flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
-          {gastos.length > 0 && <span className="text-xs text-texto-suave">{gastos.length} apuntes</span>}
+          <div className="flex items-center gap-3">
+            <select value={filtroBarco} onChange={(e) => setFiltroBarco(e.target.value)} className="rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto" aria-label="Filtrar por barco">
+              <option value="">Todos los barcos</option>
+              {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+            </select>
+            {gastosFiltrados.length > 0 && <span className="text-xs text-texto-suave">{gastosFiltrados.length} apuntes</span>}
+          </div>
         </div>
 
         {cargando ? (
           <p className="px-4 py-4 text-sm text-texto-suave">Cargando…</p>
-        ) : gastos.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-texto-suave">Aún no has registrado gastos.</p>
+        ) : gastosFiltrados.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-texto-suave">
+            {gastos.length === 0 ? "Aún no has registrado gastos." : "No hay gastos para este barco."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
@@ -431,7 +449,7 @@ export function PanelGastos() {
                 </tr>
               </thead>
               <tbody>
-                {gastos.map((g) => (
+                {gastosFiltrados.map((g) => (
                   <tr key={g.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
                     <td className="whitespace-nowrap px-4 py-2.5 text-texto-suave">{fecha(g.fecha)}</td>
                     <td className="px-3 py-2.5">

@@ -281,6 +281,7 @@ model Vencimiento {
   tipo          String
   descripcion   String
   fecha         DateTime
+  horas         Int?
   avisadoEn     DateTime?
   creadoEn      DateTime @default(now())
 

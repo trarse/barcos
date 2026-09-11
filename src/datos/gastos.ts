@@ -125,6 +125,7 @@ export const CONCEPTOS_GASTO: Record<string, string[]> = {
 /** Tipos de vencimiento de plazos del armador, con su etiqueta visible. */
 export const TIPOS_VENCIMIENTO: { clave: string; etiqueta: string }[] = [
   { clave: "seguro", etiqueta: "Seguro" },
+  { clave: "motor", etiqueta: "Mantenimiento de motor" },
   { clave: "itb", etiqueta: "Inspección (ITB)" },
   { clave: "bengalas", etiqueta: "Bengalas" },
   { clave: "salvamento", etiqueta: "Material de salvamento" },

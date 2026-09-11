@@ -8,6 +8,7 @@ const Esquema = z.object({
   tipo: z.string().trim().min(1).max(40),
   descripcion: z.string().trim().min(1).max(200),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  horas: z.coerce.number().int().min(0).optional().nullable(),
   barcoId: z.string().optional().nullable(),
 });
 
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       tipo: a.tipo,
       descripcion: a.descripcion,
       fecha: new Date(`${a.fecha}T00:00:00Z`),
+      horas: a.horas ?? null,
     },
   });
 
