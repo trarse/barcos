@@ -152,7 +152,7 @@ export async function GET(req: Request) {
 
   // Flujo de caja: próximos 6 meses.
   const inicioFlujo = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  const mesesFuturos = Array.from({ length: 6 }, (_, i) => {
+  const mesesFuturos = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
     return { mes: claveMes(d), etiqueta: etiquetaMes(d), ingresosCents: 0, gastosCents: 0 };
   });

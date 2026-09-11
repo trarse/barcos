@@ -518,7 +518,7 @@ export function PanelGastos() {
       {/* Flujo de caja: próximos 6 meses */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="border-b border-borde px-4 py-3">
-          <h3 className="text-sm font-semibold text-texto">Previsión de tesorería · próximos 6 meses</h3>
+          <h3 className="text-sm font-semibold text-texto">Previsión de tesorería · próximos 12 meses</h3>
           <p className="mt-0.5 text-xs text-texto-suave">Ingresos por reservas confirmadas y gastos previstos por vencimientos con importe.</p>
         </div>
         <div className="overflow-x-auto">

@@ -3,6 +3,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
+import type { Prisma } from "../src/generated/prisma/client";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
@@ -16,11 +17,9 @@ function fechaHace(meses: number, dia = 15): Date {
   return d;
 }
 
-function enDias(dias: number): Date {
+function fechaEnMeses(meses: number, dia: number): Date {
   const d = new Date();
-  d.setDate(d.getDate() + dias);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  return new Date(d.getFullYear(), d.getMonth() + meses, dia, 0, 0, 0, 0);
 }
 
 async function main() {
@@ -79,50 +78,66 @@ async function main() {
     throw new Error("El armador no tiene barcos y no se pudieron crear.");
   }
 
-  // ---- Vencimientos: 2-3 por cada barco, con urgencias variadas ----
-  const extras = ["bengalas", "itb", "salvamento"];
+  // ---- Vencimientos: mantenimiento completo al día (seguro, motor, ITB, bengalas, salvamento) ----
   for (let i = 0; i < barcos.length; i++) {
     const b = barcos[i];
     const horasBase = 350 + i * 140;
+    const eslora = b.esloraCm / 100; // metros
 
-    // Seguro (fecha).
     await prisma.vencimiento.create({
       data: {
         propietarioId: propietario.id,
         barcoId: b.id,
         tipo: "seguro",
         descripcion: "Póliza anual de seguro",
-        fecha: enDias(20 + (i % 5) * 22),
-        importeCents: Math.round((1850 + i * 90) * 100),
+        fecha: fechaEnMeses(5 + (i % 4), 10 + (i % 5)),
+        importeCents: Math.round((1500 + eslora * 150) * 100),
       },
     });
 
-    // Motor (horas actuales + próxima revisión + fecha).
     await prisma.vencimiento.create({
       data: {
         propietarioId: propietario.id,
         barcoId: b.id,
         tipo: "motor",
         descripcion: "Cambio de aceite y filtros",
-        fecha: enDias(45 + (i % 4) * 18),
+        fecha: fechaEnMeses(1 + (i % 3), 6 + (i % 7)),
         horas: horasBase + 250,
         horasActuales: horasBase,
-        importeCents: Math.round((460 + i * 30) * 100),
+        importeCents: Math.round((420 + eslora * 30) * 100),
       },
     });
 
-    // Uno extra rotando: bengalas / ITB / salvamento.
-    const extra = extras[i % extras.length];
-    const extraDesc =
-      extra === "bengalas" ? "Caducidad del lote de bengalas" : extra === "itb" ? "Inspección técnica (ITB)" : "Revisión de material de salvamento";
     await prisma.vencimiento.create({
       data: {
         propietarioId: propietario.id,
         barcoId: b.id,
-        tipo: extra,
-        descripcion: extraDesc,
-        fecha: enDias(75 + (i % 6) * 18),
-        importeCents: Math.round((extra === "bengalas" ? 230 : extra === "itb" ? 320 : 180) * 100),
+        tipo: "itb",
+        descripcion: "Inspección técnica (ITB)",
+        fecha: fechaEnMeses(3 + (i % 5), 15 + (i % 6)),
+        importeCents: Math.round((280 + eslora * 20) * 100),
+      },
+    });
+
+    await prisma.vencimiento.create({
+      data: {
+        propietarioId: propietario.id,
+        barcoId: b.id,
+        tipo: "bengalas",
+        descripcion: "Caducidad del lote de bengalas",
+        fecha: fechaEnMeses(6 + (i % 4), 20 + (i % 5)),
+        importeCents: Math.round((180 + eslora * 10) * 100),
+      },
+    });
+
+    await prisma.vencimiento.create({
+      data: {
+        propietarioId: propietario.id,
+        barcoId: b.id,
+        tipo: "salvamento",
+        descripcion: "Revisión de material de salvamento",
+        fecha: fechaEnMeses(2 + (i % 5), 12 + (i % 4)),
+        importeCents: Math.round((150 + eslora * 8) * 100),
       },
     });
   }
@@ -184,43 +199,111 @@ async function main() {
     });
   }
 
-  // ---- Reservas (ingresos) por barco, para ver la rentabilidad ----
-  const reservasExistentes = await prisma.reserva.count({ where: { barco: { propietarioId: propietario.id } } });
-  if (reservasExistentes === 0) {
-    let contador = 1;
-    for (let i = 0; i < barcos.length; i++) {
-      const b = barcos[i];
-      const num = 1 + (i % 3);
-      for (let j = 0; j < num; j++) {
-        const dias = 1 + ((i + j) % 3);
-        const inicio = fechaHace(2 + ((i * 3 + j) % 8), 5 + j);
-        const fin = new Date(inicio);
-        fin.setDate(fin.getDate() + dias);
-        const total = Math.round(b.precioBaseDia * dias * 1.21);
-        await prisma.reserva.create({
-          data: {
-            referencia: `RES-DEMO-${String(contador).padStart(3, "0")}`,
-            barcoId: b.id,
-            fechaInicio: inicio,
-            fechaFin: fin,
-            numDias: dias,
-            numPersonas: 6,
-            clienteNombre: `Cliente ${i + 1}`,
-            clienteEmail: `cliente${i + 1}@ejemplo.com`,
-            precioTotalCents: total,
-            estado: j % 2 === 0 ? "completada" : "confirmada",
-            pagado: true,
-            comisionCents: Math.round(total * 0.12),
-            netoArmadorCents: Math.round(total * 0.88),
-          },
-        });
-        contador++;
-      }
+  // ---- Reservas (ingresos): historial + temporada completa con pico en verano ----
+  await prisma.reserva.deleteMany({
+    where: { barco: { propietarioId: propietario.id }, referencia: { startsWith: "RES-DEMO-" } },
+  });
+
+  // Históricas (completadas) para alimentar el gráfico y la rentabilidad.
+  const historico: Array<[number, number, number]> = [
+    [5, 8, 3],
+    [4, 16, 4],
+    [3, 5, 7],
+    [2, 20, 3],
+    [1, 12, 2],
+  ];
+  // Futuras: temporada completa desde octubre, con mucha más actividad en verano (jun-ago).
+  const temporada: Array<[number, number, number]> = [
+    [1, 9, 3],
+    [2, 12, 2],
+    [3, 22, 4],
+    [4, 17, 3],
+    [5, 14, 3],
+    [6, 10, 4],
+    [7, 6, 7],
+    [8, 8, 3],
+    [8, 20, 4],
+    [9, 6, 7],
+    [9, 13, 7],
+    [9, 20, 7],
+    [9, 27, 7],
+    [10, 4, 7],
+    [10, 11, 7],
+    [10, 18, 7],
+    [10, 25, 7],
+    [11, 1, 7],
+    [11, 8, 7],
+    [11, 15, 7],
+    [11, 22, 7],
+    [12, 6, 3],
+  ];
+
+  const reservas: Prisma.ReservaCreateManyInput[] = [];
+  let contador = 1;
+  for (let i = 0; i < barcos.length; i++) {
+    const b = barcos[i];
+
+    for (let h = 0; h < historico.length; h++) {
+      if ((i + h) % 4 === 0) continue;
+      const [meses, dia, dias] = historico[h];
+      const inicio = fechaHace(meses, dia + (i % 3));
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + dias);
+      const total = Math.round(b.precioBaseDia * dias * 1.21);
+      const cliente = i * 40 + h + 1;
+      reservas.push({
+        referencia: `RES-DEMO-${String(contador).padStart(3, "0")}`,
+        barcoId: b.id,
+        fechaInicio: inicio,
+        fechaFin: fin,
+        numDias: dias,
+        numPersonas: 4 + (h % 5),
+        clienteNombre: `Cliente ${cliente}`,
+        clienteEmail: `cliente${cliente}@ejemplo.com`,
+        precioTotalCents: total,
+        estado: "completada",
+        pagado: true,
+        comisionCents: Math.round(total * 0.12),
+        netoArmadorCents: Math.round(total * 0.88),
+      });
+      contador++;
+    }
+
+    for (let k = 0; k < temporada.length; k++) {
+      if ((i + k) % 7 === 0) continue;
+      const [meses, dia, dias] = temporada[k];
+      const diaReal = Math.min(dia + (i % 3), 27);
+      const inicio = fechaEnMeses(meses, diaReal);
+      const fin = new Date(inicio);
+      fin.setDate(fin.getDate() + dias);
+      const total = Math.round(b.precioBaseDia * dias * 1.21);
+      const estado = k % 5 === 0 ? "pendiente" : "confirmada";
+      const cliente = 1000 + i * 40 + k;
+      reservas.push({
+        referencia: `RES-DEMO-${String(contador).padStart(3, "0")}`,
+        barcoId: b.id,
+        fechaInicio: inicio,
+        fechaFin: fin,
+        numDias: dias,
+        numPersonas: 4 + (k % 5),
+        clienteNombre: `Cliente ${cliente}`,
+        clienteEmail: `cliente${cliente}@ejemplo.com`,
+        precioTotalCents: total,
+        estado,
+        pagado: estado === "confirmada",
+        comisionCents: Math.round(total * 0.12),
+        netoArmadorCents: Math.round(total * 0.88),
+      });
+      contador++;
     }
   }
 
+  if (reservas.length > 0) {
+    await prisma.reserva.createMany({ data: reservas });
+  }
+
   console.log(
-    `Datos de ejemplo listos para "${propietario.nombre}": ${barcos.length} barcos, ${barcos.length * 3} vencimientos, ${barcos.length * 3} gastos y reservas de ejemplo.`,
+    `Datos de ejemplo listos para "${propietario.nombre}": ${barcos.length} barcos, ${barcos.length * 5} vencimientos, ${barcos.length * 3} gastos y ${reservas.length} reservas (temporada con pico en verano).`,
   );
   await prisma.$disconnect();
 }
