@@ -324,9 +324,10 @@ export function PanelGastos() {
 
       {/* Vencimientos y próximas salidas */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-carta border border-borde bg-superficie p-4">
-          <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
-          <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div className="space-y-4">
+          <div className="rounded-carta border border-borde bg-superficie p-4">
+            <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
+            <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
             <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
               {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
             </select>
@@ -342,7 +343,10 @@ export function PanelGastos() {
               {guardandoVencimiento ? "Guardando…" : "Añadir"}
             </button>
           </form>
+          </div>
 
+          <div className="rounded-carta border border-borde bg-superficie p-4">
+            <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
           {vencimientosOrdenados.length === 0 ? (
             <p className="mt-3 text-sm text-texto-suave">No hay vencimientos registrados.</p>
           ) : (
@@ -366,7 +370,7 @@ export function PanelGastos() {
                         <td className="whitespace-nowrap px-3 py-2 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
                         <td className="px-3 py-2">
                           <span className="text-texto">{v.descripcion || "—"}</span>
-                          {v.barco && <span className="ml-2 text-xs text-texto-suave">{v.barco}</span>}
+                          {v.barco && <p className="text-xs text-texto-suave">{v.barco}</p>}
                         </td>
                         <td className="whitespace-nowrap px-3 py-2 text-texto-suave">{fecha(v.fecha)}</td>
                         <td className="whitespace-nowrap px-3 py-2 text-texto-suave">
@@ -395,6 +399,7 @@ export function PanelGastos() {
               </table>
             </div>
           )}
+          </div>
         </div>
 
         <div className="rounded-carta border border-borde bg-superficie p-4">
