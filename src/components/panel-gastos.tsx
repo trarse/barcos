@@ -54,6 +54,8 @@ type Resumen = {
 
 type Barco = { id: string; nombre: string };
 
+type Aviso = { tipo: "ok" | "error"; mensaje: string };
+
 function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 }
@@ -87,7 +89,9 @@ export function PanelGastos() {
   const [salidas, setSalidas] = useState<Salida[]>([]);
   const [barcos, setBarcos] = useState<Barco[]>([]);
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState("");
+  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const [guardandoGasto, setGuardandoGasto] = useState(false);
+  const [guardandoVencimiento, setGuardandoVencimiento] = useState(false);
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -129,30 +133,39 @@ export function PanelGastos() {
 
   async function anadirGasto(e: React.FormEvent) {
     e.preventDefault();
-    if (!concepto.trim() || !importe) return;
-    const res = await fetch("/api/gastos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        categoria,
-        concepto: concepto.trim(),
-        importe: Number(importe),
-        fecha: fechaGasto,
-        barcoId: barcoId || null,
-        factura: factura.trim() || null,
-        notas: notas.trim() || null,
-      }),
-    });
-    if (!res.ok) {
-      setError("No se pudo guardar el gasto. Revisa los campos.");
+    if (!concepto.trim() || !importe) {
+      setAviso({ tipo: "error", mensaje: "Rellena al menos el concepto y el importe." });
       return;
     }
-    setError("");
-    setConcepto("");
-    setImporte("");
-    setFactura("");
-    setNotas("");
-    void cargar();
+    setGuardandoGasto(true);
+    setAviso(null);
+    try {
+      const res = await fetch("/api/gastos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoria,
+          concepto: concepto.trim(),
+          importe: Number(importe),
+          fecha: fechaGasto,
+          barcoId: barcoId || null,
+          factura: factura.trim() || null,
+          notas: notas.trim() || null,
+        }),
+      });
+      if (!res.ok) {
+        setAviso({ tipo: "error", mensaje: "No se pudo guardar el gasto. Revisa los campos." });
+        return;
+      }
+      setAviso({ tipo: "ok", mensaje: "Gasto añadido correctamente." });
+      setConcepto("");
+      setImporte("");
+      setFactura("");
+      setNotas("");
+      void cargar();
+    } finally {
+      setGuardandoGasto(false);
+    }
   }
 
   async function borrarGasto(id: string) {
@@ -166,24 +179,33 @@ export function PanelGastos() {
 
   async function anadirVencimiento(e: React.FormEvent) {
     e.preventDefault();
-    if (!descV.trim()) return;
-    const res = await fetch("/api/vencimientos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tipo: tipoV,
-        descripcion: descV.trim(),
-        fecha: fechaV,
-        barcoId: barcoIdV || null,
-      }),
-    });
-    if (!res.ok) {
-      setError("No se pudo guardar el vencimiento.");
+    if (!descV.trim()) {
+      setAviso({ tipo: "error", mensaje: "Escribe una descripción para el vencimiento." });
       return;
     }
-    setError("");
-    setDescV("");
-    void cargar();
+    setGuardandoVencimiento(true);
+    setAviso(null);
+    try {
+      const res = await fetch("/api/vencimientos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipo: tipoV,
+          descripcion: descV.trim(),
+          fecha: fechaV,
+          barcoId: barcoIdV || null,
+        }),
+      });
+      if (!res.ok) {
+        setAviso({ tipo: "error", mensaje: "No se pudo guardar el vencimiento." });
+        return;
+      }
+      setAviso({ tipo: "ok", mensaje: "Vencimiento añadido correctamente." });
+      setDescV("");
+      void cargar();
+    } finally {
+      setGuardandoVencimiento(false);
+    }
   }
 
   async function borrarVencimiento(id: string) {
@@ -200,13 +222,26 @@ export function PanelGastos() {
     ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]),
   );
 
-  const vencimientosProximos = vencimientos
-    .filter((v) => diasHasta(v.fecha) <= 60)
-    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
 
   return (
     <div>
       <h2 className="font-display text-xl font-semibold text-texto">Gastos e ingresos</h2>
+
+      {/* Aviso de éxito o error */}
+      {aviso && (
+        <div
+          role="status"
+          className={`mt-4 flex items-center justify-between gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${
+            aviso.tipo === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-700"
+          }`}
+        >
+          <span>{aviso.mensaje}</span>
+          <button type="button" onClick={() => setAviso(null)} className="text-xs underline" aria-label="Cerrar aviso">
+            cerrar
+          </button>
+        </div>
+      )}
 
       {/* Resumen */}
       {resumen && (
@@ -276,20 +311,23 @@ export function PanelGastos() {
               <option value="">Toda la flota</option>
               {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
             </select>
-            <button type="submit" className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo">Añadir vencimiento</button>
+            <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
+              {guardandoVencimiento ? "Guardando…" : "Añadir vencimiento"}
+            </button>
           </form>
 
-          {vencimientosProximos.length === 0 ? (
-            <p className="mt-3 text-sm text-texto-suave">No hay vencimientos en los próximos 60 días.</p>
+          {vencimientosOrdenados.length === 0 ? (
+            <p className="mt-3 text-sm text-texto-suave">No hay vencimientos registrados.</p>
           ) : (
             <ul className="mt-3 space-y-1.5">
-              {vencimientosProximos.map((v) => {
+              {vencimientosOrdenados.map((v) => {
                 const d = diasHasta(v.fecha);
                 return (
                   <li key={v.id} className="flex items-center justify-between gap-3 rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
                     <div className="min-w-0 flex-1">
                       <span className="font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</span>
                       <span className="ml-2 text-xs text-texto-suave">{v.descripcion}{v.barco ? ` · ${v.barco}` : ""}</span>
+                      <span className="ml-2 text-xs text-texto-tenue">· {fecha(v.fecha)}</span>
                     </div>
                     <span className={`shrink-0 text-xs font-semibold ${colorVencimiento(d)}`}>
                       {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
@@ -329,11 +367,11 @@ export function PanelGastos() {
         <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Categoría">
           {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Concepto" />
+        <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto *" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Concepto" />
         <datalist id="conceptos-gasto">
           {(CONCEPTOS_GASTO[categoria] ?? []).map((c) => <option key={c} value={c} />)}
         </datalist>
-        <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
+        <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
         <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
         <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
         <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
@@ -341,12 +379,10 @@ export function PanelGastos() {
           {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
         </select>
         <input value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Observaciones" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2 lg:col-span-5" aria-label="Observaciones" />
-        <button type="submit" className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo lg:col-span-1">Añadir gasto</button>
+        <button type="submit" disabled={guardandoGasto} className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo disabled:opacity-60 lg:col-span-1">
+          {guardandoGasto ? "Guardando…" : "Añadir gasto"}
+        </button>
       </form>
-
-      {error && (
-        <p role="alert" className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
-      )}
 
       {/* Listado de gastos */}
       <h3 className="mt-6 text-sm font-semibold text-texto">Últimos gastos</h3>
