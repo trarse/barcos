@@ -105,6 +105,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [{ tipo: "avisoLegal" }, 0.2, "monthly"],
     [{ tipo: "privacidad" }, 0.2, "monthly"],
     [{ tipo: "cookies" }, 0.2, "monthly"],
+    [{ tipo: "terminos" }, 0.2, "monthly"],
   ];
 
   return [

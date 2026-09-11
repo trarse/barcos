@@ -49,6 +49,7 @@ export const SEGMENTOS = {
   avisoLegal: { es: "aviso-legal", en: "legal-notice", de: "impressum" },
   privacidad: { es: "privacidad", en: "privacy", de: "datenschutz" },
   cookies: { es: "cookies", en: "cookies", de: "cookies" },
+  terminos: { es: "terminos", en: "terms", de: "agb" },
 } as const satisfies Record<string, Record<Idioma, string>>;
 
 export type ClaveSegmento = keyof typeof SEGMENTOS;
@@ -144,6 +145,7 @@ export function reescriturasLocalizadas(): { source: string; destination: string
       avisoLegal: "aviso-legal",
       privacidad: "privacidad",
       cookies: "cookies",
+      terminos: "terminos",
     };
 
     for (const [clave, carpeta] of Object.entries(carpetas) as [ClaveSegmento, string][]) {

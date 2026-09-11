@@ -71,6 +71,7 @@ export async function Pie({ idioma }: { idioma: Idioma }) {
         { texto: paginaLegal(idioma, "avisoLegal").titulo, pagina: { tipo: "avisoLegal" } },
         { texto: paginaLegal(idioma, "privacidad").titulo, pagina: { tipo: "privacidad" } },
         { texto: paginaLegal(idioma, "cookies").titulo, pagina: { tipo: "cookies" } },
+        { texto: paginaLegal(idioma, "terminos").titulo, pagina: { tipo: "terminos" } },
       ],
     },
   ];
