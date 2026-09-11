@@ -53,7 +53,6 @@ type Resumen = {
 };
 
 type Barco = { id: string; nombre: string };
-
 type Aviso = { tipo: "ok" | "error"; mensaje: string };
 
 function euros(centimos: number): string {
@@ -68,7 +67,6 @@ function hoyISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Días que faltan hasta una fecha (negativo si ya pasó). */
 function diasHasta(iso: string): number {
   return Math.ceil((new Date(`${iso}T00:00:00`).getTime() - Date.now()) / 86_400_000);
 }
@@ -80,7 +78,7 @@ function colorVencimiento(dias: number): string {
   return "text-emerald-600";
 }
 
-/** Cuadro de mando del armador: tesorería, gráfico, vencimientos y salidas. */
+/** Cuadro de mando del armador. */
 export function PanelGastos() {
   const [gastos, setGastos] = useState<Gasto[]>([]);
   const [resumen, setResumen] = useState<Resumen | null>(null);
@@ -154,7 +152,7 @@ export function PanelGastos() {
         }),
       });
       if (!res.ok) {
-        setAviso({ tipo: "error", mensaje: "No se pudo guardar el gasto. Revisa los campos." });
+        setAviso({ tipo: "error", mensaje: "No se pudo guardar el gasto." });
         return;
       }
       setAviso({ tipo: "ok", mensaje: "Gasto añadido correctamente." });
@@ -217,55 +215,53 @@ export function PanelGastos() {
     void cargar();
   }
 
-  const maxMensual = Math.max(
-    1,
-    ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]),
-  );
-
+  const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
 
   return (
-    <div>
+    <div className="space-y-5">
       <h2 className="font-display text-xl font-semibold text-texto">Gastos e ingresos</h2>
 
-      {/* Aviso de éxito o error */}
       {aviso && (
         <div
           role="status"
-          className={`mt-4 flex items-center justify-between gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${
+          className={`flex items-center justify-between gap-3 rounded-carta px-4 py-2.5 text-sm font-medium ${
             aviso.tipo === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-700"
           }`}
         >
           <span>{aviso.mensaje}</span>
-          <button type="button" onClick={() => setAviso(null)} className="text-xs underline" aria-label="Cerrar aviso">
-            cerrar
-          </button>
+          <button type="button" onClick={() => setAviso(null)} className="text-xs underline" aria-label="Cerrar aviso">cerrar</button>
         </div>
       )}
 
-      {/* Resumen */}
-      {resumen && (
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-carta border border-borde bg-superficie p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Ingresos (reservas)</p>
-            <p className="mt-1 cifra font-display text-2xl font-semibold text-emerald-600">{euros(resumen.ingresosCents)}</p>
-          </div>
-          <div className="rounded-carta border border-borde bg-superficie p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Gastos</p>
-            <p className="mt-1 cifra font-display text-2xl font-semibold text-rose-600">{euros(resumen.gastosCents)}</p>
-          </div>
-          <div className="rounded-carta border border-borde bg-superficie p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Beneficio</p>
-            <p className={`mt-1 cifra font-display text-2xl font-semibold ${resumen.beneficioCents >= 0 ? "text-acento" : "text-rose-600"}`}>
-              {euros(resumen.beneficioCents)}
-            </p>
-          </div>
+      {/* KPI */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-carta border border-borde bg-superficie p-4">
+          <div className="h-1 w-8 rounded-full bg-emerald-500" />
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-texto-tenue">Ingresos</p>
+          <p className="mt-1 cifra font-display text-2xl font-semibold text-texto">{euros(resumen?.ingresosCents ?? 0)}</p>
+          <p className="mt-1 text-xs text-texto-suave">Reservas confirmadas y completadas</p>
         </div>
-      )}
+        <div className="rounded-carta border border-borde bg-superficie p-4">
+          <div className="h-1 w-8 rounded-full bg-rose-500" />
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-texto-tenue">Gastos</p>
+          <p className="mt-1 cifra font-display text-2xl font-semibold text-texto">{euros(resumen?.gastosCents ?? 0)}</p>
+          <p className="mt-1 text-xs text-texto-suave">{gastos.length} apuntes</p>
+        </div>
+        <div className="rounded-carta border border-borde bg-superficie p-4">
+          <div className="h-1 w-8 rounded-full bg-acento" />
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-texto-tenue">Beneficio</p>
+          <p className={`mt-1 cifra font-display text-2xl font-semibold ${(resumen?.beneficioCents ?? 0) >= 0 ? "text-acento" : "text-rose-600"}`}>
+            {euros(resumen?.beneficioCents ?? 0)}
+          </p>
+          <p className="mt-1 text-xs text-texto-suave">{margen.toFixed(0)} % de margen</p>
+        </div>
+      </div>
 
-      {/* Gráfico por mes */}
-      {mensual.length > 0 && (
-        <div className="mt-4 rounded-carta border border-borde bg-superficie p-4">
+      {/* Gráfico + desglose por categoría */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-carta border border-borde bg-superficie p-4 lg:col-span-2">
           <div className="flex items-baseline justify-between gap-3">
             <h3 className="text-sm font-semibold text-texto">Últimos 12 meses</h3>
             <div className="flex items-center gap-4 text-xs text-texto-suave">
@@ -293,26 +289,48 @@ export function PanelGastos() {
             ))}
           </div>
         </div>
-      )}
+
+        <div className="rounded-carta border border-borde bg-superficie p-4">
+          <h3 className="text-sm font-semibold text-texto">Gasto por categoría</h3>
+          {resumen && resumen.porCategoria.length > 0 ? (
+            <ul className="mt-3 space-y-2.5">
+              {resumen.porCategoria.slice(0, 8).map((c) => {
+                const pct = resumen.gastosCents > 0 ? (c.totalCents / resumen.gastosCents) * 100 : 0;
+                return (
+                  <li key={c.categoria}>
+                    <div className="flex items-baseline justify-between gap-2 text-xs">
+                      <span className="text-texto">{c.categoria}</span>
+                      <span className="shrink-0 text-texto-suave">{euros(c.totalCents)} · {pct.toFixed(0)} %</span>
+                    </div>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-superficie-alt">
+                      <div className="h-full rounded-full bg-marca" style={{ width: `${pct}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-texto-suave">Aún no hay gastos.</p>
+          )}
+        </div>
+      </div>
 
       {/* Vencimientos y próximas salidas */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-carta border border-borde bg-superficie p-4">
           <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
           <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
             <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
-              {TIPOS_VENCIMIENTO.map((t) => (
-                <option key={t.clave} value={t.clave}>{t.etiqueta}</option>
-              ))}
+              {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
             </select>
             <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
-            <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (p. ej. póliza del Zodiac)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
+            <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
             <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
               <option value="">Toda la flota</option>
               {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
             </select>
             <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
-              {guardandoVencimiento ? "Guardando…" : "Añadir vencimiento"}
+              {guardandoVencimiento ? "Guardando…" : "Añadir"}
             </button>
           </form>
 
@@ -363,53 +381,68 @@ export function PanelGastos() {
       </div>
 
       {/* Alta de gasto */}
-      <form onSubmit={anadirGasto} className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Categoría">
-          {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto *" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Concepto" />
-        <datalist id="conceptos-gasto">
-          {(CONCEPTOS_GASTO[categoria] ?? []).map((c) => <option key={c} value={c} />)}
-        </datalist>
-        <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
-        <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
-        <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
-        <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
-          <option value="">Toda la flota</option>
-          {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-        </select>
-        <input value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Observaciones" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2 lg:col-span-5" aria-label="Observaciones" />
-        <button type="submit" disabled={guardandoGasto} className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo disabled:opacity-60 lg:col-span-1">
-          {guardandoGasto ? "Guardando…" : "Añadir gasto"}
-        </button>
-      </form>
+      <div className="rounded-carta border border-borde bg-superficie p-4">
+        <h3 className="text-sm font-semibold text-texto">Añadir gasto</h3>
+        <form onSubmit={anadirGasto} className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Categoría">
+            {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto *" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Concepto" />
+          <datalist id="conceptos-gasto">
+            {(CONCEPTOS_GASTO[categoria] ?? []).map((c) => <option key={c} value={c} />)}
+          </datalist>
+          <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
+          <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
+          <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
+          <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Barco">
+            <option value="">Toda la flota</option>
+            {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+          </select>
+          <input value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Observaciones" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-3" aria-label="Observaciones" />
+          <button type="submit" disabled={guardandoGasto} className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo disabled:opacity-60 lg:col-span-1">
+            {guardandoGasto ? "Guardando…" : "Añadir gasto"}
+          </button>
+        </form>
+      </div>
 
       {/* Listado de gastos */}
-      <h3 className="mt-6 text-sm font-semibold text-texto">Últimos gastos</h3>
-      {cargando ? (
-        <p className="mt-2 text-sm text-texto-suave">Cargando…</p>
-      ) : gastos.length === 0 ? (
-        <p className="mt-2 text-sm text-texto-suave">Aún no has registrado gastos.</p>
-      ) : (
-        <ul className="mt-2 space-y-1.5">
-          {gastos.map((g) => (
-            <li key={g.id} className="rounded-md border border-borde bg-superficie px-3 py-2 text-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <span className="text-texto">{g.concepto}</span>
-                  <span className="ml-2 text-xs text-texto-tenue">{g.categoria}{g.barco ? ` · ${g.barco}` : ""} · {fecha(g.fecha)}</span>
-                  {g.factura && <span className="ml-2 text-xs text-texto-suave">Factura {g.factura}</span>}
+      <div>
+        <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
+        {cargando ? (
+          <p className="mt-2 text-sm text-texto-suave">Cargando…</p>
+        ) : gastos.length === 0 ? (
+          <p className="mt-2 text-sm text-texto-suave">Aún no has registrado gastos.</p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {gastos.map((g) => (
+              <li key={g.id} className="rounded-carta border border-borde bg-superficie p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium leading-snug text-texto">{g.concepto}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-superficie-alt px-2 py-0.5 text-[11px] font-medium text-texto-suave">{g.categoria}</span>
+                      {g.barco && <span className="rounded-full border border-borde px-2 py-0.5 text-[11px] text-texto-suave">⛵ {g.barco}</span>}
+                      <span className="text-[11px] text-texto-tenue">{fecha(g.fecha)}</span>
+                      {g.factura && <span className="rounded-full bg-marca-suave px-2 py-0.5 text-[11px] font-medium text-marca">Factura {g.factura}</span>}
+                    </div>
+                    {g.notas && <p className="mt-1.5 text-xs leading-relaxed text-texto-suave">{g.notas}</p>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="cifra font-display text-base font-semibold text-texto">{euros(g.importeCents)}</span>
+                    <button
+                      onClick={() => void borrarGasto(g.id)}
+                      className="rounded-md px-1.5 py-0.5 text-texto-tenue transition-colors hover:bg-rose-50 hover:text-rose-600"
+                      aria-label={`Borrar gasto ${g.concepto}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="cifra font-medium text-texto">{euros(g.importeCents)}</span>
-                  <button onClick={() => void borrarGasto(g.id)} className="text-xs text-rose-600 underline">borrar</button>
-                </div>
-              </div>
-              {g.notas && <p className="mt-1 text-xs text-texto-suave">{g.notas}</p>}
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
