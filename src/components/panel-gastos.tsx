@@ -114,6 +114,19 @@ function colorPlazo(dias: number): Plazo {
   return "verde";
 }
 
+const PASOS_TOUR = [
+  { titulo: "Panel de gastos e ingresos", texto: "Aquí controlas el dinero de tu flota: ingresos, gastos y mantenimientos." },
+  { titulo: "Añadir gasto", texto: "Pulsa para registrar una factura o gasto." },
+  { titulo: "Rellenar el gasto", texto: "Concepto, importe, IVA y si es deducible." },
+  { titulo: "Guardar gasto", texto: "Se guarda y queda registrado." },
+  { titulo: "Tabla de gastos", texto: "El gasto aparece aquí al momento." },
+  { titulo: "Añadir mantenimiento", texto: "Aquí se programan vencimientos: seguro, motor, bengalas…" },
+  { titulo: "Rellenar el mantenimiento", texto: "Tipo, fecha, horas de motor e importe." },
+  { titulo: "Guardar mantenimiento", texto: "Se guarda y queda en el calendario de vencimientos." },
+  { titulo: "Tabla de vencimientos", texto: "Aquí ves los mantenimientos y su urgencia por colores." },
+  { titulo: "Recuperación de la inversión", texto: "Y aquí cuánto te falta por recuperar de cada barco." },
+];
+
 /** Cuadro de mando del armador. */
 export function PanelGastos() {
   const [gastos, setGastos] = useState<Gasto[]>([]);
@@ -132,6 +145,7 @@ export function PanelGastos() {
   const [filtroPlazos, setFiltroPlazos] = useState<Plazo[]>(["rojo", "ambar", "verde"]);
   const [abrirGasto, setAbrirGasto] = useState(false);
   const [abrirVencimiento, setAbrirVencimiento] = useState(false);
+  const [tour, setTour] = useState<number | null>(null);
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -181,8 +195,7 @@ export function PanelGastos() {
     void cargar();
   }, [cargar]);
 
-  async function anadirGasto(e: React.FormEvent) {
-    e.preventDefault();
+  async function guardarGasto() {
     if (!concepto.trim() || !importe) {
       setAviso({ tipo: "error", mensaje: "Rellena al menos el concepto y el importe." });
       return;
@@ -215,10 +228,15 @@ export function PanelGastos() {
       setFactura("");
       setNotas("");
       setAbrirGasto(false);
-      void cargar();
+      await cargar();
     } finally {
       setGuardandoGasto(false);
     }
+  }
+
+  function anadirGasto(e: React.FormEvent) {
+    e.preventDefault();
+    void guardarGasto();
   }
 
   async function borrarGasto(id: string) {
@@ -231,8 +249,7 @@ export function PanelGastos() {
     void cargar();
   }
 
-  async function anadirVencimiento(e: React.FormEvent) {
-    e.preventDefault();
+  async function guardarVencimiento() {
     setGuardandoVencimiento(true);
     setAviso(null);
     try {
@@ -257,10 +274,15 @@ export function PanelGastos() {
       setDescV("");
       setImporteV("");
       setAbrirVencimiento(false);
-      void cargar();
+      await cargar();
     } finally {
       setGuardandoVencimiento(false);
     }
+  }
+
+  function anadirVencimiento(e: React.FormEvent) {
+    e.preventDefault();
+    void guardarVencimiento();
   }
 
   async function borrarVencimiento(id: string) {
@@ -276,6 +298,56 @@ export function PanelGastos() {
   function alternarPlazo(c: Plazo) {
     setFiltroPlazos((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   }
+
+  function resalta(paso: number): string {
+    return tour === paso ? "ring-2 ring-acento" : "";
+  }
+
+  useEffect(() => {
+    if (tour === null) return;
+    let cancelado = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    async function ejecutar() {
+      if (tour === 1) setAbrirGasto(true);
+      if (tour === 2) {
+        setCategoria("Motor y propulsión");
+        setConcepto("Cambio de aceite y filtros");
+        setImporte("460");
+        setIva(21);
+        setDeducible(true);
+        setBarcoId("");
+        setFactura("F-TOUR-001");
+        setNotas("");
+        setFechaGasto(hoyISO());
+      }
+      if (tour === 3) await guardarGasto();
+      if (tour === 5) setAbrirVencimiento(true);
+      if (tour === 6) {
+        const en30 = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+        setTipoV("motor");
+        setDescV("Revisión de motor (tour)");
+        setFechaV(en30);
+        setHorasActualesV("500");
+        setHorasV("750");
+        setImporteV("480");
+        setBarcoIdV("");
+      }
+      if (tour === 7) await guardarVencimiento();
+
+      if (cancelado) return;
+      timer = setTimeout(() => {
+        if (!cancelado) setTour((t) => (t === null ? null : t + 1 >= PASOS_TOUR.length ? null : t + 1));
+      }, 3400);
+    }
+
+    void ejecutar();
+    return () => {
+      cancelado = true;
+      if (timer) clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tour]);
 
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -304,6 +376,13 @@ export function PanelGastos() {
             <option value="">Toda la flota</option>
             {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
+          <button
+            type="button"
+            onClick={() => setTour(0)}
+            className="rounded-md border border-borde px-3 py-2 text-xs font-semibold text-texto-suave transition-colors hover:text-acento"
+          >
+            Recorrido guiado
+          </button>
         </div>
       </div>
 
@@ -354,18 +433,18 @@ export function PanelGastos() {
 
       {/* Alta rápida: gasto y vencimiento (colapsable) */}
       <div className="space-y-3">
-        <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(3)}`}>
           <button
             type="button"
             onClick={() => setAbrirGasto((v) => !v)}
             aria-expanded={abrirGasto}
-            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+            className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${resalta(1)}`}
           >
             <span className="text-sm font-semibold text-texto">Añadir gasto</span>
             <span className={`text-xs font-semibold ${abrirGasto ? "text-texto-suave" : "text-acento"}`}>{abrirGasto ? "Cerrar" : "Abrir"}</span>
           </button>
           {abrirGasto && (
-            <form onSubmit={anadirGasto} className="grid gap-2 border-t border-borde p-4 sm:grid-cols-2 lg:grid-cols-6">
+            <form onSubmit={anadirGasto} className={`grid gap-2 border-t border-borde p-4 sm:grid-cols-2 lg:grid-cols-6 ${resalta(2)}`}>
               <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Categoría">
                 {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -397,18 +476,18 @@ export function PanelGastos() {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(7)}`}>
           <button
             type="button"
             onClick={() => setAbrirVencimiento((v) => !v)}
             aria-expanded={abrirVencimiento}
-            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+            className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${resalta(5)}`}
           >
             <span className="text-sm font-semibold text-texto">Añadir vencimiento</span>
             <span className={`text-xs font-semibold ${abrirVencimiento ? "text-texto-suave" : "text-acento"}`}>{abrirVencimiento ? "Cerrar" : "Abrir"}</span>
           </button>
           {abrirVencimiento && (
-            <form onSubmit={anadirVencimiento} className="grid gap-2 border-t border-borde p-4 sm:grid-cols-2">
+            <form onSubmit={anadirVencimiento} className={`grid gap-2 border-t border-borde p-4 sm:grid-cols-2 ${resalta(6)}`}>
               <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
                 {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
               </select>
@@ -526,7 +605,7 @@ export function PanelGastos() {
       </div>
 
       {/* Recuperación de la inversión */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(9)}`}>
         <div className="border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Recuperación de la inversión</h3>
           <p className="mt-0.5 text-xs text-texto-suave">Cuánto te falta por recuperar del precio de compra con el beneficio acumulado de cada barco.</p>
@@ -623,7 +702,7 @@ export function PanelGastos() {
       </div>
 
       {/* Listado de gastos */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(4)}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
           <div className="flex items-center gap-3">
@@ -697,7 +776,7 @@ export function PanelGastos() {
       </div>
 
       {/* Vencimientos */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(8)}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
           <div className="flex items-center gap-1.5">
@@ -785,6 +864,22 @@ export function PanelGastos() {
           </ul>
         )}
       </div>
+
+      {tour !== null && (
+        <div className="fixed bottom-4 left-1/2 z-50 w-[min(92vw,540px)] -translate-x-1/2 rounded-carta border border-acento/40 bg-superficie p-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-acento">Recorrido · Paso {tour + 1} de {PASOS_TOUR.length}</p>
+              <h3 className="mt-1 text-sm font-semibold text-texto">{PASOS_TOUR[tour].titulo}</h3>
+              <p className="mt-1 text-xs text-texto-suave">{PASOS_TOUR[tour].texto}</p>
+            </div>
+            <button type="button" onClick={() => setTour(null)} className="shrink-0 text-xs font-semibold text-texto-suave underline">Saltar</button>
+          </div>
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-superficie-alt">
+            <div className="h-full bg-acento transition-all" style={{ width: `${((tour + 1) / PASOS_TOUR.length) * 100}%` }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
