@@ -82,6 +82,7 @@ export async function GET(
       aseos: barco.aseos,
       potenciaCv: barco.potenciaCv,
       precioBaseDia: barco.precioBaseDia,
+      precioAdquisicionCents: barco.precioAdquisicionCents,
       limpieza: barco.limpieza,
       tasaPortuariaDia: barco.tasaPortuariaDia,
       patronDia: barco.patronDia,

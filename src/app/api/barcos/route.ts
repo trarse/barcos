@@ -204,6 +204,7 @@ const Edicion = z.object({
   minimoDias: z.coerce.number().int().min(1).max(30).optional(),
   descuentoSemana: z.coerce.number().int().min(0).max(100).optional(),
   reservaInstantanea: z.boolean().optional(),
+  precioAdquisicion: z.coerce.number().min(0).optional().nullable(),
 });
 
 export async function PATCH(req: Request) {
@@ -254,6 +255,9 @@ export async function PATCH(req: Request) {
   if (a.minimoDias !== undefined) data.minimoDias = a.minimoDias;
   if (a.descuentoSemana !== undefined) data.descuentoSemana = a.descuentoSemana;
   if (a.reservaInstantanea !== undefined) data.reservaInstantanea = a.reservaInstantanea;
+  if (a.precioAdquisicion !== undefined) {
+    data.precioAdquisicionCents = a.precioAdquisicion === null ? null : Math.round(a.precioAdquisicion * 100);
+  }
 
   await db.barco.update({ where: { id: a.id }, data });
   return NextResponse.json({ ok: true });

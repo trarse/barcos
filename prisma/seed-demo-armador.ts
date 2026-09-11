@@ -78,6 +78,24 @@ async function main() {
     throw new Error("El armador no tiene barcos y no se pudieron crear.");
   }
 
+  // ---- Precio de adquisición de referencia, para la recuperación de la inversión ----
+  const preciosAdquisicion: Record<string, number> = {
+    "Zodiac Open 5.5": 45000,
+    "Copino 38": 180000,
+    "Lagoon 42": 350000,
+    "Oceanis 40": 220000,
+    "Sea Ray 320": 150000,
+    "Bayliner VR5": 60000,
+    "Quicksilver Activ 675": 70000,
+    "Dufour 390 Grand Large": 200000,
+    "Beneteau Flyer 8": 120000,
+    "Bénéteau Oceanis 38.1": 190000,
+  };
+  for (const b of barcos) {
+    const precio = preciosAdquisicion[b.nombre] ?? Math.round((b.esloraCm / 100) * 9000);
+    await prisma.barco.update({ where: { id: b.id }, data: { precioAdquisicionCents: Math.round(precio * 100) } });
+  }
+
   // ---- Vencimientos: mantenimiento completo al día (seguro, motor, ITB, bengalas, salvamento) ----
   for (let i = 0; i < barcos.length; i++) {
     const b = barcos[i];

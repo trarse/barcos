@@ -29,6 +29,7 @@ type RentabilidadBarco = {
   ingresosCents: number;
   gastosCents: number;
   beneficioCents: number;
+  precioAdquisicionCents: number | null;
 };
 
 type Vencimiento = {
@@ -284,6 +285,15 @@ export function PanelGastos() {
   const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
   const barcoSeleccionado = barcos.find((b) => b.id === filtroBarco)?.nombre ?? null;
 
+  const recuperacion = rentabilidad
+    .filter((r) => r.precioAdquisicionCents != null && r.precioAdquisicionCents > 0)
+    .map((r) => {
+      const precio = r.precioAdquisicionCents ?? 0;
+      const ganado = r.beneficioCents;
+      return { barcoId: r.barcoId, barco: r.barco, precio, ganado, falta: precio - ganado, pct: precio > 0 ? (ganado / precio) * 100 : 0 };
+    })
+    .sort((a, b) => b.falta - a.falta);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -515,7 +525,45 @@ export function PanelGastos() {
         </div>
       </div>
 
-      {/* Flujo de caja: próximos 6 meses */}
+      {/* Recuperación de la inversión */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Recuperación de la inversión</h3>
+          <p className="mt-0.5 text-xs text-texto-suave">Cuánto te falta por recuperar del precio de compra con el beneficio acumulado de cada barco.</p>
+        </div>
+        {recuperacion.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-texto-suave">Añade el precio de adquisición en la ficha de cada barco para verlo aquí.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                  <th className="px-4 py-2.5 font-semibold">Barco</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Precio</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Ganado</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Falta por recuperar</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">% recuperado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recuperacion.map((r) => (
+                  <tr key={r.barcoId} className="border-b border-borde last:border-0">
+                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{r.barco}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-texto-suave">{euros(r.precio)}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-emerald-600">{euros(r.ganado)}</td>
+                    <td className={`whitespace-nowrap px-3 py-2.5 text-right cifra font-semibold ${r.falta <= 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                      {r.falta <= 0 ? "Recuperado" : euros(r.falta)}
+                    </td>
+                    <td className={`whitespace-nowrap px-4 py-2.5 text-right text-xs font-semibold ${r.pct >= 100 ? "text-emerald-600" : "text-amber-600"}`}>{r.pct.toFixed(0)} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Flujo de caja: próximos 12 meses */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Previsión de tesorería · próximos 12 meses</h3>

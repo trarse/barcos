@@ -19,6 +19,7 @@ export type BarcoDetalle = {
   aseos: number;
   potenciaCv: number;
   precioBaseDia: number;
+  precioAdquisicionCents: number | null;
   limpieza: number;
   tasaPortuariaDia: number;
   patronDia: number | null;
@@ -64,6 +65,7 @@ export function FormularioEditarBarco({
     tipoId: barco.tipoId,
     puertoId: barco.puertoId,
     precioBaseDia: String(barco.precioBaseDia / 100),
+    precioAdquisicion: barco.precioAdquisicionCents !== null ? String(barco.precioAdquisicionCents / 100) : "",
     limpieza: String(barco.limpieza / 100),
     tasaPortuariaDia: String(barco.tasaPortuariaDia / 100),
     patronDia: barco.patronDia !== null ? String(barco.patronDia / 100) : "",
@@ -88,7 +90,11 @@ export function FormularioEditarBarco({
       const res = await fetch("/api/barcos", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: barco.id, ...f }),
+        body: JSON.stringify({
+          id: barco.id,
+          ...f,
+          precioAdquisicion: f.precioAdquisicion.trim() === "" ? null : Number(f.precioAdquisicion),
+        }),
       });
       if (res.ok) onGuardado();
       else setError("No se pudo guardar. Revisa los campos.");
@@ -189,6 +195,14 @@ export function FormularioEditarBarco({
           {campo("Patrón / día (vacío = no)", input("patronDia", { type: "number" }))}
           {campo("Fianza", input("fianza", { type: "number" }))}
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h4 className="text-sm font-semibold text-texto">Inversión</h4>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {campo("Precio de adquisición (€)", input("precioAdquisicion", { type: "number", step: "0.01", placeholder: "Ej.: 100000" }))}
+        </div>
+        <p className="text-xs text-texto-suave">Con este precio se calcula cuánto te falta por recuperar de la inversión.</p>
       </section>
 
       <section className="space-y-3">

@@ -179,6 +179,9 @@ model Barco {
 
   // Tarifa. Todo en céntimos de euro.
   precioBaseDia     Int
+  /// Precio de adquisición del barco, en céntimos de euro. Sirve para calcular
+  /// cuánto de la inversión se ha recuperado con el beneficio acumulado.
+  precioAdquisicionCents Int?
   limpieza          Int   @default(0)
   tasaPortuariaDia  Int   @default(0)
   patronDia         Int?

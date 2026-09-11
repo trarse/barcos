@@ -132,7 +132,7 @@ export async function GET(req: Request) {
   // Rentabilidad por barco: ingresos (reservas) frente a gastos.
   const barcosDelArmador = await db.barco.findMany({
     where: esAdmin ? {} : { propietarioId: propietarioId ?? "" },
-    select: { id: true, nombre: true },
+    select: { id: true, nombre: true, precioAdquisicionCents: true },
   });
   const rentabilidadPorBarco = await Promise.all(
     barcosDelArmador.map(async (b) => {
@@ -145,7 +145,7 @@ export async function GET(req: Request) {
       ]);
       const ingresos = ing._sum.precioTotalCents ?? 0;
       const gastosB = gas._sum.importeCents ?? 0;
-      return { barcoId: b.id, barco: b.nombre, ingresosCents: ingresos, gastosCents: gastosB, beneficioCents: ingresos - gastosB };
+      return { barcoId: b.id, barco: b.nombre, ingresosCents: ingresos, gastosCents: gastosB, beneficioCents: ingresos - gastosB, precioAdquisicionCents: b.precioAdquisicionCents };
     }),
   );
   rentabilidadPorBarco.sort((a, b) => b.beneficioCents - a.beneficioCents);
