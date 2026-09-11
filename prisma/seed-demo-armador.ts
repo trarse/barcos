@@ -181,8 +181,43 @@ async function main() {
     });
   }
 
+  // ---- Reservas (ingresos) por barco, para ver la rentabilidad ----
+  const reservasExistentes = await prisma.reserva.count({ where: { barco: { propietarioId: propietario.id } } });
+  if (reservasExistentes === 0) {
+    let contador = 1;
+    for (let i = 0; i < barcos.length; i++) {
+      const b = barcos[i];
+      const num = 1 + (i % 3);
+      for (let j = 0; j < num; j++) {
+        const dias = 1 + ((i + j) % 3);
+        const inicio = fechaHace(2 + ((i * 3 + j) % 8), 5 + j);
+        const fin = new Date(inicio);
+        fin.setDate(fin.getDate() + dias);
+        const total = Math.round(b.precioBaseDia * dias * 1.21);
+        await prisma.reserva.create({
+          data: {
+            referencia: `RES-DEMO-${String(contador).padStart(3, "0")}`,
+            barcoId: b.id,
+            fechaInicio: inicio,
+            fechaFin: fin,
+            numDias: dias,
+            numPersonas: 6,
+            clienteNombre: `Cliente ${i + 1}`,
+            clienteEmail: `cliente${i + 1}@ejemplo.com`,
+            precioTotalCents: total,
+            estado: j % 2 === 0 ? "completada" : "confirmada",
+            pagado: true,
+            comisionCents: Math.round(total * 0.12),
+            netoArmadorCents: Math.round(total * 0.88),
+          },
+        });
+        contador++;
+      }
+    }
+  }
+
   console.log(
-    `Datos de ejemplo listos para "${propietario.nombre}": ${barcos.length} barcos, ${barcos.length * 3} vencimientos, ${barcos.length * 3} gastos.`,
+    `Datos de ejemplo listos para "${propietario.nombre}": ${barcos.length} barcos, ${barcos.length * 3} vencimientos, ${barcos.length * 3} gastos y reservas de ejemplo.`,
   );
   await prisma.$disconnect();
 }
