@@ -224,6 +224,7 @@ export function PanelGastos() {
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
   const gastosFiltrados = filtroBarco ? gastos.filter((g) => g.barcoId === filtroBarco) : gastos;
+  const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
 
   return (
     <div className="space-y-5">
@@ -345,29 +346,54 @@ export function PanelGastos() {
           {vencimientosOrdenados.length === 0 ? (
             <p className="mt-3 text-sm text-texto-suave">No hay vencimientos registrados.</p>
           ) : (
-            <ul className="mt-3 space-y-1.5">
-              {vencimientosOrdenados.map((v) => {
-                const d = diasHasta(v.fecha);
-                return (
-                  <li key={v.id} className="rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-texto">
-                        {ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}
-                        {v.horas != null && <span className="font-normal text-texto-suave"> · próxima a las {v.horas} h</span>}
-                      </span>
-                      <span className={`shrink-0 text-xs font-semibold ${colorVencimiento(d)}`}>
-                        {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
-                      </span>
-                      <button onClick={() => void borrarVencimiento(v.id)} className="shrink-0 text-xs text-rose-600 underline">borrar</button>
-                    </div>
-                    <p className="mt-0.5 text-xs text-texto-suave">
-                      {v.descripcion ? `${v.descripcion} · ` : ""}{v.barco ? `${v.barco} · ` : ""}{fecha(v.fecha)}
-                      {v.horasActuales != null && ` · actuales ${v.horasActuales} h`}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                    <th className="px-3 py-2 font-semibold">Tipo</th>
+                    <th className="px-3 py-2 font-semibold">Detalle</th>
+                    <th className="px-3 py-2 font-semibold">Fecha</th>
+                    <th className="px-3 py-2 font-semibold">Horas</th>
+                    <th className="px-3 py-2 text-right font-semibold">Plazo</th>
+                    <th className="px-3 py-2" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {vencimientosOrdenados.map((v) => {
+                    const d = diasHasta(v.fecha);
+                    return (
+                      <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                        <td className="whitespace-nowrap px-3 py-2 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
+                        <td className="px-3 py-2">
+                          <span className="text-texto">{v.descripcion || "—"}</span>
+                          {v.barco && <span className="ml-2 text-xs text-texto-suave">{v.barco}</span>}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-texto-suave">{fecha(v.fecha)}</td>
+                        <td className="whitespace-nowrap px-3 py-2 text-texto-suave">
+                          {v.horasActuales != null && <span>actuales {v.horasActuales} h</span>}
+                          {v.horasActuales != null && v.horas != null && <span> · </span>}
+                          {v.horas != null && <span>próxima {v.horas} h</span>}
+                          {v.horasActuales == null && v.horas == null && "—"}
+                        </td>
+                        <td className={`whitespace-nowrap px-3 py-2 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
+                          {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            onClick={() => void borrarVencimiento(v.id)}
+                            className="text-texto-tenue transition-colors hover:text-rose-600"
+                            aria-label={`Borrar ${ETIQUETA_VENCIMIENTO[v.tipo]}`}
+                            title="Borrar"
+                          >
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
@@ -457,7 +483,7 @@ export function PanelGastos() {
                     <td className="whitespace-nowrap px-4 py-2.5 text-texto-suave">{fecha(g.fecha)}</td>
                     <td className="px-3 py-2.5">
                       <span className="font-medium text-texto">{g.concepto}</span>
-                      {g.notas && <span className="ml-2 text-xs text-texto-suave">{g.notas}</span>}
+                      {g.notas && <p className="text-xs text-texto-suave">{g.notas}</p>}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.categoria}</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.barco ?? "—"}</td>
@@ -482,7 +508,7 @@ export function PanelGastos() {
                     Total
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right cifra font-display text-base font-semibold text-texto">
-                    {euros(resumen?.gastosCents ?? 0)}
+                    {euros(totalFiltrado)}
                   </td>
                   <td className="px-4 py-2.5" />
                 </tr>
