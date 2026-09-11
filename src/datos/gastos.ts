@@ -121,3 +121,17 @@ export const CONCEPTOS_GASTO: Record<string, string[]> = {
     "Otros gastos no clasificados",
   ],
 };
+
+/** Tipos de vencimiento de plazos del armador, con su etiqueta visible. */
+export const TIPOS_VENCIMIENTO: { clave: string; etiqueta: string }[] = [
+  { clave: "seguro", etiqueta: "Seguro" },
+  { clave: "itb", etiqueta: "Inspección (ITB)" },
+  { clave: "bengalas", etiqueta: "Bengalas" },
+  { clave: "salvamento", etiqueta: "Material de salvamento" },
+  { clave: "despacho", etiqueta: "Despacho" },
+  { clave: "otro", etiqueta: "Otro" },
+];
+
+export const ETIQUETA_VENCIMIENTO: Record<string, string> = Object.fromEntries(
+  TIPOS_VENCIMIENTO.map((t) => [t.clave, t.etiqueta]),
+);

@@ -154,6 +154,7 @@ model Propietario {
 
   barcos Barco[]
   gastos Gasto[]
+  vencimientos Vencimiento[]
 }
 
 model Barco {
@@ -214,6 +215,7 @@ model Barco {
   bloqueos     Bloqueo[]
   calendarios  CalendarioExterno[]
   gastos       Gasto[]
+  vencimientos Vencimiento[]
 
   @@index([tipoId])
   @@index([puertoId])
@@ -259,7 +261,27 @@ model Gasto {
   categoria     String
   concepto      String
   importeCents  Int
+  factura       String?
+  notas         String?
   fecha         DateTime
+  creadoEn      DateTime @default(now())
+
+  propietario Propietario @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
+  barco       Barco?      @relation(fields: [barcoId], references: [id], onDelete: SetNull)
+
+  @@index([propietarioId, fecha])
+  @@index([barcoId])
+}
+
+/// Vencimiento de un plazo del armador: seguro, bengalas, salvamento, ITB...
+model Vencimiento {
+  id            String    @id @default(cuid())
+  propietarioId String
+  barcoId       String?
+  tipo          String
+  descripcion   String
+  fecha         DateTime
+  avisadoEn     DateTime?
   creadoEn      DateTime @default(now())
 
   propietario Propietario @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
