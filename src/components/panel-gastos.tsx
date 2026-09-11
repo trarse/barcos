@@ -80,6 +80,14 @@ function colorVencimiento(dias: number): string {
   return "text-emerald-600";
 }
 
+type Plazo = "rojo" | "ambar" | "verde";
+
+function colorPlazo(dias: number): Plazo {
+  if (dias < 0 || dias <= 30) return "rojo";
+  if (dias <= 60) return "ambar";
+  return "verde";
+}
+
 /** Cuadro de mando del armador. */
 export function PanelGastos() {
   const [gastos, setGastos] = useState<Gasto[]>([]);
@@ -92,6 +100,7 @@ export function PanelGastos() {
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [guardandoGasto, setGuardandoGasto] = useState(false);
   const [guardandoVencimiento, setGuardandoVencimiento] = useState(false);
+  const [filtroPlazos, setFiltroPlazos] = useState<Plazo[]>(["rojo", "ambar", "verde"]);
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -220,8 +229,13 @@ export function PanelGastos() {
     void cargar();
   }
 
+  function alternarPlazo(c: Plazo) {
+    setFiltroPlazos((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  }
+
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
   const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const vencimientosFiltrados = vencimientosOrdenados.filter((v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))));
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
   const gastosFiltrados = filtroBarco ? gastos.filter((g) => g.barcoId === filtroBarco) : gastos;
   const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
@@ -393,11 +407,18 @@ export function PanelGastos() {
 
       {/* Vencimientos */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
-        <div className="border-b border-borde px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={() => alternarPlazo("rojo")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("rojo") ? "border-rose-500 bg-rose-50 text-rose-700" : "border-borde text-texto-tenue"}`}>≤ 30 días</button>
+            <button type="button" onClick={() => alternarPlazo("ambar")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("ambar") ? "border-amber-500 bg-amber-50 text-amber-700" : "border-borde text-texto-tenue"}`}>31–60 días</button>
+            <button type="button" onClick={() => alternarPlazo("verde")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("verde") ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-borde text-texto-tenue"}`}>&gt; 60 días</button>
+          </div>
         </div>
-        {vencimientosOrdenados.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-texto-suave">No hay vencimientos registrados.</p>
+        {vencimientosFiltrados.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-texto-suave">
+            {vencimientosOrdenados.length === 0 ? "No hay vencimientos registrados." : "No hay vencimientos con estos filtros."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
@@ -412,7 +433,7 @@ export function PanelGastos() {
                 </tr>
               </thead>
               <tbody>
-                {vencimientosOrdenados.map((v) => {
+                {vencimientosFiltrados.map((v) => {
                   const d = diasHasta(v.fecha);
                   return (
                     <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
