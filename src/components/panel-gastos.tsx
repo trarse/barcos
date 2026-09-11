@@ -129,6 +129,8 @@ export function PanelGastos() {
   const [guardandoGasto, setGuardandoGasto] = useState(false);
   const [guardandoVencimiento, setGuardandoVencimiento] = useState(false);
   const [filtroPlazos, setFiltroPlazos] = useState<Plazo[]>(["rojo", "ambar", "verde"]);
+  const [abrirGasto, setAbrirGasto] = useState(false);
+  const [abrirVencimiento, setAbrirVencimiento] = useState(false);
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -211,6 +213,7 @@ export function PanelGastos() {
       setImporte("");
       setFactura("");
       setNotas("");
+      setAbrirGasto(false);
       void cargar();
     } finally {
       setGuardandoGasto(false);
@@ -252,6 +255,7 @@ export function PanelGastos() {
       setAviso({ tipo: "ok", mensaje: "Vencimiento añadido correctamente." });
       setDescV("");
       setImporteV("");
+      setAbrirVencimiento(false);
       void cargar();
     } finally {
       setGuardandoVencimiento(false);
@@ -335,6 +339,83 @@ export function PanelGastos() {
             {euros(resumen?.beneficioCents ?? 0)}
           </p>
           <p className="mt-1 text-xs text-texto-suave">{margen.toFixed(0)} % de margen</p>
+        </div>
+      </div>
+
+      {/* Alta rápida: gasto y vencimiento (colapsable) */}
+      <div className="space-y-3">
+        <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+          <button
+            type="button"
+            onClick={() => setAbrirGasto((v) => !v)}
+            aria-expanded={abrirGasto}
+            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+          >
+            <span className="text-sm font-semibold text-texto">Añadir gasto</span>
+            <span className={`text-xs font-semibold ${abrirGasto ? "text-texto-suave" : "text-acento"}`}>{abrirGasto ? "Cerrar" : "Abrir"}</span>
+          </button>
+          {abrirGasto && (
+            <form onSubmit={anadirGasto} className="grid gap-2 border-t border-borde p-4 sm:grid-cols-2 lg:grid-cols-6">
+              <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Categoría">
+                {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto *" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Concepto" />
+              <datalist id="conceptos-gasto">
+                {(CONCEPTOS_GASTO[categoria] ?? []).map((c) => <option key={c} value={c} />)}
+              </datalist>
+              <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
+              <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
+              <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
+              <select value={iva} onChange={(e) => setIva(Number(e.target.value))} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="IVA">
+                <option value={21}>IVA 21 %</option>
+                <option value={10}>IVA 10 %</option>
+                <option value={0}>Sin IVA</option>
+              </select>
+              <label className="flex items-center gap-2 rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto">
+                <input type="checkbox" checked={deducible} onChange={(e) => setDeducible(e.target.checked)} className="h-4 w-4 accent-[var(--acento)]" />
+                Deducible
+              </label>
+              <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Barco">
+                <option value="">Toda la flota</option>
+                {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+              </select>
+              <input value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Observaciones" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-3" aria-label="Observaciones" />
+              <button type="submit" disabled={guardandoGasto} className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo disabled:opacity-60 lg:col-span-1">
+                {guardandoGasto ? "Guardando…" : "Añadir gasto"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+          <button
+            type="button"
+            onClick={() => setAbrirVencimiento((v) => !v)}
+            aria-expanded={abrirVencimiento}
+            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+          >
+            <span className="text-sm font-semibold text-texto">Añadir vencimiento</span>
+            <span className={`text-xs font-semibold ${abrirVencimiento ? "text-texto-suave" : "text-acento"}`}>{abrirVencimiento ? "Cerrar" : "Abrir"}</span>
+          </button>
+          {abrirVencimiento && (
+            <form onSubmit={anadirVencimiento} className="grid gap-2 border-t border-borde p-4 sm:grid-cols-2">
+              <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
+                {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
+              </select>
+              <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
+              <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
+              <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
+              <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
+              <input value={importeV} onChange={(e) => setImporteV(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) opcional" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Importe del vencimiento" />
+              <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
+                <option value="">Toda la flota</option>
+                {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+              </select>
+              <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
+                {guardandoVencimiento ? "Guardando…" : "Añadir"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
 
@@ -493,40 +574,6 @@ export function PanelGastos() {
         <p className="border-t border-borde px-4 py-2.5 text-xs text-texto-suave">El IVA soportado deducible se recupera en la declaración trimestral (modelo 303).</p>
       </div>
 
-      {/* Gastos: alta y listado */}
-      <div className="rounded-carta border border-borde bg-superficie p-4">
-        <h3 className="text-sm font-semibold text-texto">Añadir gasto</h3>
-        <form onSubmit={anadirGasto} className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
-          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Categoría">
-            {CATEGORIAS_GASTO.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <input value={concepto} onChange={(e) => setConcepto(e.target.value)} placeholder="Concepto *" list="conceptos-gasto" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Concepto" />
-          <datalist id="conceptos-gasto">
-            {(CONCEPTOS_GASTO[categoria] ?? []).map((c) => <option key={c} value={c} />)}
-          </datalist>
-          <input value={importe} onChange={(e) => setImporte(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) *" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Importe en euros" />
-          <input value={fechaGasto} onChange={(e) => setFechaGasto(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha" />
-          <input value={factura} onChange={(e) => setFactura(e.target.value)} placeholder="Nº factura" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Número de factura" />
-          <select value={iva} onChange={(e) => setIva(Number(e.target.value))} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="IVA">
-            <option value={21}>IVA 21 %</option>
-            <option value={10}>IVA 10 %</option>
-            <option value={0}>Sin IVA</option>
-          </select>
-          <label className="flex items-center gap-2 rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto">
-            <input type="checkbox" checked={deducible} onChange={(e) => setDeducible(e.target.checked)} className="h-4 w-4 accent-[var(--acento)]" />
-            Deducible
-          </label>
-          <select value={barcoId} onChange={(e) => setBarcoId(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-2" aria-label="Barco">
-            <option value="">Toda la flota</option>
-            {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-          </select>
-          <input value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Observaciones" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto lg:col-span-3" aria-label="Observaciones" />
-          <button type="submit" disabled={guardandoGasto} className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-fondo disabled:opacity-60 lg:col-span-1">
-            {guardandoGasto ? "Guardando…" : "Añadir gasto"}
-          </button>
-        </form>
-      </div>
-
       {/* Listado de gastos */}
       <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
@@ -599,28 +646,6 @@ export function PanelGastos() {
             </table>
           </div>
         )}
-      </div>
-
-      {/* Vencimientos: alta y listado */}
-      <div className="rounded-carta border border-borde bg-superficie p-4">
-        <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
-        <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
-          <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
-            {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
-          </select>
-          <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
-          <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
-          <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
-          <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
-          <input value={importeV} onChange={(e) => setImporteV(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) opcional" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Importe del vencimiento" />
-          <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
-            <option value="">Toda la flota</option>
-            {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-          </select>
-          <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
-            {guardandoVencimiento ? "Guardando…" : "Añadir"}
-          </button>
-        </form>
       </div>
 
       {/* Vencimientos */}
