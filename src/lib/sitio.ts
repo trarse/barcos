@@ -42,7 +42,7 @@ function urlDelSitio(): string {
     if (!url) {
       throw new Error(
         "Falta NEXT_PUBLIC_URL. En producción hay que definirla con el dominio " +
-          "real (por ejemplo https://estribor.es): de ahí salen el canonical, " +
+          "real (por ejemplo https://estribor-preview.netlify.app): de ahí salen el canonical, " +
           "el sitemap, el hreflang y el JSON-LD.",
       );
     }
