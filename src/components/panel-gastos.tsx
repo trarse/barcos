@@ -406,41 +406,68 @@ export function PanelGastos() {
       </div>
 
       {/* Listado de gastos */}
-      <div>
-        <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
+          {gastos.length > 0 && <span className="text-xs text-texto-suave">{gastos.length} apuntes</span>}
+        </div>
+
         {cargando ? (
-          <p className="mt-2 text-sm text-texto-suave">Cargando…</p>
+          <p className="px-4 py-4 text-sm text-texto-suave">Cargando…</p>
         ) : gastos.length === 0 ? (
-          <p className="mt-2 text-sm text-texto-suave">Aún no has registrado gastos.</p>
+          <p className="px-4 py-4 text-sm text-texto-suave">Aún no has registrado gastos.</p>
         ) : (
-          <ul className="mt-2 space-y-2">
-            {gastos.map((g) => (
-              <li key={g.id} className="rounded-carta border border-borde bg-superficie p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium leading-snug text-texto">{g.concepto}</p>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-full bg-superficie-alt px-2 py-0.5 text-[11px] font-medium text-texto-suave">{g.categoria}</span>
-                      {g.barco && <span className="rounded-full border border-borde px-2 py-0.5 text-[11px] text-texto-suave">⛵ {g.barco}</span>}
-                      <span className="text-[11px] text-texto-tenue">{fecha(g.fecha)}</span>
-                      {g.factura && <span className="rounded-full bg-marca-suave px-2 py-0.5 text-[11px] font-medium text-marca">Factura {g.factura}</span>}
-                    </div>
-                    {g.notas && <p className="mt-1.5 text-xs leading-relaxed text-texto-suave">{g.notas}</p>}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <span className="cifra font-display text-base font-semibold text-texto">{euros(g.importeCents)}</span>
-                    <button
-                      onClick={() => void borrarGasto(g.id)}
-                      className="rounded-md px-1.5 py-0.5 text-texto-tenue transition-colors hover:bg-rose-50 hover:text-rose-600"
-                      aria-label={`Borrar gasto ${g.concepto}`}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                  <th className="px-4 py-2.5 font-semibold">Fecha</th>
+                  <th className="px-3 py-2.5 font-semibold">Concepto</th>
+                  <th className="px-3 py-2.5 font-semibold">Categoría</th>
+                  <th className="px-3 py-2.5 font-semibold">Barco</th>
+                  <th className="px-3 py-2.5 font-semibold">Factura</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
+                  <th className="px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                {gastos.map((g) => (
+                  <tr key={g.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-texto-suave">{fecha(g.fecha)}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="font-medium text-texto">{g.concepto}</span>
+                      {g.notas && <span className="ml-2 text-xs text-texto-suave">{g.notas}</span>}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.categoria}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.barco ?? "—"}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{g.factura ?? "—"}</td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right cifra font-semibold text-texto">{euros(g.importeCents)}</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <button
+                        onClick={() => void borrarGasto(g.id)}
+                        className="text-texto-tenue transition-colors hover:text-rose-600"
+                        aria-label={`Borrar ${g.concepto}`}
+                        title="Borrar"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-borde-fuerte bg-superficie-alt/50">
+                  <td className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-texto-suave" colSpan={5}>
+                    Total
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right cifra font-display text-base font-semibold text-texto">
+                    {euros(resumen?.gastosCents ?? 0)}
+                  </td>
+                  <td className="px-4 py-2.5" />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         )}
       </div>
     </div>
