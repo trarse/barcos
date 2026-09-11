@@ -92,6 +92,7 @@ const SIN_PARPADEO = `try{var t=localStorage.getItem("tema");if(t==="claro"||t==
 export default async function LayoutRaiz(props: LayoutProps<"/[idioma]">) {
   const { idioma } = await props.params;
   if (!esIdioma(idioma)) notFound();
+  const t = textos(idioma);
 
   return (
     <html
@@ -105,8 +106,14 @@ export default async function LayoutRaiz(props: LayoutProps<"/[idioma]">) {
       <body className="flex min-h-dvh flex-col">
         <JsonLd datos={organizacionJsonLd()} />
         <JsonLd datos={sitioJsonLd(idioma)} />
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-marca focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-fondo"
+        >
+          {t.nav.saltar}
+        </a>
         <Cabecera idioma={idioma} />
-        <main className="flex-1">{props.children}</main>
+        <main id="contenido" className="flex-1">{props.children}</main>
         <Pie idioma={idioma} />
         <BarraComparar idioma={idioma} />
         <Consentimiento idioma={idioma} />

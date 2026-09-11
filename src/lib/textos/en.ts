@@ -47,6 +47,7 @@ export const en: Textos = {
     cambiarTema: "Switch between light and dark theme",
     idioma: "Language",
     cambiarIdioma: "Change language",
+    saltar: "Skip to content",
   },
 
   buscador: {

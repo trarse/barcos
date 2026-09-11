@@ -258,7 +258,7 @@ export function Reserva({
       </p>
 
       {solape && (
-        <p className="mt-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+        <p role="alert" className="mt-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
           {t.reserva.ocupado}
         </p>
       )}
@@ -375,7 +375,7 @@ export function Reserva({
 
       <div className="isobata my-5" />
 
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex items-baseline justify-between gap-4" aria-live="polite">
         <span className="font-display text-lg font-semibold text-texto">
           {t.reserva.total}
         </span>
@@ -414,6 +414,7 @@ export function Reserva({
 
       {resultado && (
         <p
+          role={resultado.tipo === "ok" ? "status" : "alert"}
           className={`mt-3 rounded-md px-3 py-2 text-sm ${
             resultado.tipo === "ok"
               ? "bg-emerald-50 text-emerald-800"

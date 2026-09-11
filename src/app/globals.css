@@ -28,8 +28,9 @@
   --borde: #d3e2e4;
   --borde-fuerte: #adc7cb;
   --texto: #0d2229;
-  --texto-suave: #5a757d;
-  --texto-tenue: #8aa2a8;
+  /* Subidas de #5a757d y #8aa2a8 para cumplir WCAG AA (≥ 4,5:1) en tema claro. */
+  --texto-suave: #4f6870;
+  --texto-tenue: #5a7078;
   --acento: #b02a5f;
   --acento-suave: #fce8f0;
   --marca: #0e5566;

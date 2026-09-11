@@ -49,6 +49,7 @@ export const es = {
     cambiarTema: "Cambiar entre tema claro y oscuro",
     idioma: "Idioma",
     cambiarIdioma: "Cambiar de idioma",
+    saltar: "Saltar al contenido",
   },
 
   buscador: {
