@@ -493,52 +493,7 @@ export function PanelGastos() {
         <p className="border-t border-borde px-4 py-2.5 text-xs text-texto-suave">El IVA soportado deducible se recupera en la declaración trimestral (modelo 303).</p>
       </div>
 
-      {/* Vencimientos y próximas salidas */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-carta border border-borde bg-superficie p-4">
-          <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
-          <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
-            <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
-              {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
-            </select>
-            <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
-            <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
-            <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
-            <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
-            <input value={importeV} onChange={(e) => setImporteV(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) opcional" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Importe del vencimiento" />
-            <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
-              <option value="">Toda la flota</option>
-              {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-            </select>
-            <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
-              {guardandoVencimiento ? "Guardando…" : "Añadir"}
-            </button>
-          </form>
-        </div>
-
-        <div className="rounded-carta border border-borde bg-superficie p-4">
-          <h3 className="text-sm font-semibold text-texto">Próximas salidas</h3>
-          {salidas.length === 0 ? (
-            <p className="mt-3 text-sm text-texto-suave">No hay salidas confirmadas próximamente.</p>
-          ) : (
-            <ul className="mt-3 space-y-1.5">
-              {salidas.map((s) => (
-                <li key={s.referencia} className="rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium text-texto">{s.barco}</span>
-                    <span className="shrink-0 text-xs font-semibold text-acento">{fecha(s.fechaInicio)}</span>
-                  </div>
-                  <p className="mt-0.5 text-xs text-texto-suave">
-                    {s.clienteNombre} · {s.estado === "confirmada" ? "confirmada" : "pendiente de confirmar"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* Alta de gasto */}
+      {/* Gastos: alta y listado */}
       <div className="rounded-carta border border-borde bg-superficie p-4">
         <h3 className="text-sm font-semibold text-texto">Añadir gasto</h3>
         <form onSubmit={anadirGasto} className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
@@ -570,74 +525,6 @@ export function PanelGastos() {
             {guardandoGasto ? "Guardando…" : "Añadir gasto"}
           </button>
         </form>
-      </div>
-
-      {/* Vencimientos */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
-          <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
-          <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => alternarPlazo("rojo")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("rojo") ? "border-rose-500 bg-rose-50 text-rose-700" : "border-borde text-texto-tenue"}`}>≤ 30 días</button>
-            <button type="button" onClick={() => alternarPlazo("ambar")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("ambar") ? "border-amber-500 bg-amber-50 text-amber-700" : "border-borde text-texto-tenue"}`}>31–60 días</button>
-            <button type="button" onClick={() => alternarPlazo("verde")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("verde") ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-borde text-texto-tenue"}`}>&gt; 60 días</button>
-          </div>
-        </div>
-        {vencimientosFiltrados.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-texto-suave">
-            {vencimientos.length === 0 ? (filtroBarco ? "Este barco no tiene vencimientos." : "No hay vencimientos registrados.") : "No hay vencimientos con estos filtros."}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
-                  <th className="px-4 py-2.5 font-semibold">Tipo</th>
-                  <th className="px-3 py-2.5 font-semibold">Detalle</th>
-                  <th className="px-3 py-2.5 font-semibold">Fecha</th>
-                  <th className="px-3 py-2.5 font-semibold">Horas</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Plazo</th>
-                  <th className="px-4 py-2.5" />
-                </tr>
-              </thead>
-              <tbody>
-                {vencimientosFiltrados.map((v) => {
-                  const d = diasHasta(v.fecha);
-                  return (
-                    <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
-                      <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
-                      <td className="px-3 py-2.5">
-                        <span className="text-texto">{v.descripcion || "—"}</span>
-                        {v.barco && <p className="text-xs text-texto-suave">{v.barco}</p>}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{fecha(v.fecha)}</td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">
-                        {v.horasActuales != null && <span>actuales {v.horasActuales} h</span>}
-                        {v.horasActuales != null && v.horas != null && <span> · </span>}
-                        {v.horas != null && <span>próxima {v.horas} h</span>}
-                        {v.horasActuales == null && v.horas == null && "—"}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-texto-suave">{v.importeCents != null ? euros(v.importeCents) : "—"}</td>
-                      <td className={`whitespace-nowrap px-3 py-2.5 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
-                        {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <button
-                          onClick={() => void borrarVencimiento(v.id)}
-                          className="text-texto-tenue transition-colors hover:text-rose-600"
-                          aria-label={`Borrar ${ETIQUETA_VENCIMIENTO[v.tipo]}`}
-                          title="Borrar"
-                        >
-                          ✕
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       {/* Listado de gastos */}
@@ -711,6 +598,118 @@ export function PanelGastos() {
               </tfoot>
             </table>
           </div>
+        )}
+      </div>
+
+      {/* Vencimientos: alta y listado */}
+      <div className="rounded-carta border border-borde bg-superficie p-4">
+        <h3 className="text-sm font-semibold text-texto">Añadir vencimiento</h3>
+        <form onSubmit={anadirVencimiento} className="mt-3 grid gap-2 sm:grid-cols-2">
+          <select value={tipoV} onChange={(e) => setTipoV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Tipo de vencimiento">
+            {TIPOS_VENCIMIENTO.map((t) => <option key={t.clave} value={t.clave}>{t.etiqueta}</option>)}
+          </select>
+          <input value={fechaV} onChange={(e) => setFechaV(e.target.value)} type="date" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Fecha de vencimiento" />
+          <input value={horasActualesV} onChange={(e) => setHorasActualesV(e.target.value)} type="number" min={0} step={1} placeholder="Horas actuales" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Horas actuales de motor" />
+          <input value={horasV} onChange={(e) => setHorasV(e.target.value)} type="number" min={0} step={1} placeholder="Próxima revisión (h)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Próxima revisión en horas" />
+          <input value={descV} onChange={(e) => setDescV(e.target.value)} placeholder="Descripción (opcional)" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Descripción del vencimiento" />
+          <input value={importeV} onChange={(e) => setImporteV(e.target.value)} type="number" min={0} step="0.01" placeholder="Importe (€) opcional" className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto sm:col-span-2" aria-label="Importe del vencimiento" />
+          <select value={barcoIdV} onChange={(e) => setBarcoIdV(e.target.value)} className="rounded-md border border-borde bg-fondo px-3 py-2 text-sm text-texto" aria-label="Barco">
+            <option value="">Toda la flota</option>
+            {barcos.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+          </select>
+          <button type="submit" disabled={guardandoVencimiento} className="rounded-md bg-marca px-3 py-2 text-sm font-semibold text-fondo disabled:opacity-60">
+            {guardandoVencimiento ? "Guardando…" : "Añadir"}
+          </button>
+        </form>
+      </div>
+
+      {/* Vencimientos */}
+      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
+          <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={() => alternarPlazo("rojo")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("rojo") ? "border-rose-500 bg-rose-50 text-rose-700" : "border-borde text-texto-tenue"}`}>≤ 30 días</button>
+            <button type="button" onClick={() => alternarPlazo("ambar")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("ambar") ? "border-amber-500 bg-amber-50 text-amber-700" : "border-borde text-texto-tenue"}`}>31–60 días</button>
+            <button type="button" onClick={() => alternarPlazo("verde")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("verde") ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-borde text-texto-tenue"}`}>&gt; 60 días</button>
+          </div>
+        </div>
+        {vencimientosFiltrados.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-texto-suave">
+            {vencimientos.length === 0 ? (filtroBarco ? "Este barco no tiene vencimientos." : "No hay vencimientos registrados.") : "No hay vencimientos con estos filtros."}
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
+                  <th className="px-4 py-2.5 font-semibold">Tipo</th>
+                  <th className="px-3 py-2.5 font-semibold">Detalle</th>
+                  <th className="px-3 py-2.5 font-semibold">Fecha</th>
+                  <th className="px-3 py-2.5 font-semibold">Horas</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Plazo</th>
+                  <th className="px-4 py-2.5" />
+                </tr>
+              </thead>
+              <tbody>
+                {vencimientosFiltrados.map((v) => {
+                  const d = diasHasta(v.fecha);
+                  return (
+                    <tr key={v.id} className="border-b border-borde last:border-0 hover:bg-superficie-alt/60">
+                      <td className="whitespace-nowrap px-4 py-2.5 font-medium text-texto">{ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-texto">{v.descripcion || "—"}</span>
+                        {v.barco && <p className="text-xs text-texto-suave">{v.barco}</p>}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">{fecha(v.fecha)}</td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-texto-suave">
+                        {v.horasActuales != null && <span>actuales {v.horasActuales} h</span>}
+                        {v.horasActuales != null && v.horas != null && <span> · </span>}
+                        {v.horas != null && <span>próxima {v.horas} h</span>}
+                        {v.horasActuales == null && v.horas == null && "—"}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2.5 text-right cifra text-texto-suave">{v.importeCents != null ? euros(v.importeCents) : "—"}</td>
+                      <td className={`whitespace-nowrap px-3 py-2.5 text-right text-xs font-semibold ${colorVencimiento(d)}`}>
+                        {d < 0 ? "vencido" : d === 0 ? "hoy" : `${d} días`}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <button
+                          onClick={() => void borrarVencimiento(v.id)}
+                          className="text-texto-tenue transition-colors hover:text-rose-600"
+                          aria-label={`Borrar ${ETIQUETA_VENCIMIENTO[v.tipo]}`}
+                          title="Borrar"
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Próximas salidas */}
+      <div className="rounded-carta border border-borde bg-superficie p-4">
+        <h3 className="text-sm font-semibold text-texto">Próximas salidas</h3>
+        {salidas.length === 0 ? (
+          <p className="mt-3 text-sm text-texto-suave">No hay salidas confirmadas próximamente.</p>
+        ) : (
+          <ul className="mt-3 space-y-1.5">
+            {salidas.map((s) => (
+              <li key={s.referencia} className="rounded-md border border-borde bg-superficie-alt px-3 py-2 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-medium text-texto">{s.barco}</span>
+                  <span className="shrink-0 text-xs font-semibold text-acento">{fecha(s.fechaInicio)}</span>
+                </div>
+                <p className="mt-0.5 text-xs text-texto-suave">
+                  {s.clienteNombre} · {s.estado === "confirmada" ? "confirmada" : "pendiente de confirmar"}
+                </p>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
