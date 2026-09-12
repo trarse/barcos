@@ -96,6 +96,7 @@ export function PanelArmador() {
   const [editando, setEditando] = useState<BarcoDetalle | null>(null);
   const [parteDe, setParteDe] = useState<string | null>(null);
   const [firmaDe, setFirmaDe] = useState<string | null>(null);
+  const [modoManual, setModoManual] = useState<"simple" | "operador" | null>(null);
 
   const cargarDatos = useCallback(async () => {
     const [rb, rr, rm] = await Promise.all([
@@ -359,6 +360,7 @@ export function PanelArmador() {
     );
   }
 
+  const esOperador = (modoManual ?? (barcos.length >= 2 ? "operador" : "simple")) === "operador";
   const pendientes = reservas.filter((r) => r.estado === "pendiente").length;
   const visibles = filtro === "todas" ? reservas : reservas.filter((r) => r.estado === filtro);
 
@@ -382,14 +384,27 @@ export function PanelArmador() {
           <button onClick={() => setVista("gastos")} className="text-sm text-texto-suave underline">
             Gastos
           </button>
-          <button onClick={() => setVista("clientes")} className="text-sm text-texto-suave underline">
-            Clientes
-          </button>
-          <button onClick={() => setVista("cobros")} className="text-sm text-texto-suave underline">
-            Cobros
-          </button>
-          <button onClick={() => setVista("plan")} className="text-sm text-texto-suave underline">
-            Plan
+          {esOperador && (
+            <>
+              <button onClick={() => setVista("clientes")} className="text-sm text-texto-suave underline">
+                Clientes
+              </button>
+              <button onClick={() => setVista("cobros")} className="text-sm text-texto-suave underline">
+                Cobros
+              </button>
+              <button onClick={() => setVista("plan")} className="text-sm text-texto-suave underline">
+                Plan
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => {
+              if (esOperador && ["clientes", "cobros", "plan"].includes(vista)) setVista("reservas");
+              setModoManual(esOperador ? "simple" : "operador");
+            }}
+            className="rounded-md border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave"
+          >
+            {esOperador ? "Modo operador" : "Modo simple"}
           </button>
           <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
             Salir
