@@ -42,27 +42,37 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const barcoId = url.searchParams.get("barcoId") || null;
+  const desde = url.searchParams.get("desde");
+  const hasta = url.searchParams.get("hasta");
 
   const base = esAdmin ? {} : { propietarioId: propietarioId ?? "" };
   const where = barcoId ? { ...base, barcoId } : base;
   const baseReserva = esAdmin ? {} : { barco: { propietarioId: propietarioId ?? "" } };
   const whereReserva = barcoId ? { ...baseReserva, barcoId } : baseReserva;
   const hoy = new Date();
-  const inicioMeses = new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1);
+  const rangoFecha: { gte?: Date; lte?: Date } = {
+    ...(desde ? { gte: new Date(`${desde}T00:00:00.000Z`) } : {}),
+    ...(hasta ? { lte: new Date(`${hasta}T23:59:59.999Z`) } : {}),
+  };
+  const hayRango = Object.keys(rangoFecha).length > 0;
+  const whereGasto = hayRango ? { ...where, fecha: rangoFecha } : where;
+  const whereReservaFecha = hayRango ? { ...whereReserva, fechaInicio: rangoFecha } : whereReserva;
+  const inicioVentana = desde ? new Date(`${desde}T00:00:00.000Z`) : new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1);
+  const finVentana = hasta ? new Date(`${hasta}T23:59:59.999Z`) : hoy;
 
   const [gastos, totalGastos, totalIngresos, vencimientos, proximasSalidas, reservasMes] =
     await Promise.all([
       db.gasto.findMany({
-        where,
+        where: whereGasto,
         orderBy: { fecha: "desc" },
         take: 500,
         include: { barco: { select: { nombre: true } } },
       }),
-      db.gasto.aggregate({ where, _sum: { importeCents: true } }),
+      db.gasto.aggregate({ where: whereGasto, _sum: { importeCents: true } }),
       db.reserva.aggregate({
         where: {
-          estado: { in: ["confirmada", "completada"] },
-          ...whereReserva,
+          estado: "completada",
+          ...whereReservaFecha,
         },
         _sum: { precioTotalCents: true },
       }),
@@ -83,8 +93,8 @@ export async function GET(req: Request) {
       }),
       db.reserva.findMany({
         where: {
-          estado: { in: ["confirmada", "completada"] },
-          fechaInicio: { gte: inicioMeses },
+          estado: "completada",
+          fechaInicio: { gte: inicioVentana, lte: finVentana },
           ...whereReserva,
         },
         select: { fechaInicio: true, precioTotalCents: true },
@@ -94,11 +104,19 @@ export async function GET(req: Request) {
   const gastosCents = totalGastos._sum.importeCents ?? 0;
   const ingresosCents = totalIngresos._sum.precioTotalCents ?? 0;
 
-  // Serie mensual de los últimos 12 meses, rellenada a partir de los datos.
-  const meses = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(hoy.getFullYear(), hoy.getMonth() - 11 + i, 1);
-    return { mes: claveMes(d), etiqueta: etiquetaMes(d), ingresosCents: 0, gastosCents: 0 };
-  });
+  // Serie mensual: el rango elegido o, si no hay, los últimos 12 meses.
+  const baseIni = new Date(hoy.getFullYear(), hoy.getMonth() - 11, 1);
+  const iniAnio = desde ? Number(desde.slice(0, 4)) : baseIni.getFullYear();
+  const iniMes = desde ? Number(desde.slice(5, 7)) - 1 : baseIni.getMonth();
+  const finAnio = hasta ? Number(hasta.slice(0, 4)) : hoy.getFullYear();
+  const finMes = hasta ? Number(hasta.slice(5, 7)) - 1 : hoy.getMonth();
+  const meses: Array<{ mes: string; etiqueta: string; ingresosCents: number; gastosCents: number }> = [];
+  const cursorMes = new Date(iniAnio, iniMes, 1);
+  const topeMes = new Date(finAnio, finMes, 1);
+  while (cursorMes <= topeMes) {
+    meses.push({ mes: claveMes(cursorMes), etiqueta: etiquetaMes(cursorMes), ingresosCents: 0, gastosCents: 0 });
+    cursorMes.setMonth(cursorMes.getMonth() + 1);
+  }
   const mapa = new Map(meses.map((m) => [m.mes, m]));
   for (const g of gastos) {
     const m = mapa.get(claveMes(g.fecha));
@@ -136,16 +154,22 @@ export async function GET(req: Request) {
   });
   const rentabilidadPorBarco = await Promise.all(
     barcosDelArmador.map(async (b) => {
-      const [ing, gas] = await Promise.all([
+      const [ing, gas, ingTotal, gasTotal] = await Promise.all([
         db.reserva.aggregate({
-          where: { barcoId: b.id, estado: { in: ["confirmada", "completada"] } },
+          where: { barcoId: b.id, estado: "completada", ...(hayRango ? { fechaInicio: rangoFecha } : {}) },
+          _sum: { precioTotalCents: true },
+        }),
+        db.gasto.aggregate({ where: { barcoId: b.id, ...(hayRango ? { fecha: rangoFecha } : {}) }, _sum: { importeCents: true } }),
+        db.reserva.aggregate({
+          where: { barcoId: b.id, estado: "completada" },
           _sum: { precioTotalCents: true },
         }),
         db.gasto.aggregate({ where: { barcoId: b.id }, _sum: { importeCents: true } }),
       ]);
       const ingresos = ing._sum.precioTotalCents ?? 0;
       const gastosB = gas._sum.importeCents ?? 0;
-      return { barcoId: b.id, barco: b.nombre, ingresosCents: ingresos, gastosCents: gastosB, beneficioCents: ingresos - gastosB, precioAdquisicionCents: b.precioAdquisicionCents };
+      const beneficioTotal = (ingTotal._sum.precioTotalCents ?? 0) - (gasTotal._sum.importeCents ?? 0);
+      return { barcoId: b.id, barco: b.nombre, ingresosCents: ingresos, gastosCents: gastosB, beneficioCents: ingresos - gastosB, beneficioTotalCents: beneficioTotal, precioAdquisicionCents: b.precioAdquisicionCents };
     }),
   );
   rentabilidadPorBarco.sort((a, b) => b.beneficioCents - a.beneficioCents);

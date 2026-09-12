@@ -29,6 +29,7 @@ type RentabilidadBarco = {
   ingresosCents: number;
   gastosCents: number;
   beneficioCents: number;
+  beneficioTotalCents: number;
   precioAdquisicionCents: number | null;
 };
 
@@ -151,6 +152,8 @@ export function PanelGastos() {
   const [ordenVencimientos, setOrdenVencimientos] = useState<Orden>({ campo: "fecha", dir: "asc" });
   const [busquedaGastos, setBusquedaGastos] = useState("");
   const [busquedaVencimientos, setBusquedaVencimientos] = useState("");
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -176,9 +179,13 @@ export function PanelGastos() {
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
-      const qs = filtroBarco ? `?barcoId=${encodeURIComponent(filtroBarco)}` : "";
+      const params = new URLSearchParams();
+      if (filtroBarco) params.set("barcoId", filtroBarco);
+      if (desde) params.set("desde", desde);
+      if (hasta) params.set("hasta", hasta);
+      const qs = params.toString();
       const [rg, rb] = await Promise.all([
-        fetch(`/api/gastos${qs}`).then((r) => r.json()),
+        fetch(`/api/gastos${qs ? `?${qs}` : ""}`).then((r) => r.json()),
         fetch("/api/barcos").then((r) => r.json()),
       ]);
       setGastos(rg?.gastos ?? []);
@@ -193,7 +200,7 @@ export function PanelGastos() {
     } finally {
       setCargando(false);
     }
-  }, [filtroBarco]);
+  }, [filtroBarco, desde, hasta]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -334,6 +341,24 @@ export function PanelGastos() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function aplicarPreset(tipo: "todo" | "30d" | "anio" | "12m") {
+    const ahora = new Date();
+    const fin = ahora.toISOString().slice(0, 10);
+    if (tipo === "todo") {
+      setDesde("");
+      setHasta("");
+      return;
+    }
+    const ini = new Date(ahora);
+    if (tipo === "30d") ini.setDate(ini.getDate() - 30);
+    else if (tipo === "anio") {
+      ini.setMonth(0);
+      ini.setDate(1);
+    } else if (tipo === "12m") ini.setMonth(ini.getMonth() - 12);
+    setDesde(ini.toISOString().slice(0, 10));
+    setHasta(fin);
+  }
+
   function thOrden(etiqueta: string, campo: string, orden: Orden, setOrden: React.Dispatch<React.SetStateAction<Orden>>, alineacion = "text-left") {
     const activa = orden.campo === campo;
     return (
@@ -429,7 +454,7 @@ export function PanelGastos() {
     .filter((r) => r.precioAdquisicionCents != null && r.precioAdquisicionCents > 0)
     .map((r) => {
       const precio = r.precioAdquisicionCents ?? 0;
-      const ganado = r.beneficioCents;
+      const ganado = r.beneficioTotalCents;
       return { barcoId: r.barcoId, barco: r.barco, precio, ganado, falta: precio - ganado, pct: precio > 0 ? (ganado / precio) * 100 : 0 };
     })
     .sort((a, b) => b.falta - a.falta);
@@ -464,6 +489,22 @@ export function PanelGastos() {
         <button type="button" onClick={() => irA("tabla-iva")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">IVA</button>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-carta border border-borde bg-superficie px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-texto-tenue">Periodo</span>
+        <label className="flex items-center gap-1.5 text-xs text-texto-suave">
+          Desde
+          <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto" />
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-texto-suave">
+          Hasta
+          <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto" />
+        </label>
+        <button type="button" onClick={() => aplicarPreset("todo")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave hover:border-acento hover:text-acento">Todo</button>
+        <button type="button" onClick={() => aplicarPreset("30d")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave hover:border-acento hover:text-acento">30 días</button>
+        <button type="button" onClick={() => aplicarPreset("anio")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave hover:border-acento hover:text-acento">Este año</button>
+        <button type="button" onClick={() => aplicarPreset("12m")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave hover:border-acento hover:text-acento">12 meses</button>
+      </div>
+
       {aviso && (
         <div
           role="status"
@@ -491,7 +532,7 @@ export function PanelGastos() {
           <div className="h-1 w-8 rounded-full bg-emerald-500" />
           <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-texto-tenue">Ingresos</p>
           <p className="mt-1 cifra font-display text-2xl font-semibold text-texto">{euros(resumen?.ingresosCents ?? 0)}</p>
-          <p className="mt-1 text-xs text-texto-suave">Reservas confirmadas y completadas</p>
+          <p className="mt-1 text-xs text-texto-suave">Reservas completadas (cobradas)</p>
         </div>
         <div className="rounded-carta border border-borde bg-superficie p-4">
           <div className="h-1 w-8 rounded-full bg-rose-500" />
@@ -590,7 +631,7 @@ export function PanelGastos() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-carta border border-borde bg-superficie p-4 lg:col-span-2">
           <div className="flex items-baseline justify-between gap-3">
-            <h3 className="text-sm font-semibold text-texto">Últimos 12 meses</h3>
+            <h3 className="text-sm font-semibold text-texto">Ingresos y gastos por mes</h3>
             <div className="flex items-center gap-4 text-xs text-texto-suave">
               <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500" /> Ingresos</span>
               <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-sm bg-rose-500" /> Gastos</span>
