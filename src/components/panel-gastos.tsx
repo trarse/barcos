@@ -82,6 +82,7 @@ type ResumenIva = {
 
 type Barco = { id: string; nombre: string };
 type Aviso = { tipo: "ok" | "error"; mensaje: string };
+type Orden = { campo: string; dir: "asc" | "desc" };
 
 function euros(centimos: number): string {
   return (centimos / 100).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
@@ -146,6 +147,10 @@ export function PanelGastos() {
   const [abrirGasto, setAbrirGasto] = useState(false);
   const [abrirVencimiento, setAbrirVencimiento] = useState(false);
   const [tour, setTour] = useState<number | null>(null);
+  const [ordenGastos, setOrdenGastos] = useState<Orden>({ campo: "fecha", dir: "desc" });
+  const [ordenVencimientos, setOrdenVencimientos] = useState<Orden>({ campo: "fecha", dir: "asc" });
+  const [busquedaGastos, setBusquedaGastos] = useState("");
+  const [busquedaVencimientos, setBusquedaVencimientos] = useState("");
 
   // Alta de gasto.
   const [categoria, setCategoria] = useState<string>(CATEGORIAS_GASTO[0]);
@@ -303,6 +308,47 @@ export function PanelGastos() {
     return tour === paso ? "ring-2 ring-acento" : "";
   }
 
+  function compararGastos(a: Gasto, b: Gasto): number {
+    const factor = ordenGastos.dir === "asc" ? 1 : -1;
+    if (ordenGastos.campo === "concepto") return a.concepto.localeCompare(b.concepto, "es") * factor;
+    if (ordenGastos.campo === "categoria") return a.categoria.localeCompare(b.categoria, "es") * factor;
+    if (ordenGastos.campo === "importe") return (a.importeCents - b.importeCents) * factor;
+    return (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0) * factor;
+  }
+
+  function compararVencimientos(a: Vencimiento, b: Vencimiento): number {
+    const factor = ordenVencimientos.dir === "asc" ? 1 : -1;
+    if (ordenVencimientos.campo === "tipo") {
+      const ta = ETIQUETA_VENCIMIENTO[a.tipo] ?? a.tipo;
+      const tb = ETIQUETA_VENCIMIENTO[b.tipo] ?? b.tipo;
+      return ta.localeCompare(tb, "es") * factor;
+    }
+    if (ordenVencimientos.campo === "importe") return ((a.importeCents ?? 0) - (b.importeCents ?? 0)) * factor;
+    if (ordenVencimientos.campo === "plazo") return (diasHasta(a.fecha) - diasHasta(b.fecha)) * factor;
+    return (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0) * factor;
+  }
+
+  function irA(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function thOrden(etiqueta: string, campo: string, orden: Orden, setOrden: React.Dispatch<React.SetStateAction<Orden>>, alineacion = "text-left") {
+    const activa = orden.campo === campo;
+    return (
+      <th className={`px-3 py-2.5 ${alineacion}`}>
+        <button
+          type="button"
+          onClick={() => setOrden((prev) => ({ campo, dir: prev.campo === campo ? (prev.dir === "asc" ? "desc" : "asc") : "asc" }))}
+          className={`inline-flex items-center gap-1 font-semibold ${activa ? "text-acento" : ""}`}
+          title={`Ordenar por ${etiqueta}`}
+        >
+          {etiqueta}
+          <span className="text-[9px]">{activa ? (orden.dir === "asc" ? "▲" : "▼") : ""}</span>
+        </button>
+      </th>
+    );
+  }
+
   useEffect(() => {
     if (tour === null) return;
     let cancelado = false;
@@ -350,10 +396,30 @@ export function PanelGastos() {
   }, [tour]);
 
   const maxMensual = Math.max(1, ...mensual.flatMap((m) => [m.ingresosCents, m.gastosCents]));
-  const vencimientosOrdenados = [...vencimientos].sort((a, b) => a.fecha.localeCompare(b.fecha));
-  const vencimientosFiltrados = vencimientosOrdenados.filter((v) => filtroPlazos.includes(colorPlazo(diasHasta(v.fecha))));
+  const vencimientosOrdenados = [...vencimientos].sort(compararVencimientos);
+  const vencimientosFiltrados = vencimientosOrdenados.filter((v) => {
+    if (!filtroPlazos.includes(colorPlazo(diasHasta(v.fecha)))) return false;
+    const q = busquedaVencimientos.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (ETIQUETA_VENCIMIENTO[v.tipo] ?? v.tipo).toLowerCase().includes(q) ||
+      v.descripcion.toLowerCase().includes(q) ||
+      (v.barco ?? "").toLowerCase().includes(q)
+    );
+  });
   const margen = resumen && resumen.ingresosCents > 0 ? (resumen.beneficioCents / resumen.ingresosCents) * 100 : 0;
-  const gastosFiltrados = gastos;
+  const gastosFiltrados = gastos
+    .filter((g) => {
+      const q = busquedaGastos.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        g.concepto.toLowerCase().includes(q) ||
+        g.categoria.toLowerCase().includes(q) ||
+        (g.barco ?? "").toLowerCase().includes(q) ||
+        (g.factura ?? "").toLowerCase().includes(q)
+      );
+    })
+    .sort(compararGastos);
   const totalFiltrado = gastosFiltrados.reduce((sum, g) => sum + g.importeCents, 0);
   const barcoSeleccionado = barcos.find((b) => b.id === filtroBarco)?.nombre ?? null;
 
@@ -384,6 +450,16 @@ export function PanelGastos() {
             Recorrido guiado
           </button>
         </div>
+      </div>
+
+      <div className="sticky top-0 z-30 flex flex-wrap items-center gap-1.5 rounded-carta border border-borde bg-superficie px-3 py-2">
+        <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-texto-tenue">Ir a</span>
+        <button type="button" onClick={() => irA("tabla-gastos")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">Gastos</button>
+        <button type="button" onClick={() => irA("tabla-vencimientos")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">Vencimientos</button>
+        <button type="button" onClick={() => irA("tabla-rentabilidad")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">Rentabilidad</button>
+        <button type="button" onClick={() => irA("tabla-recuperacion")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">Recuperación</button>
+        <button type="button" onClick={() => irA("tabla-tesoreria")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">Tesorería</button>
+        <button type="button" onClick={() => irA("tabla-iva")} className="rounded-full border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave transition-colors hover:border-acento hover:text-acento">IVA</button>
       </div>
 
       {aviso && (
@@ -565,7 +641,7 @@ export function PanelGastos() {
       </div>
 
       {/* Rentabilidad por barco */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div id="tabla-rentabilidad" className="scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="flex items-baseline justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Rentabilidad por barco</h3>
           <p className="text-xs text-texto-suave">Clic en una fila para filtrar el panel</p>
@@ -605,7 +681,7 @@ export function PanelGastos() {
       </div>
 
       {/* Recuperación de la inversión */}
-      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(9)}`}>
+      <div id="tabla-recuperacion" className={`scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(9)}`}>
         <div className="border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Recuperación de la inversión</h3>
           <p className="mt-0.5 text-xs text-texto-suave">Cuánto te falta por recuperar del precio de compra con el beneficio acumulado de cada barco.</p>
@@ -643,7 +719,7 @@ export function PanelGastos() {
       </div>
 
       {/* Flujo de caja: próximos 12 meses */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div id="tabla-tesoreria" className="scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Previsión de tesorería · próximos 12 meses</h3>
           <p className="mt-0.5 text-xs text-texto-suave">Ingresos por reservas confirmadas y gastos previstos por vencimientos con importe.</p>
@@ -678,7 +754,7 @@ export function PanelGastos() {
       </div>
 
       {/* Resumen fiscal: IVA y deducibilidad */}
-      <div className="overflow-hidden rounded-carta border border-borde bg-superficie">
+      <div id="tabla-iva" className="scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie">
         <div className="border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Resumen fiscal · IVA y deducibilidad</h3>
         </div>
@@ -702,10 +778,17 @@ export function PanelGastos() {
       </div>
 
       {/* Listado de gastos */}
-      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(4)}`}>
+      <div id="tabla-gastos" className={`scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(4)}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Últimos gastos</h3>
           <div className="flex items-center gap-3">
+            <input
+              value={busquedaGastos}
+              onChange={(e) => setBusquedaGastos(e.target.value)}
+              placeholder="Buscar gasto…"
+              className="w-40 rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto"
+              aria-label="Buscar en gastos"
+            />
             {gastosFiltrados.length > 0 && <span className="text-xs text-texto-suave">{gastosFiltrados.length} apuntes</span>}
           </div>
         </div>
@@ -721,14 +804,14 @@ export function PanelGastos() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
-                  <th className="px-4 py-2.5 font-semibold">Fecha</th>
-                  <th className="px-3 py-2.5 font-semibold">Concepto</th>
-                  <th className="px-3 py-2.5 font-semibold">Categoría</th>
+                  {thOrden("Fecha", "fecha", ordenGastos, setOrdenGastos)}
+                  {thOrden("Concepto", "concepto", ordenGastos, setOrdenGastos)}
+                  {thOrden("Categoría", "categoria", ordenGastos, setOrdenGastos)}
                   <th className="px-3 py-2.5 font-semibold">Barco</th>
                   <th className="px-3 py-2.5 font-semibold">Factura</th>
                   <th className="px-3 py-2.5 text-right font-semibold">IVA</th>
                   <th className="px-3 py-2.5 text-center font-semibold">Deducible</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
+                  {thOrden("Importe", "importe", ordenGastos, setOrdenGastos, "text-right")}
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
@@ -776,10 +859,17 @@ export function PanelGastos() {
       </div>
 
       {/* Vencimientos */}
-      <div className={`overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(8)}`}>
+      <div id="tabla-vencimientos" className={`scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie ${resalta(8)}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <h3 className="text-sm font-semibold text-texto">Vencimientos</h3>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <input
+              value={busquedaVencimientos}
+              onChange={(e) => setBusquedaVencimientos(e.target.value)}
+              placeholder="Buscar…"
+              className="w-32 rounded-md border border-borde bg-fondo px-2 py-1.5 text-xs text-texto"
+              aria-label="Buscar en vencimientos"
+            />
             <button type="button" onClick={() => alternarPlazo("rojo")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("rojo") ? "border-rose-500 bg-rose-50 text-rose-700" : "border-borde text-texto-tenue"}`}>≤ 30 días</button>
             <button type="button" onClick={() => alternarPlazo("ambar")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("ambar") ? "border-amber-500 bg-amber-50 text-amber-700" : "border-borde text-texto-tenue"}`}>31–60 días</button>
             <button type="button" onClick={() => alternarPlazo("verde")} className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filtroPlazos.includes("verde") ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-borde text-texto-tenue"}`}>&gt; 60 días</button>
@@ -794,12 +884,12 @@ export function PanelGastos() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-borde text-left text-[11px] uppercase tracking-wider text-texto-tenue">
-                  <th className="px-4 py-2.5 font-semibold">Tipo</th>
+                  {thOrden("Tipo", "tipo", ordenVencimientos, setOrdenVencimientos)}
                   <th className="px-3 py-2.5 font-semibold">Detalle</th>
-                  <th className="px-3 py-2.5 font-semibold">Fecha</th>
+                  {thOrden("Fecha", "fecha", ordenVencimientos, setOrdenVencimientos)}
                   <th className="px-3 py-2.5 font-semibold">Horas</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Importe</th>
-                  <th className="px-3 py-2.5 text-right font-semibold">Plazo</th>
+                  {thOrden("Importe", "importe", ordenVencimientos, setOrdenVencimientos, "text-right")}
+                  {thOrden("Plazo", "plazo", ordenVencimientos, setOrdenVencimientos, "text-right")}
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
