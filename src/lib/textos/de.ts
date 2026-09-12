@@ -24,6 +24,7 @@ export const de: Textos = {
     sinExtras: "Alles inklusive, keine Zuschläge beim Bezahlen",
     sinLicencia: "Ohne Führerschein",
     reservaInmediata: "Sofort buchbar",
+    verificado: (fecha) => `Am Liegeplatz verifiziert · ${fecha}`,
     plazas: "Plätze",
     camarotes: "Kabinen",
     dia: "Tag",

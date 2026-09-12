@@ -20,6 +20,7 @@ export type BarcoDetalle = {
   potenciaCv: number;
   precioBaseDia: number;
   precioAdquisicionCents: number | null;
+  verificadoEn: string | null;
   limpieza: number;
   tasaPortuariaDia: number;
   patronDia: number | null;
@@ -66,6 +67,7 @@ export function FormularioEditarBarco({
     puertoId: barco.puertoId,
     precioBaseDia: String(barco.precioBaseDia / 100),
     precioAdquisicion: barco.precioAdquisicionCents !== null ? String(barco.precioAdquisicionCents / 100) : "",
+    verificado: barco.verificadoEn !== null,
     limpieza: String(barco.limpieza / 100),
     tasaPortuariaDia: String(barco.tasaPortuariaDia / 100),
     patronDia: barco.patronDia !== null ? String(barco.patronDia / 100) : "",
@@ -203,6 +205,19 @@ export function FormularioEditarBarco({
           {campo("Precio de adquisición (€)", input("precioAdquisicion", { type: "number", step: "0.01", placeholder: "Ej.: 100000" }))}
         </div>
         <p className="text-xs text-texto-suave">Con este precio se calcula cuánto te falta por recuperar de la inversión.</p>
+      </section>
+
+      <section className="space-y-3">
+        <h4 className="text-sm font-semibold text-texto">Verificación</h4>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={f.verificado}
+            onChange={(e) => set("verificado", e.target.checked)}
+            className="h-4 w-4 accent-[var(--acento)]"
+          />
+          <span className="text-sm text-texto">Verificado físicamente en su pantalán (muestra sello con fecha)</span>
+        </label>
       </section>
 
       <section className="space-y-3">

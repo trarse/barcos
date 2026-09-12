@@ -83,6 +83,7 @@ export async function GET(
       potenciaCv: barco.potenciaCv,
       precioBaseDia: barco.precioBaseDia,
       precioAdquisicionCents: barco.precioAdquisicionCents,
+      verificadoEn: barco.verificadoEn ? barco.verificadoEn.toISOString().slice(0, 10) : null,
       limpieza: barco.limpieza,
       tasaPortuariaDia: barco.tasaPortuariaDia,
       patronDia: barco.patronDia,

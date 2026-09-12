@@ -47,6 +47,8 @@ export interface BarcoResumen {
   opiniones: number;
   requiereTitulacion: boolean;
   reservaInstantanea: boolean;
+  /** ISO "YYYY-MM-DD" de la verificación física en pantalán, o null. */
+  verificadoEn: string | null;
   imagen: string;
   temporada: Temporada;
 }
@@ -106,6 +108,7 @@ function resumir(barco: FilaResumen, hoy: Date): BarcoResumen {
     opiniones: barco.numOpiniones,
     requiereTitulacion: barco.requiereTitulacion,
     reservaInstantanea: barco.reservaInstantanea,
+    verificadoEn: barco.verificadoEn ? barco.verificadoEn.toISOString().slice(0, 10) : null,
     imagen: barco.imagenes[0]?.url ?? `carta:${barco.tipo.slug}:0`,
     temporada,
   };

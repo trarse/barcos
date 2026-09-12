@@ -54,6 +54,17 @@ export function TarjetaBarco({
         <div className="absolute right-3 top-3">
           <BotonComparar slug={barco.slug} nombre={barco.nombre} idioma={idioma} />
         </div>
+
+        {barco.verificadoEn && (
+          <div className="absolute bottom-3 left-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-acento/40 bg-superficie/90 px-2.5 py-1 text-[11px] font-semibold text-acento backdrop-blur">
+              <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.7-9.3a1 1 0 0 0-1.4-1.4L9 10.6 7.7 9.3a1 1 0 0 0-1.4 1.4l2 2a1 1 0 0 0 1.4 0l4-4Z" clipRule="evenodd" />
+              </svg>
+              {t.comun.verificado(barco.verificadoEn)}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">

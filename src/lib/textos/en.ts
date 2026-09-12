@@ -25,6 +25,7 @@ export const en: Textos = {
     sinExtras: "All in. Nothing added at checkout",
     sinLicencia: "No licence",
     reservaInmediata: "Instant booking",
+    verificado: (fecha) => `Verified at its berth · ${fecha}`,
     plazas: "guests",
     camarotes: "cabins",
     dia: "day",

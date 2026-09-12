@@ -91,9 +91,16 @@ async function main() {
     "Beneteau Flyer 8": 120000,
     "Bénéteau Oceanis 38.1": 190000,
   };
-  for (const b of barcos) {
+  for (let i = 0; i < barcos.length; i++) {
+    const b = barcos[i];
     const precio = preciosAdquisicion[b.nombre] ?? Math.round((b.esloraCm / 100) * 9000);
-    await prisma.barco.update({ where: { id: b.id }, data: { precioAdquisicionCents: Math.round(precio * 100) } });
+    await prisma.barco.update({
+      where: { id: b.id },
+      data: {
+        precioAdquisicionCents: Math.round(precio * 100),
+        verificadoEn: new Date(Date.now() - (i % 6) * 86_400_000),
+      },
+    });
   }
 
   // ---- Vencimientos: mantenimiento completo al día (seguro, motor, ITB, bengalas, salvamento) ----

@@ -199,6 +199,9 @@ model Barco {
   // Reputación
   valoracion   Float @default(0)
   numOpiniones Int   @default(0)
+  /// Fecha en que el barco fue verificado físicamente en su pantalán.
+  /// Si es null, el barco no muestra el sello de verificación.
+  verificadoEn DateTime?
 
   publicado Boolean  @default(true)
   creadoEn  DateTime @default(now())

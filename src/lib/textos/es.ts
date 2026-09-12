@@ -27,6 +27,7 @@ export const es = {
     sinExtras: "Todo incluido, sin extras al pagar",
     sinLicencia: "Sin licencia",
     reservaInmediata: "Reserva inmediata",
+    verificado: (fecha: string) => `Verificado en su pantalán · ${fecha}`,
     plazas: "plazas",
     camarotes: "camarotes",
     dia: "día",
