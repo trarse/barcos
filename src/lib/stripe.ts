@@ -56,6 +56,45 @@ export async function crearSesionPago(opciones: {
   });
 }
 
+/** Sesión de pago de una fianza: autoriza (retiene) sin cobrar hasta la devolución. */
+export async function crearSesionFianza(opciones: {
+  reservaId: string;
+  referencia: string;
+  descripcion: string;
+  fianzaCents: number;
+  idioma: string;
+}): Promise<Stripe.Checkout.Session | null> {
+  const stripe = obtenerStripe();
+  if (!stripe) return null;
+
+  const locale = opciones.idioma === "de" ? "de" : opciones.idioma === "en" ? "en" : "es";
+
+  return stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_intent_data: {
+      capture_method: "manual",
+      metadata: { tipo: "fianza", reservaId: opciones.reservaId },
+    },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "eur",
+          unit_amount: opciones.fianzaCents,
+          product_data: {
+            name: opciones.descripcion,
+            description: `Fianza ${opciones.referencia}`,
+          },
+        },
+      },
+    ],
+    metadata: { tipo: "fianza", reservaId: opciones.reservaId, referencia: opciones.referencia },
+    success_url: urlAbsoluta(`/reserva/pagada?referencia=${opciones.referencia}&fianza=1`),
+    cancel_url: urlAbsoluta(`/reserva/cancelada?referencia=${opciones.referencia}`),
+    locale,
+  });
+}
+
 /** Verifica la firma de un webhook de Stripe; devuelve null si no es válida. */
 export async function verificarWebhook(
   payload: string,

@@ -10,6 +10,7 @@ import { PanelCobros } from "@/components/panel-cobros";
 import { PanelGastos } from "@/components/panel-gastos";
 import { PanelPlan } from "@/components/panel-plan";
 import { ParteEntrega } from "@/components/parte-entrega";
+import { Firma } from "@/components/firma";
 
 /**
  * Área del armador: cada propietario entra con su email y contraseña y ve
@@ -40,7 +41,9 @@ type Reserva = {
   precioTotalCents: number;
   estado: string;
   pagado: boolean;
-  barco: { nombre: string; slug: string; puerto: { nombre: string } };
+  fianzaRetenida: boolean;
+  firmaUrl: string | null;
+  barco: { nombre: string; slug: string; fianza: number; puerto: { nombre: string } };
 };
 
 const ESTADOS = ["pendiente", "confirmada", "cancelada", "rechazada", "completada"];
@@ -92,6 +95,7 @@ export function PanelArmador() {
   const [gestionId, setGestionId] = useState<string | null>(null);
   const [editando, setEditando] = useState<BarcoDetalle | null>(null);
   const [parteDe, setParteDe] = useState<string | null>(null);
+  const [firmaDe, setFirmaDe] = useState<string | null>(null);
 
   const cargarDatos = useCallback(async () => {
     const [rb, rr, rm] = await Promise.all([
@@ -169,6 +173,20 @@ export function PanelArmador() {
         prev.map((r) => (r.id === id ? { ...r, estado } : r)),
       );
     }
+  }
+
+  async function fianza(id: string, accion?: "liberar" | "cobrar") {
+    const res = await fetch(accion ? "/api/pagos/fianza/gestionar" : "/api/pagos/fianza", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(accion ? { reservaId: id, accion } : { reservaId: id }),
+    });
+    const datos = await res.json().catch(() => null);
+    if (accion) {
+      if (res.ok) void cargarDatos();
+      return;
+    }
+    if (datos?.urlPago) window.location.assign(datos.urlPago);
   }
 
   if (!autenticado) {
@@ -511,6 +529,23 @@ export function PanelArmador() {
                     >
                       Parte
                     </button>
+                    <button
+                      onClick={() => setFirmaDe(firmaDe === r.id ? null : r.id)}
+                      className="rounded-md border border-borde px-3.5 py-2 text-sm font-medium text-texto-suave transition-colors hover:bg-superficie-alt"
+                    >
+                      Firma
+                    </button>
+                    {r.barco.fianza > 0 && !r.fianzaRetenida && (r.estado === "confirmada" || r.estado === "completada") && (
+                      <button onClick={() => void fianza(r.id)} className="rounded-md border border-amber-500 px-3.5 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
+                        Retener fianza
+                      </button>
+                    )}
+                    {r.fianzaRetenida && (
+                      <>
+                        <button onClick={() => void fianza(r.id, "liberar")} className="rounded-md border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50">Liberar fianza</button>
+                        <button onClick={() => void fianza(r.id, "cobrar")} className="rounded-md border border-rose-600 px-3 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50">Cobrar fianza</button>
+                      </>
+                    )}
                     {r.estado === "pendiente" && (
                       <>
                         <button
@@ -547,6 +582,7 @@ export function PanelArmador() {
                 </div>
 
                 {parteDe === r.id && <ParteEntrega reservaId={r.id} referencia={r.referencia} />}
+                {firmaDe === r.id && <Firma reservaId={r.id} firmaInicial={r.firmaUrl} />}
               </li>
             ))}
           </ul>

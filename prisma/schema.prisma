@@ -460,6 +460,12 @@ model Reserva {
   /// True cuando Stripe confirma el cobro por webhook.
   pagado           Boolean  @default(false)
   pagadoEn         DateTime?
+  /// Firma digital del cliente (data URL PNG) al recoger el barco.
+  firmaUrl         String?
+  /// True cuando la fianza está retenida (hold) en Stripe.
+  fianzaRetenida   Boolean  @default(false)
+  /// PaymentIntent de la fianza retenida (captura manual).
+  fianzaStripeIntentId String?
   /// Comisión de la plataforma en céntimos (calculada al reservar).
   comisionCents    Int      @default(0)
   /// Parte del armador (total - comisión) en céntimos.

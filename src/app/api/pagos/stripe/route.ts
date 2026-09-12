@@ -26,7 +26,8 @@ export async function POST(req: Request) {
       mode?: string;
       customer?: string;
       subscription?: string;
-      metadata?: { reservaId?: string; propietarioId?: string } | null;
+      payment_intent?: string | { id: string } | null;
+      metadata?: { reservaId?: string; propietarioId?: string; tipo?: string } | null;
     };
 
     // Suscripción Pro completada: activa el plan en el Propietario.
@@ -40,6 +41,19 @@ export async function POST(req: Request) {
           stripeSubscriptionId: sesion.subscription ?? null,
         },
       });
+    }
+
+    // Fianza retenida: guarda el PaymentIntent para poder liberarla o cobrarla.
+    if (sesion.metadata?.tipo === "fianza") {
+      const reservaId = sesion.metadata?.reservaId;
+      const intentId = typeof sesion.payment_intent === "string" ? sesion.payment_intent : sesion.payment_intent?.id;
+      if (reservaId && intentId) {
+        await db.reserva.update({
+          where: { id: reservaId },
+          data: { fianzaRetenida: true, fianzaStripeIntentId: intentId },
+        });
+      }
+      return NextResponse.json({ ok: true });
     }
 
     // Reserva pagada: marca pagada (y confirmada si estaba pendiente).

@@ -270,7 +270,7 @@ export async function GET(req: Request) {
     where,
     include: {
       barco: {
-        select: { nombre: true, slug: true, puerto: { select: { nombre: true } } },
+        select: { nombre: true, slug: true, fianza: true, puerto: { select: { nombre: true } } },
       },
     },
     orderBy: { creadoEn: "desc" },
