@@ -1,0 +1,79 @@
+===============================================================
+  ESTRIBOR · Guía rápida de carpetas y uso
+===============================================================
+
+REGLA DE ORO
+---------------------------------------------------------------
+- WEB / PANEL / CÓDIGO  ->  barcos
+- INFORMES / DOCUMENTOS ->  variasCosas
+
+
+1) CARPETA DEL PROYECTO WEB
+---------------------------------------------------------------
+C:\Users\kety follen\Desktop\deepseek\barcos
+
+Qué hay dentro:
+  package.json       Proyecto Next.js (define scripts y dependencias)
+  src\               Todo el código
+    src\app            Páginas (portada, alquiler, sin-licencia, panel, etc.)
+    src\components     Componentes (tarjetas, panel, formularios, mapas…)
+    src\lib            Lógica (precios, SEO, Stripe, idiomas, iCal…)
+    src\datos          Datos estáticos (calas, textos, categorías…)
+  prisma\             Base de datos
+    schema.prisma      Definición de tablas
+    seed-demo-armador.ts  Datos de ejemplo del armador
+  .env                Claves privadas (base de datos, Stripe) — NO subir
+  arrancar.py         Script para arrancar el servidor (doble clic)
+  CHECKLIST-PENDIENTES.md  Lo que falta por hacer
+  DESPLIEGUE.md       Guía de despliegue (Netlify)
+
+
+2) CARPETA DE INFORMES Y DOCUMENTOS
+---------------------------------------------------------------
+C:\Users\kety follen\Desktop\deepseek\variasCosas
+
+Documentos principales:
+  INFORME-ESTRIBOR-MEGA.md / .pdf   Informe grande (48 págs)
+  INFORME-ESTRIBOR-COMPLETO.md
+  informe-estribor.md / informe-avance.md
+  guia-panel-estribor.md            Manual del panel del armador
+  resumen-seo-estribor.md
+  ticket-soporte-netlify.md
+  traduccion-estribor\              Lotes de traducción
+  video-delfines-guion.md           Guiones de vídeo
+
+
+3) CÓMO ARRANCAR EL SERVIDOR
+---------------------------------------------------------------
+Opción A (doble clic):
+  Ir a la carpeta barcos y hacer doble clic en arrancar.py
+  (abre el navegador solo en http://localhost:3050)
+
+Opción B (terminal):
+  Abrir terminal en la carpeta barcos y escribir:
+      npm run dev
+  Luego abrir http://localhost:3050
+
+Parar el servidor: Ctrl+C o cerrar la ventana.
+
+
+4) URLS Y ACCESOS
+---------------------------------------------------------------
+  Web pública      http://localhost:3050  (lleva a /es)
+  Panel armador    http://localhost:3050/armador
+                   armador@estribor.es / Armador2026!
+  Panel admin      http://localhost:3050/admin
+                   admin@estribor.es / Estribor-2026!
+
+
+5) PARA QUE UN AGENTE (CLAUDE U OTRO) TRABAJE EN LA WEB
+---------------------------------------------------------------
+Dale SIEMPRE esta carpeta:
+  C:\Users\kety follen\Desktop\deepseek\barcos
+
+Si solo quieres que redacte o revise informes, dale:
+  C:\Users\kety follen\Desktop\deepseek\variasCosas
+
+Nota: el archivo CLAUDE.md y AGENTS.md dentro de barcos NO son informes,
+son instrucciones para que el agente sepa cómo trabajar en el proyecto.
+===============================================================
