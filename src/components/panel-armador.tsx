@@ -9,6 +9,7 @@ import { PanelClientes } from "@/components/panel-clientes";
 import { PanelCobros } from "@/components/panel-cobros";
 import { PanelGastos } from "@/components/panel-gastos";
 import { PanelPlan } from "@/components/panel-plan";
+import { ParteEntrega } from "@/components/parte-entrega";
 
 /**
  * Área del armador: cada propietario entra con su email y contraseña y ve
@@ -90,6 +91,7 @@ export function PanelArmador() {
   const [vista, setVista] = useState<"reservas" | "calendario" | "gastos" | "clientes" | "cobros" | "plan">("reservas");
   const [gestionId, setGestionId] = useState<string | null>(null);
   const [editando, setEditando] = useState<BarcoDetalle | null>(null);
+  const [parteDe, setParteDe] = useState<string | null>(null);
 
   const cargarDatos = useCallback(async () => {
     const [rb, rr, rm] = await Promise.all([
@@ -503,6 +505,12 @@ export function PanelArmador() {
                     >
                       Contrato
                     </a>
+                    <button
+                      onClick={() => setParteDe(parteDe === r.id ? null : r.id)}
+                      className="rounded-md border border-borde px-3.5 py-2 text-sm font-medium text-texto-suave transition-colors hover:bg-superficie-alt"
+                    >
+                      Parte
+                    </button>
                     {r.estado === "pendiente" && (
                       <>
                         <button
@@ -537,6 +545,8 @@ export function PanelArmador() {
                     )}
                   </div>
                 </div>
+
+                {parteDe === r.id && <ParteEntrega reservaId={r.id} referencia={r.referencia} />}
               </li>
             ))}
           </ul>

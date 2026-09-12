@@ -470,6 +470,8 @@ model Reserva {
   creadoEn         DateTime @default(now())
   actualizadoEn    DateTime @updatedAt
 
+  partes           ParteEntrega[]
+
   @@index([barcoId, fechaInicio])
   @@index([estado, creadoEn])
   @@index([clienteId])
@@ -585,4 +587,31 @@ model Sesion {
 
   @@index([usuarioId])
   @@index([expiraEn])
+}
+
+/// Parte de entrega/recogida de un barco: checklist con fotos fechadas.
+model ParteEntrega {
+  id        String   @id @default(cuid())
+  reservaId String
+  reserva   Reserva  @relation(fields: [reservaId], references: [id], onDelete: Cascade)
+  /// "salida" (embarque) o "entrada" (devolución).
+  tipo      String
+  /// Array de { texto, ok } con el estado de cada comprobación.
+  items     Json
+  notas     String?
+  creadoEn  DateTime @default(now())
+  fotos     FotoParte[]
+
+  @@index([reservaId])
+}
+
+/// Foto fechada de un parte de entrega (url o data URL).
+model FotoParte {
+  id       String       @id @default(cuid())
+  parteId  String
+  parte    ParteEntrega @relation(fields: [parteId], references: [id], onDelete: Cascade)
+  url      String
+  creadoEn DateTime     @default(now())
+
+  @@index([parteId])
 }
