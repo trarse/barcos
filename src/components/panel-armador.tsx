@@ -11,6 +11,7 @@ import { PanelGastos } from "@/components/panel-gastos";
 import { PanelPlan } from "@/components/panel-plan";
 import { ParteEntrega } from "@/components/parte-entrega";
 import { Firma } from "@/components/firma";
+import { ModoTravesia } from "@/components/modo-travesia";
 
 /**
  * Área del armador: cada propietario entra con su email y contraseña y ve
@@ -97,6 +98,7 @@ export function PanelArmador() {
   const [parteDe, setParteDe] = useState<string | null>(null);
   const [firmaDe, setFirmaDe] = useState<string | null>(null);
   const [modoManual, setModoManual] = useState<"simple" | "operador" | null>(null);
+  const [travesiaAbierta, setTravesiaAbierta] = useState(false);
 
   const cargarDatos = useCallback(async () => {
     const [rb, rr, rm] = await Promise.all([
@@ -406,11 +408,20 @@ export function PanelArmador() {
           >
             {esOperador ? "Modo operador" : "Modo simple"}
           </button>
+          <button onClick={() => setTravesiaAbierta((v) => !v)} className="rounded-md border border-borde px-2.5 py-1 text-xs font-medium text-texto-suave">
+            Travesía
+          </button>
           <button onClick={() => void salir()} className="text-sm text-texto-suave underline">
             Salir
           </button>
         </div>
       </div>
+
+      {travesiaAbierta && (
+        <div className="mt-6">
+          <ModoTravesia barcoNombre={barcos[0]?.nombre ?? "Mi flota"} />
+        </div>
+      )}
 
       <section className="mt-8">
         <h2 className="font-display text-xl font-semibold text-texto">Tus barcos</h2>

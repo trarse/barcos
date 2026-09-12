@@ -621,3 +621,29 @@ model FotoParte {
 
   @@index([parteId])
 }
+
+/// Travesía en curso: comparte la posición GPS (modo travesía).
+model Travesia {
+  id          String   @id @default(cuid())
+  /// Token público para el enlace de seguimiento.
+  token       String   @unique
+  barcoNombre String
+  propietarioId String?
+  activo      Boolean  @default(true)
+  creadoEn    DateTime @default(now())
+  posiciones  PosicionTravesia[]
+
+  @@index([token])
+}
+
+/// Posición GPS de una travesía.
+model PosicionTravesia {
+  id         String   @id @default(cuid())
+  travesiaId String
+  travesia   Travesia @relation(fields: [travesiaId], references: [id], onDelete: Cascade)
+  lat        Float
+  lng        Float
+  creadoEn   DateTime @default(now())
+
+  @@index([travesiaId, creadoEn])
+}
