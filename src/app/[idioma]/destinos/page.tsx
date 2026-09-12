@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/json-ld";
 import { Migas, migasBase } from "@/components/migas";
+import { MapaCalas } from "@/components/mapa-calas";
 import { listarLugares } from "@/lib/consultas";
 import { entero } from "@/lib/formato";
 import { esIdioma, IDIOMAS } from "@/lib/idiomas";
@@ -72,6 +73,14 @@ export default async function Lugares(props: PageProps<"/[idioma]/destinos">) {
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-texto-suave">
             {t.lugar.entradilla}
           </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6">
+        <h2 className="font-display text-2xl font-semibold text-texto">Fondeaderos de la Costa Blanca</h2>
+        <p className="mt-2 max-w-2xl text-sm text-texto-suave">Calas y fondeaderos con su tipo de fondeo y avisos. La normativa se revisa cada temporada.</p>
+        <div className="mt-5">
+          <MapaCalas />
         </div>
       </section>
 
