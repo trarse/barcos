@@ -312,6 +312,8 @@ export function PanelGastos() {
     const factor = ordenGastos.dir === "asc" ? 1 : -1;
     if (ordenGastos.campo === "concepto") return a.concepto.localeCompare(b.concepto, "es") * factor;
     if (ordenGastos.campo === "categoria") return a.categoria.localeCompare(b.categoria, "es") * factor;
+    if (ordenGastos.campo === "barco") return (a.barco ?? "").localeCompare(b.barco ?? "", "es") * factor;
+    if (ordenGastos.campo === "factura") return (a.factura ?? "").localeCompare(b.factura ?? "", "es") * factor;
     if (ordenGastos.campo === "importe") return (a.importeCents - b.importeCents) * factor;
     return (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0) * factor;
   }
@@ -807,8 +809,8 @@ export function PanelGastos() {
                   {thOrden("Fecha", "fecha", ordenGastos, setOrdenGastos)}
                   {thOrden("Concepto", "concepto", ordenGastos, setOrdenGastos)}
                   {thOrden("Categoría", "categoria", ordenGastos, setOrdenGastos)}
-                  <th className="px-3 py-2.5 font-semibold">Barco</th>
-                  <th className="px-3 py-2.5 font-semibold">Factura</th>
+                  {thOrden("Barco", "barco", ordenGastos, setOrdenGastos)}
+                  {thOrden("Factura", "factura", ordenGastos, setOrdenGastos)}
                   <th className="px-3 py-2.5 text-right font-semibold">IVA</th>
                   <th className="px-3 py-2.5 text-center font-semibold">Deducible</th>
                   {thOrden("Importe", "importe", ordenGastos, setOrdenGastos, "text-right")}
