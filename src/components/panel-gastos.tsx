@@ -9,6 +9,8 @@ import {
   TIPOS_VENCIMIENTO,
 } from "@/datos/gastos";
 
+import { ComparativaProvincial } from "@/components/comparativa-provincial";
+
 type Gasto = {
   id: string;
   categoria: string;
@@ -760,6 +762,8 @@ export function PanelGastos() {
           </div>
         )}
       </div>
+
+      <ComparativaProvincial ingresosCents={resumen?.ingresosCents ?? 0} numBarcos={barcos.length} />
 
       {/* Flujo de caja: próximos 12 meses */}
       <div id="tabla-tesoreria" className="scroll-mt-16 overflow-hidden rounded-carta border border-borde bg-superficie">
