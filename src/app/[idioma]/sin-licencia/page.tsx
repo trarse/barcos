@@ -6,6 +6,7 @@ import { Faq } from "@/components/faq";
 import { JsonLd } from "@/components/json-ld";
 import { Migas, migasBase } from "@/components/migas";
 import { TarjetaBarco } from "@/components/tarjeta-barco";
+import { TestTitulacion } from "@/components/test-titulacion";
 import { paginasFijas } from "@/datos/paginas";
 import { buscarBarcos, listarDestinos } from "@/lib/consultas";
 import { FILTROS_VACIOS } from "@/lib/filtros";
@@ -96,6 +97,10 @@ export default async function SinLicencia(
             </p>
           )}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+        <TestTitulacion idioma={idioma} />
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
